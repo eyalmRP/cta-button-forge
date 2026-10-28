@@ -1,10 +1,4 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-</head>
-<body>
-<title>CTA Button Forge</title>
+<!doctype html><html lang="en"><head><meta charset="utf-8"></head><body><title>CTA Button Forge</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -91,10 +85,52 @@ input[type="color"] { width: 100%; height: 26px; padding: 0 2px; border: 1px sol
 .checks { display: flex; flex-wrap: wrap; gap: 6px 16px; }
 .fx { border: 1px solid var(--line); border-radius: 8px; background: var(--panel); }
 .fx > summary { list-style: none; cursor: pointer; padding: 9px 10px; display: flex; align-items: center; gap: 9px; font-weight: 500; }
-.fx:not(.on) > summary span { color: var(--muted); }
+.fx:not(.on) > summary .fxl { color: var(--muted); }
 .fx .fx-body { padding: 4px 10px 12px; display: grid; gap: 9px; border-top: 1px dashed var(--line); }
-.fx-group { font-size: 11px; color: var(--muted); margin: 6px 0 -2px; letter-spacing: .04em; }
 .note-sm { color: var(--muted); font-size: 11.5px; line-height: 1.45; }
+/* layers: pick what you are editing, its controls show below */
+.layers { padding: 6px 10px 10px; border-bottom: 1px solid var(--line); display: grid; gap: 2px; }
+.layers-h { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); padding: 6px 6px 4px; }
+.layer { display: grid; grid-template-columns: 30px auto minmax(0, 1fr); align-items: center; gap: 10px; border: 1px solid transparent; background: none; color: var(--fg); padding: 5px 8px; border-radius: 8px; cursor: pointer; text-align: left; font: inherit; }
+.layer:hover { background: var(--sunk); }
+.layer[aria-selected="true"] { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 40%, transparent); }
+.layer:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.lic { width: 30px; height: 30px; border-radius: 7px; background: var(--sunk); display: grid; place-items: center; color: var(--muted); }
+.layer[aria-selected="true"] .lic { background: var(--panel); color: var(--accent); }
+.lic svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.lnm { font-weight: 600; font-size: 13px; }
+.lsum { color: var(--muted); font-size: 12px; text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lsum.add { color: var(--accent); font-weight: 600; }
+.layer[aria-selected="true"] .lsum:not(.add) { color: var(--fg); }
+.lpage > .sec:last-child { border-bottom: 0; }
+.sec > summary:has(.fxadd)::after { margin-left: 0; }
+.fxadd { margin-left: auto; border: 1px solid var(--line); background: var(--panel); color: var(--accent); border-radius: 6px; padding: 3px 10px; font: 600 12px var(--ui); letter-spacing: 0; text-transform: none; cursor: pointer; }
+.fxadd:hover { border-color: var(--accent); }
+.fxth { width: 42px; height: 26px; flex: none; display: grid; place-items: center; background: var(--sunk); border-radius: 6px; }
+.fxth .aa, .menu .mi .aa { font: 800 15px/1 var(--ui); }
+.fxl { flex: 1; min-width: 0; }
+.fxrm { width: 24px; height: 24px; border: 1px solid transparent; background: none; border-radius: 6px; display: grid; place-items: center; color: var(--muted); cursor: pointer; padding: 0; flex: none; }
+.fxrm:hover { border-color: var(--line); color: var(--danger); }
+.fxrm svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+/* segmented choices, shape pictures and row icons */
+.fld > .flab { color: var(--muted); }
+.fld > .segf { grid-column: 2 / 4; display: flex; }
+.segf button { flex: 1; display: grid; place-items: center; padding: 6px 8px; }
+.segf svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; }
+.shp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(58px, 1fr)); gap: 6px; }
+.shp { display: grid; justify-items: center; gap: 4px; padding: 8px 4px 6px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); cursor: pointer; font-size: 11px; color: var(--muted); }
+.shp svg { width: 34px; height: 16px; fill: var(--sunk); stroke: currentColor; stroke-width: 1.4; overflow: visible; }
+.shp:hover { border-color: var(--muted); color: var(--fg); }
+.shp[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+.shp[aria-pressed="true"] svg { fill: color-mix(in srgb, var(--accent) 28%, transparent); }
+.fic { width: 14px; height: 14px; vertical-align: -2px; margin-right: 5px; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
+/* the + Add picker */
+.menu.tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); width: 330px; max-width: calc(100vw - 16px); gap: 5px; padding: 8px; }
+.menu.tiles .mh, .menu.tiles hr { grid-column: 1 / -1; }
+.menu.tiles .mh { padding: 6px 2px 0; }
+.menu.tiles button { flex-direction: column; justify-content: flex-start; gap: 6px; padding: 10px 4px 8px; text-align: center; font-size: 11.5px; line-height: 1.25; border: 1px solid var(--line); }
+.menu.tiles button .mi { width: 46px; height: 28px; opacity: 1; display: grid; place-items: center; background: var(--sunk); border-radius: 6px; }
+.menu.tiles button[disabled] .ml::after { content: " ✓"; }
 
 /* gradient editor */
 .ge { display: grid; gap: 6px; padding: 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--sunk); }
@@ -110,13 +146,15 @@ input[type="color"] { width: 100%; height: 26px; padding: 0 2px; border: 1px sol
 .ge-edit { display: grid; grid-template-columns: 38px 1fr 1fr auto; gap: 6px; align-items: end; }
 .ge-edit label { display: grid; font-size: 10.5px; color: var(--muted); gap: 2px; }
 .ge-edit input[type="color"] { height: 26px; }
-.ge-presets { display: flex; flex-wrap: wrap; gap: 4px; }
-.ge-presets button { width: 24px; height: 14px; border-radius: 3px; border: 1px solid var(--line); cursor: pointer; padding: 0; }
+.ge-presets { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; }
+.ge-presets button { height: 22px; border-radius: 5px; border: 1px solid var(--line); cursor: pointer; padding: 0; }
+.ge-presets button:hover { outline: 2px solid var(--accent); outline-offset: 1px; }
 
 /* font picker */
 .fp-wrap { grid-column: 2 / 4; position: relative; min-width: 0; }
 .fp-btn { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 5px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); cursor: pointer; font-size: 16px; min-width: 0; }
-.fp-btn .fp-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fp-btn .fp-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; text-align: left; }
+.fp-sample { flex: none; max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; line-height: 1.3; padding: 3px 9px; border-radius: 999px; background: linear-gradient(180deg, #4b5cff, #2f3ad8); color: #ffffff; }
 .fp-caret { width: 6px; height: 6px; border-right: 1.5px solid var(--muted); border-bottom: 1.5px solid var(--muted); transform: rotate(45deg); flex: none; }
 .fp-pop { position: absolute; z-index: 30; top: calc(100% + 4px); left: -100px; right: 0; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 12px 32px rgba(0,0,0,.22); padding: 8px; display: grid; gap: 6px; }
 .fp-pop input { padding: 6px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); }
@@ -342,13 +380,12 @@ select.sm, input.sm { padding: 6px 8px; border: 1px solid var(--line); border-ra
 .sec > summary .st.on { background: var(--accent-soft); color: var(--accent); }
 .sec > summary .st:empty { display: none; }
 .fx.on { border-color: color-mix(in srgb, var(--accent) 55%, var(--line)); box-shadow: inset 3px 0 0 var(--accent); }
-.fx.on > summary span { color: var(--fg); font-weight: 600; }
+.fx.on > summary .fxl { color: var(--fg); font-weight: 600; }
 .fx summary input.tg, input.tg { appearance: none; -webkit-appearance: none; width: 30px; height: 18px; border-radius: 999px; background: var(--line); position: relative; cursor: pointer; flex: none; margin: 0; transition: background .15s; }
 input.tg::after { content: ""; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: #ffffff; box-shadow: 0 1px 2px rgba(0,0,0,.3); transition: transform .15s; }
 .fx summary input.tg:checked, input.tg:checked { background: var(--accent); }
 .fx summary input.tg:checked::after, input.tg:checked::after { transform: translateX(12px); }
 input.tg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.fxbar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .fx-empty { color: var(--muted); font-size: 12px; padding: 4px 2px; }
 .pinbtn { display: none; }
 @media (max-width: 860px) {
@@ -2137,28 +2174,151 @@ const hasIcon = d => d.icon.type !== 'none', bgOn = d => hasIcon(d) && d.icon.bg
 const curOn = d => d.cursor.type !== 'none', curSh = d => curOn(d) && d.cursor.shadow;
 const curVec = d => !!CURSORS[d.cursor.type], curFx = d => curVec(d) && d.cursor.fx !== 'none';
 
-const SECTIONS = [
-  { title: 'Text', open: true, fields: [
-    { k: 'font.family', t: 'font' },
-    SEL('font.weight', 'Weight', [['100', 'Thin 100'], ['200', 'Extra light 200'], ['300', 'Light 300'], ['400', 'Regular 400'], ['500', 'Medium 500'], ['600', 'Semibold 600'], ['700', 'Bold 700'], ['800', 'Extra bold 800'], ['900', 'Black 900']]),
-    R('font.size', 'Size', 8, 240, 1, 'px'),
-    R('font.spacing', 'Letter space', -10, 40, 0.5, 'px'),
-    R('font.lineHeight', 'Line height', 0.5, 2.5, 0.01, '×'),
-    R('font.skew', 'Slant', -30, 30, 0.5, '°'),
-    R('font.arc', 'Arc bend', -100, 100, 1),
-    { t: 'checks', items: [CHK('font.upper', 'Uppercase'), CHK('font.italic', 'Italic')] },
-    { t: 'note', text: 'Several lines (Enter, or | in batch):' },
-    SEL('font.align', 'Align', [['left', 'Left'], ['center', 'Center'], ['right', 'Right']], d => !d.font.block),
-    CHK('font.block', 'Block: every line the same width'),
-    SEL('font.blockMode', 'Fill by', [['spacing', 'Spreading the letters'], ['scale', 'Scaling the lines']], d => d.font.block),
+const SEG = (k, l, o, s) => ({ k, t: 'seg', l, o, s });
+const PERSP = (p) => [R(`fx.${p}.persp`, 'Perspective', 0, 100, 1, '%'), R(`fx.${p}.vpx`, 'Vanish X', -400, 400, 1, 'px', d => d.fx[p].persp > 0), R(`fx.${p}.vpy`, 'Vanish Y', -400, 400, 1, 'px', d => d.fx[p].persp > 0)];
+const ticket = d => shapeFx(d) && d.box.shape === 'ticket';
+// small pictures for the shape grid and the compact number rows
+const SHAPE_PIC = {
+  pill: '<rect x="1" y="1" width="32" height="14" rx="7"/>', rounded: '<rect x="1" y="1" width="32" height="14" rx="3.5"/>', square: '<rect x="1" y="1" width="32" height="14"/>',
+  chamfer: '<path d="M5 1h24l4 4v6l-4 4H5l-4-4V5z"/>', slant: '<path d="M6 1h27l-5 14H1z"/>', leaf: '<path d="M8 1h25v7a7 7 0 0 1-7 7H1V8a7 7 0 0 1 7-7z"/>',
+  tab: '<path d="M6 1h22a5 5 0 0 1 5 5v9H1V6a5 5 0 0 1 5-5z"/>', ticket: '<path d="M1 1h32v5a2 2 0 0 0 0 4v5H1v-5a2 2 0 0 0 0-4z"/>', custom: '<path d="M7 1h26v8l-6 6H1V7a6 6 0 0 1 6-6z"/>',
+};
+const SHAPE_SHORT = { pill: 'Pill', rounded: 'Rounded', square: 'Square', chamfer: 'Cut', slant: 'Slant', leaf: 'Leaf', tab: 'Tab', ticket: 'Ticket', custom: 'Custom' };
+const FIELD_ICON = {
+  'font.size': '<path d="M2 13 6 3l4 10M3.5 9.5h5M11 13l2-5 2 5M11.7 11.4h2.6"/>',
+  'font.spacing': '<path d="M2 3v10M14 3v10M5 8h6M5 8l2-2M5 8l2 2M11 8 9 6M11 8l-2 2"/>',
+  'font.lineHeight': '<path d="M2 2.5h12M2 13.5h12M8 5v6M6 7l2-2 2 2M6 9l2 2 2-2"/>',
+  'font.arc': '<path d="M2 12q6-9 12 0"/>',
+  'font.skew': '<path d="M5 13 9 3M3 13h5M8 3h5"/>',
+  'box.radius': '<path d="M3 14V8a5 5 0 0 1 5-5h6"/>',
+  'box.padX': '<path d="M2 3v10M14 3v10M5 8h6M5 8l2-2M5 8l2 2M11 8 9 6M11 8l-2 2"/>',
+  'box.padY': '<path d="M3 2h10M3 14h10M8 5v6M6 7l2-2 2 2M6 9l2 2 2-2"/>',
+  'box.minW': '<path d="M2 8h12M2 5v6M14 5v6"/>',
+};
+const ALIGN_PIC = { left: '<path d="M2 4h12M2 8h8M2 12h10"/>', center: '<path d="M2 4h12M4 8h8M3 12h10"/>', right: '<path d="M2 4h12M6 8h8M4 12h10"/>' };
+
+// every effect: label, its settings, when it applies, and the switch that turns it on
+const FX_DEF = {
+  hilite: ['Light shadow (neumorphism)', [C('fx.hilite.color', 'Color'), R('fx.hilite.alpha', 'Opacity', 0, 1, 0.01), R('fx.hilite.blur', 'Blur', 0, 80, 1, 'px'), R('fx.hilite.x', 'Offset X', -60, 60, 1, 'px'), R('fx.hilite.y', 'Offset Y', -60, 60, 1, 'px')], on],
+  shadow: ['Drop shadow', [C('fx.shadow.color', 'Color'), R('fx.shadow.alpha', 'Opacity', 0, 1, 0.01), R('fx.shadow.blur', 'Blur', 0, 80, 1, 'px'), R('fx.shadow.x', 'Offset X', -60, 60, 1, 'px'), R('fx.shadow.y', 'Offset Y', -60, 60, 1, 'px')], on],
+  glow: ['Outer glow', [C('fx.glow.color', 'Color'), R('fx.glow.size', 'Size', 1, 60, 1, 'px'), R('fx.glow.strength', 'Strength', 1, 6, 1)], on],
+  stroke: ['Surrounding stroke', [CHK('fx.stroke.grad', 'Gradient'), C('fx.stroke.color', 'Color', d => !d.fx.stroke.grad), GR('fx.stroke.gradient', 'Stroke gradient', { s: d => d.fx.stroke.grad, type: true, angle: true }), R('fx.stroke.width', 'Width', 0.5, 20, 0.5, 'px'), R('fx.stroke.gap', 'Gap from button', 0, 20, 0.5, 'px'), R('fx.stroke.alpha', 'Opacity', 0, 1, 0.01)], shapeFx],
+  depth: ['3D depth', [GR('fx.depth.gradient', 'Near → far colors'), R('fx.depth.size', 'Depth', 1, 40, 1, 'px'), R('fx.depth.angle', 'Direction', 0, 360, 1, '°'), ...PERSP('depth')], shapeFx],
+  gloss: ['Gloss (3D light)', [SEL('fx.gloss.style', 'Shape', [['shape', 'Follows button shape'], ['ellipse', 'Ellipse'], ['band', 'Flat band']]), R('fx.gloss.height', 'Height', 5, 100, 1, '%'), R('fx.gloss.inset', 'Inset', 0, 40, 0.5, 'px'), R('fx.gloss.offset', 'Move down', -30, 40, 0.5, 'px'), R('fx.gloss.alpha', 'Top strength', 0, 1, 0.01), R('fx.gloss.fade', 'Bottom strength', 0, 1, 0.01), R('fx.gloss.blur', 'Softness', 0, 20, 0.5, 'px')], on],
+  bevel: ['Bevel', [R('fx.bevel.size', 'Size', 1, 24, 0.5, 'px'), R('fx.bevel.light', 'Highlight', 0, 1, 0.01), R('fx.bevel.dark', 'Shade', 0, 1, 0.01)], shapeFx],
+  innerShadow: ['Inner shadow', [C('fx.innerShadow.color', 'Color'), R('fx.innerShadow.alpha', 'Opacity', 0, 1, 0.01), R('fx.innerShadow.blur', 'Blur', 0, 40, 1, 'px'), R('fx.innerShadow.x', 'Offset X', -30, 30, 1, 'px'), R('fx.innerShadow.y', 'Offset Y', -30, 30, 1, 'px')], shapeFx],
+  innerShadow2: ['Inner shadow 2', [C('fx.innerShadow2.color', 'Color'), R('fx.innerShadow2.alpha', 'Opacity', 0, 1, 0.01), R('fx.innerShadow2.blur', 'Blur', 0, 40, 1, 'px'), R('fx.innerShadow2.x', 'Offset X', -30, 30, 1, 'px'), R('fx.innerShadow2.y', 'Offset Y', -30, 30, 1, 'px')], shapeFx],
+  inner: ['Inner line', [C('fx.inner.color', 'Color'), R('fx.inner.alpha', 'Opacity', 0, 1, 0.01), R('fx.inner.inset', 'Inset', 1, 30, 0.5, 'px'), R('fx.inner.width', 'Width', 0.5, 10, 0.5, 'px')], shapeFx],
+  tail: ['Speech bubble tail', [SEL('box.tail.side', 'Tail side', [['bottom', 'Bottom'], ['top', 'Top'], ['left', 'Left'], ['right', 'Right']]),
+    R('box.tail.pos', 'Position', 0, 100, 0.5, '%'), R('box.tail.base', 'Width', 4, 160, 1, 'px'), R('box.tail.len', 'Length', 2, 160, 1, 'px'), R('box.tail.tilt', 'Tilt', -120, 120, 1, 'px'), R('box.tail.curve', 'Curve', -1, 1, 0.01)], tailOK, 'box.tail.on'],
+  sweep: ['Light sweep', [SEL('fx.sweep.layer', 'Layer', [['under', 'On the button, under the text'], ['over', 'Over button and text']], on),
+    SEL('fx.sweep.area', 'Show on', [['fill', 'The whole face'], ['edges', 'Edges only (rim light)']], on),
+    R('fx.sweep.edgeInset', 'Rim inset', 0, 30, 0.5, 'px', d => on(d) && d.fx.sweep.area === 'edges'),
+    R('fx.sweep.edgeW', 'Rim width', 0.5, 16, 0.5, 'px', d => on(d) && d.fx.sweep.area === 'edges'),
+    R('fx.sweep.blur', 'Rim softness', 0, 12, 0.5, 'px', d => on(d) && d.fx.sweep.area === 'edges'), C('fx.sweep.color', 'Color'), R('fx.sweep.pos', 'Position', 0, 100, 1, '%'), R('fx.sweep.width', 'Width', 2, 200, 1, 'px'), R('fx.sweep.angle', 'Tilt', -180, 180, 1, '°'), R('fx.sweep.alpha', 'Strength', 0, 1, 0.01)]],
+  sparkles: ['Sparkles', [CHK('fx.sparkles.inside', 'Inside the button (glints)'), C('fx.sparkles.color', 'Color'), R('fx.sparkles.count', 'Count', 1, 16, 1), R('fx.sparkles.size', 'Size', 4, 60, 1, 'px'), R('fx.sparkles.vary', 'Size variety', 0, 1, 0.01), R('fx.sparkles.sharp', 'Sharpness', 0, 100, 1, '%'), SEL('fx.sparkles.points', 'Points', [['4', '4 points'], ['6', '6 points'], ['8', '8 points (twinkle)']]), R('fx.sparkles.rotate', 'Rotation', 0, 360, 1, '°'), R('fx.sparkles.glow', 'Glow', 0, 40, 1, 'px'), R('fx.sparkles.seed', 'Shuffle', 1, 99, 1)]],
+  tExtrude: ['3D extrusion', [GR('fx.tExtrude.gradient', 'Near → far colors'), R('fx.tExtrude.depth', 'Depth', 1, 60, 1, 'px'), R('fx.tExtrude.angle', 'Direction', 0, 360, 1, '°'), ...PERSP('tExtrude'), CHK('fx.tExtrude.outline', 'Include text stroke width')]],
+  tBevel: ['Bubble bevel', [R('fx.tBevel.size', 'Size', 0.5, 12, 0.5, 'px'), R('fx.tBevel.blur', 'Softness', 0, 12, 0.5, 'px'), R('fx.tBevel.light', 'Highlight', 0, 1, 0.01), R('fx.tBevel.dark', 'Shade', 0, 1, 0.01)]],
+  tGloss: ['Text gloss', [R('fx.tGloss.alpha', 'Strength', 0, 1, 0.01), R('fx.tGloss.height', 'Height', 10, 100, 1, '%')]],
+  tStroke: ['Text stroke', [C('fx.tStroke.color', 'Color'), R('fx.tStroke.width', 'Width', 0.5, 16, 0.5, 'px')]],
+  tShadow: ['Text shadow', [C('fx.tShadow.color', 'Color'), R('fx.tShadow.alpha', 'Opacity', 0, 1, 0.01), R('fx.tShadow.blur', 'Blur', 0, 40, 1, 'px'), R('fx.tShadow.x', 'Offset X', -30, 30, 0.5, 'px'), R('fx.tShadow.y', 'Offset Y', -30, 30, 0.5, 'px')]],
+  tGlow: ['Text glow', [C('fx.tGlow.color', 'Color'), R('fx.tGlow.size', 'Size', 1, 50, 1, 'px')]],
+};
+const fxOnK = key => FX_DEF[key][3] || `fx.${key}.on`;
+const fxIsOn = (d, key) => !!getK(d, fxOnK(key));
+const fxShows = (d, key) => !FX_DEF[key][2] || FX_DEF[key][2](d);
+// what each effect looks like, for its row and the Add picker
+const PILL = 'background:linear-gradient(180deg,#4b5cff,#2f3ad8);border-radius:999px;width:34px;height:15px;display:block;';
+const AA = t => `<b class="aa" style="${t}">Aa</b>`;
+const FX_THUMB = {
+  shadow: `<i style="${PILL}box-shadow:0 4px 5px rgba(0,0,0,.4)"></i>`,
+  hilite: `<i style="${PILL}background:#e6e9f1;box-shadow:-3px -3px 5px #ffffff,3px 3px 5px rgba(40,50,80,.35)"></i>`,
+  glow: `<i style="${PILL}box-shadow:0 0 7px 2px #8a96ff"></i>`,
+  innerShadow: `<i style="${PILL}box-shadow:inset 0 3px 4px rgba(0,0,0,.55)"></i>`,
+  innerShadow2: `<i style="${PILL}box-shadow:inset 0 -3px 4px rgba(255,255,255,.6)"></i>`,
+  stroke: `<i style="${PILL}outline:2px solid #f5b800;outline-offset:2px"></i>`,
+  inner: `<i style="${PILL}box-shadow:inset 0 0 0 2px #3f4fe6,inset 0 0 0 3px rgba(255,255,255,.85)"></i>`,
+  bevel: `<i style="${PILL}box-shadow:inset 0 2px 0 rgba(255,255,255,.6),inset 0 -2px 0 rgba(0,0,0,.4)"></i>`,
+  depth: `<i style="${PILL}box-shadow:0 2px 0 #2430b8,0 4px 0 #18208a"></i>`,
+  gloss: `<i style="${PILL}background:linear-gradient(180deg,rgba(255,255,255,.75),rgba(255,255,255,.1) 50%,transparent 52%),linear-gradient(180deg,#4b5cff,#2f3ad8)"></i>`,
+  sweep: `<i style="${PILL}background:linear-gradient(110deg,transparent 38%,rgba(255,255,255,.85) 48%,transparent 58%),linear-gradient(180deg,#4b5cff,#2f3ad8)"></i>`,
+  sparkles: `<i style="${PILL}position:relative"><b style="position:absolute;right:-5px;top:-8px;color:#f5b800;font-size:13px;line-height:1">✦</b><b style="position:absolute;left:3px;top:1px;color:#fff;font-size:8px;line-height:1">✦</b></i>`,
+  tail: `<svg width="34" height="20" viewBox="0 0 34 20"><rect x="1" y="1" width="32" height="13" rx="6.5" fill="#3f4fe6"/><path d="M9 13 7 19l7-6z" fill="#3f4fe6"/></svg>`,
+  tExtrude: AA('color:#ffffff;text-shadow:1px 1px 0 #3f4fe6,2px 2px 0 #2f3ad8,3px 3px 0 #18208a'),
+  tBevel: AA('color:#4b5cff;text-shadow:-1px -1px 0 rgba(255,255,255,.9),1px 1px 1px rgba(0,0,0,.45)'),
+  tGloss: AA('background:linear-gradient(180deg,#c9cfff 0 46%,#2f3ad8 54%);-webkit-background-clip:text;background-clip:text;color:transparent'),
+  tStroke: AA('color:#ffffff;-webkit-text-stroke:1.6px #2f3ad8;paint-order:stroke fill'),
+  tShadow: AA('color:#4b5cff;text-shadow:2px 2px 2px rgba(0,0,0,.45)'),
+  tGlow: AA('color:#ffffff;text-shadow:0 0 3px #6f7dff,0 0 7px #6f7dff'),
+};
+// the picker groups; a layer's list shows only the effects that are on (or just added)
+const FX_GROUPS = {
+  button: [['Shadows & glow', ['shadow', 'glow', 'hilite', 'innerShadow', 'innerShadow2']], ['Edges', ['stroke', 'inner', 'bevel']], ['Depth & light', ['depth', 'gloss', 'sweep']], ['Extras', ['sparkles', 'tail']]],
+  text: [['Depth & light', ['tExtrude', 'tBevel', 'tGloss']], ['Outline & shadow', ['tStroke', 'tShadow', 'tGlow']]],
+};
+
+const LAYER_PIC = {
+  text: '<path d="M5 6h14M12 6v13"/>',
+  button: '<rect x="3" y="7" width="18" height="10" rx="5"/>',
+  icon: '<path d="m12 3 2.5 6H21l-5 4 2 7-6-4-6 4 2-7-5-4h6.5z"/>',
+  cursor: '<path d="M6 3l13 7-6 1.6L10.5 18z"/>',
+  whole: '<rect x="4" y="6" width="16" height="12" rx="2" transform="rotate(-10 12 12)"/>',
+};
+const LAYERS = [
+  { id: 'text', name: 'Text', secs: [
+    { title: 'Typography', open: true, fields: [
+      { k: 'font.family', t: 'font' },
+      SEL('font.weight', 'Weight', [['100', 'Thin 100'], ['200', 'Extra light 200'], ['300', 'Light 300'], ['400', 'Regular 400'], ['500', 'Medium 500'], ['600', 'Semibold 600'], ['700', 'Bold 700'], ['800', 'Extra bold 800'], ['900', 'Black 900']]),
+      R('font.size', 'Size', 8, 240, 1, 'px'),
+      R('font.spacing', 'Letter space', -10, 40, 0.5, 'px'),
+      R('font.lineHeight', 'Line height', 0.5, 2.5, 0.01, '×'),
+      { t: 'checks', items: [CHK('font.upper', 'Uppercase'), CHK('font.italic', 'Italic')] },
+      SEG('font.align', 'Align lines', [['left', 'Left', ALIGN_PIC.left], ['center', 'Center', ALIGN_PIC.center], ['right', 'Right', ALIGN_PIC.right]], d => !d.font.block),
+      CHK('font.block', 'Block: every line the same width'),
+      SEL('font.blockMode', 'Fill by', [['spacing', 'Spreading the letters'], ['scale', 'Scaling the lines']], d => d.font.block),
+      { t: 'note', text: 'Several lines: press Enter in the text box (or type | in batch).' },
+    ] },
+    { title: 'Text color', open: true, fields: [
+      SEG('font.grad', 'Color', [[false, 'Solid'], [true, 'Gradient']]),
+      C('font.color', 'Color', d => !d.font.grad), GR('font.gradient', 'Text gradient', { s: d => d.font.grad, type: true, angle: true }),
+      CHK('font.alt.on', 'Different colors for lines 2, 4, …'),
+      C('font.alt.color', 'Alt color', d => d.font.alt.on && !d.font.grad), GR('font.alt.gradient', 'Alt line gradient', { s: d => d.font.alt.on && d.font.grad, type: true, angle: true }),
+    ] },
+    { title: 'Shape of the words', open: true, fields: [R('font.arc', 'Arc bend', -100, 100, 1), R('font.skew', 'Slant', -30, 30, 0.5, '°')] },
+    { title: 'Text effects', open: true, fx: 'text' },
   ] },
-  { title: 'Text color', open: true, fields: [
-    CHK('font.grad', 'Gradient'),
-    C('font.color', 'Color', d => !d.font.grad), GR('font.gradient', 'Text gradient', { s: d => d.font.grad, type: true, angle: true }),
-    CHK('font.alt.on', 'Different colors for lines 2, 4, …'),
-    C('font.alt.color', 'Alt color', d => d.font.alt.on && !d.font.grad), GR('font.alt.gradient', 'Alt line gradient', { s: d => d.font.alt.on && d.font.grad, type: true, angle: true }),
+  { id: 'button', name: 'Button', secs: [
+    { title: 'Shape', open: true, fields: [
+      CHK('box.on', 'Draw a button behind the text'),
+      { t: 'note', text: 'Off: export just the text with its effects.', s: d => !d.box.on },
+      { t: 'shapes', s: d => on(d) && !isImgFill(d) },
+      R('box.radius', 'Corner', 0, 120, 1, 'px', d => shapeFx(d) && !['pill', 'square', 'custom'].includes(d.box.shape)),
+      CHK('box.slantL', 'Lean left', d => shapeFx(d) && d.box.shape === 'slant'),
+      { t: 'corners', s: d => shapeFx(d) && d.box.shape === 'custom' },
+      SEL('box.notchPos', 'Notches', [['sides', 'On the sides'], ['stub', 'Top & bottom (stub)']], ticket),
+      SEL('box.notchStyle', 'Notch style', [['round', 'Round'], ['triangle', 'Triangle'], ['square', 'Square']], ticket),
+      R('box.notch', 'Notch size', 2, 40, 0.5, 'px', ticket),
+      R('box.notchCount', 'Per side', 1, 3, 1, '', d => ticket(d) && d.box.notchPos === 'sides'),
+      R('box.stubPos', 'Stub at', 5, 95, 1, '%', d => ticket(d) && (d.box.notchPos === 'stub' || d.box.perf)),
+      CHK('box.perf', 'Dashed tear line', ticket),
+      C('box.perfColor', 'Line color', d => ticket(d) && d.box.perf),
+      R('box.perfAlpha', 'Line opacity', 0, 1, 0.01, '', d => ticket(d) && d.box.perf),
+      R('box.padX', 'Sides', 0, 200, 1, 'px'),
+      R('box.padY', 'Top & bottom', 0, 120, 1, 'px'),
+      R('box.minW', 'Min width', 0, 1000, 1, 'px', on),
+    ] },
+    { title: 'Fill', open: true, s: on, fields: [
+      SEG('box.fill', 'Type', [['solid', 'Solid'], ['gradient', 'Gradient'], ['image', 'Image']]),
+      C('box.c1', 'Color', d => d.box.fill === 'solid'),
+      GR('box.gradient', 'Fill gradient', { s: d => d.box.fill === 'gradient', type: true, angle: true }),
+      R('box.opacity', 'Opacity', 0, 1, 0.01, '', d => d.box.fill !== 'image'),
+      { t: 'slice', s: d => d.box.fill === 'image' },
+      { t: 'checks', s: d => d.box.fill === 'image' && d.box.img.src, items: [CHK('box.img.tile', 'Repeat middle'), CHK('box.img.nine', 'Fix top & bottom too')] },
+      R('box.img.scale', 'Image scale', 0.1, 3, 0.01, '×', d => d.box.fill === 'image' && d.box.img.nine),
+    ] },
+    { title: 'Button effects', open: true, fx: 'button' },
   ] },
-  { title: 'Icon', open: false, fields: [
+  { id: 'icon', name: 'Icon', secs: [{ title: 'Icon', open: true, fields: [
     { t: 'icons' },
     SEL('icon.pos', 'Position', [['left', 'Before text'], ['right', 'After text']], d => d.icon.type !== 'none'),
     R('icon.size', 'Size', 20, 400, 1, '%', d => d.icon.type !== 'none'),
@@ -2180,8 +2340,8 @@ const SECTIONS = [
     C('icon.bgStroke', 'Border / divider', bgOn),
     R('icon.bgStrokeW', 'Border width', 0, 16, 0.5, 'px', bgOn),
     R('icon.bgShadow', 'Badge shadow', 0, 1, 0.01, '', bgRound),
-  ] },
-  { title: 'Cursor', open: false, fields: [
+  ] }] },
+  { id: 'cursor', name: 'Cursor', secs: [{ title: 'Cursor', open: true, fields: [
     { t: 'cursorgal' },
     { t: 'curup', s: d => d.cursor.type === 'custom' },
     SEL('cursor.style', 'Style', [['white', 'White, black outline'], ['black', 'Black, white outline'], ['outline', 'Outline only'], ['custom', 'My colors']], curVec),
@@ -2204,78 +2364,15 @@ const SECTIONS = [
     R('cursor.sX', 'Shadow X', -20, 20, 0.5, 'px', curSh),
     R('cursor.sY', 'Shadow Y', -20, 20, 0.5, 'px', curSh),
     { t: 'note', text: 'The cursor sits on top of everything. Position is measured on the button: 0% is the left or top edge, 100% the right or bottom edge.', s: curOn },
-  ] },
-  { title: 'Button', open: true, fields: [
-    CHK('box.on', 'Draw a button behind the text'),
-    { t: 'note', text: 'Off: export just the text with its effects.', s: d => !d.box.on },
-    SEL('box.shape', 'Shape', SHAPES, d => on(d) && !isImgFill(d)),
-    R('box.radius', 'Corner', 0, 120, 1, 'px', d => shapeFx(d) && !['pill', 'square', 'custom'].includes(d.box.shape)),
-    CHK('box.slantL', 'Lean left', d => shapeFx(d) && d.box.shape === 'slant'),
-    { t: 'corners', s: d => shapeFx(d) && d.box.shape === 'custom' },
-    SEL('box.notchPos', 'Notches', [['sides', 'On the sides'], ['stub', 'Top & bottom (stub)']], d => shapeFx(d) && d.box.shape === 'ticket'),
-    SEL('box.notchStyle', 'Notch style', [['round', 'Round'], ['triangle', 'Triangle'], ['square', 'Square']], d => shapeFx(d) && d.box.shape === 'ticket'),
-    R('box.notch', 'Notch size', 2, 40, 0.5, 'px', d => shapeFx(d) && d.box.shape === 'ticket'),
-    R('box.notchCount', 'Per side', 1, 3, 1, '', d => shapeFx(d) && d.box.shape === 'ticket' && d.box.notchPos === 'sides'),
-    R('box.stubPos', 'Stub at', 5, 95, 1, '%', d => shapeFx(d) && d.box.shape === 'ticket' && (d.box.notchPos === 'stub' || d.box.perf)),
-    CHK('box.perf', 'Dashed tear line', d => shapeFx(d) && d.box.shape === 'ticket'),
-    C('box.perfColor', 'Line color', d => shapeFx(d) && d.box.shape === 'ticket' && d.box.perf),
-    R('box.perfAlpha', 'Line opacity', 0, 1, 0.01, '', d => shapeFx(d) && d.box.shape === 'ticket' && d.box.perf),
-    CHK('box.tail.on', 'Speech bubble tail', tailOK),
-    SEL('box.tail.side', 'Tail side', [['bottom', 'Bottom'], ['top', 'Top'], ['left', 'Left'], ['right', 'Right']], tailOn),
-    R('box.tail.pos', 'Tail position', 0, 100, 0.5, '%', tailOn),
-    R('box.tail.base', 'Tail width', 4, 160, 1, 'px', tailOn),
-    R('box.tail.len', 'Tail length', 2, 160, 1, 'px', tailOn),
-    R('box.tail.tilt', 'Tail tilt', -120, 120, 1, 'px', tailOn),
-    R('box.tail.curve', 'Tail curve', -1, 1, 0.01, '', tailOn),
-    R('box.padX', 'Padding X', 0, 200, 1, 'px'),
-    R('box.padY', 'Padding Y', 0, 120, 1, 'px'),
-    R('box.minW', 'Min width', 0, 1000, 1, 'px', on),
-  ] },
-  { title: 'Fill', open: true, s: on, fields: [
-    SEL('box.fill', 'Type', [['solid', 'Solid color'], ['gradient', 'Gradient'], ['image', 'My own image (stretch)']]),
-    C('box.c1', 'Color', d => d.box.fill === 'solid'),
-    GR('box.gradient', 'Fill gradient', { s: d => d.box.fill === 'gradient', type: true, angle: true }),
-    R('box.opacity', 'Opacity', 0, 1, 0.01, '', d => d.box.fill !== 'image'),
-    { t: 'slice', s: d => d.box.fill === 'image' },
-    { t: 'checks', s: d => d.box.fill === 'image' && d.box.img.src, items: [CHK('box.img.tile', 'Repeat middle'), CHK('box.img.nine', 'Fix top & bottom too')] },
-    R('box.img.scale', 'Image scale', 0.1, 3, 0.01, '×', d => d.box.fill === 'image' && d.box.img.nine),
-  ] },
+  ] }] },
+  { id: 'whole', name: 'Whole design', secs: [{ title: 'Rotate & tilt', open: true, fields: [
+    R('tf.rot', 'Rotate', -180, 180, 1, '°'),
+    R('tf.skewX', 'Slant all', -45, 45, 0.5, '°'),
+    R('tf.tiltX', 'Tilt back', -100, 100, 1, '%'),
+    R('tf.tiltY', 'Turn sideways', -100, 100, 1, '%'),
+    { t: 'note', text: 'Tilt is applied to PNG exports. SVG keeps rotate and slant.' },
+  ] }] },
 ];
-const PERSP = (p) => [R(`fx.${p}.persp`, 'Perspective', 0, 100, 1, '%'), R(`fx.${p}.vpx`, 'Vanish X', -400, 400, 1, 'px', d => d.fx[p].persp > 0), R(`fx.${p}.vpy`, 'Vanish Y', -400, 400, 1, 'px', d => d.fx[p].persp > 0)];
-const EFFECTS = [
-  ['Button effects', on],
-  ['hilite', 'Light shadow (neumorphism)', [C('fx.hilite.color', 'Color'), R('fx.hilite.alpha', 'Opacity', 0, 1, 0.01), R('fx.hilite.blur', 'Blur', 0, 80, 1, 'px'), R('fx.hilite.x', 'Offset X', -60, 60, 1, 'px'), R('fx.hilite.y', 'Offset Y', -60, 60, 1, 'px')], on],
-  ['shadow', 'Drop shadow', [C('fx.shadow.color', 'Color'), R('fx.shadow.alpha', 'Opacity', 0, 1, 0.01), R('fx.shadow.blur', 'Blur', 0, 80, 1, 'px'), R('fx.shadow.x', 'Offset X', -60, 60, 1, 'px'), R('fx.shadow.y', 'Offset Y', -60, 60, 1, 'px')], on],
-  ['glow', 'Outer glow', [C('fx.glow.color', 'Color'), R('fx.glow.size', 'Size', 1, 60, 1, 'px'), R('fx.glow.strength', 'Strength', 1, 6, 1)], on],
-  ['stroke', 'Surrounding stroke', [CHK('fx.stroke.grad', 'Gradient'), C('fx.stroke.color', 'Color', d => !d.fx.stroke.grad), GR('fx.stroke.gradient', 'Stroke gradient', { s: d => d.fx.stroke.grad, type: true, angle: true }), R('fx.stroke.width', 'Width', 0.5, 20, 0.5, 'px'), R('fx.stroke.gap', 'Gap from button', 0, 20, 0.5, 'px'), R('fx.stroke.alpha', 'Opacity', 0, 1, 0.01)], shapeFx],
-  ['depth', '3D depth', [GR('fx.depth.gradient', 'Near → far colors'), R('fx.depth.size', 'Depth', 1, 40, 1, 'px'), R('fx.depth.angle', 'Direction', 0, 360, 1, '°'), ...PERSP('depth')], shapeFx],
-  ['gloss', 'Gloss (3D light)', [SEL('fx.gloss.style', 'Shape', [['shape', 'Follows button shape'], ['ellipse', 'Ellipse'], ['band', 'Flat band']]), R('fx.gloss.height', 'Height', 5, 100, 1, '%'), R('fx.gloss.inset', 'Inset', 0, 40, 0.5, 'px'), R('fx.gloss.offset', 'Move down', -30, 40, 0.5, 'px'), R('fx.gloss.alpha', 'Top strength', 0, 1, 0.01), R('fx.gloss.fade', 'Bottom strength', 0, 1, 0.01), R('fx.gloss.blur', 'Softness', 0, 20, 0.5, 'px')], on],
-  ['bevel', 'Bevel', [R('fx.bevel.size', 'Size', 1, 24, 0.5, 'px'), R('fx.bevel.light', 'Highlight', 0, 1, 0.01), R('fx.bevel.dark', 'Shade', 0, 1, 0.01)], shapeFx],
-  ['innerShadow', 'Inner shadow', [C('fx.innerShadow.color', 'Color'), R('fx.innerShadow.alpha', 'Opacity', 0, 1, 0.01), R('fx.innerShadow.blur', 'Blur', 0, 40, 1, 'px'), R('fx.innerShadow.x', 'Offset X', -30, 30, 1, 'px'), R('fx.innerShadow.y', 'Offset Y', -30, 30, 1, 'px')], shapeFx],
-  ['innerShadow2', 'Inner shadow 2', [C('fx.innerShadow2.color', 'Color'), R('fx.innerShadow2.alpha', 'Opacity', 0, 1, 0.01), R('fx.innerShadow2.blur', 'Blur', 0, 40, 1, 'px'), R('fx.innerShadow2.x', 'Offset X', -30, 30, 1, 'px'), R('fx.innerShadow2.y', 'Offset Y', -30, 30, 1, 'px')], shapeFx],
-  ['inner', 'Inner line', [C('fx.inner.color', 'Color'), R('fx.inner.alpha', 'Opacity', 0, 1, 0.01), R('fx.inner.inset', 'Inset', 1, 30, 0.5, 'px'), R('fx.inner.width', 'Width', 0.5, 10, 0.5, 'px')], shapeFx],
-  ['Text effects'],
-  ['tExtrude', '3D extrusion', [GR('fx.tExtrude.gradient', 'Near → far colors'), R('fx.tExtrude.depth', 'Depth', 1, 60, 1, 'px'), R('fx.tExtrude.angle', 'Direction', 0, 360, 1, '°'), ...PERSP('tExtrude'), CHK('fx.tExtrude.outline', 'Include text stroke width')]],
-  ['tBevel', 'Bubble bevel', [R('fx.tBevel.size', 'Size', 0.5, 12, 0.5, 'px'), R('fx.tBevel.blur', 'Softness', 0, 12, 0.5, 'px'), R('fx.tBevel.light', 'Highlight', 0, 1, 0.01), R('fx.tBevel.dark', 'Shade', 0, 1, 0.01)]],
-  ['tGloss', 'Text gloss', [R('fx.tGloss.alpha', 'Strength', 0, 1, 0.01), R('fx.tGloss.height', 'Height', 10, 100, 1, '%')]],
-  ['tStroke', 'Text stroke', [C('fx.tStroke.color', 'Color'), R('fx.tStroke.width', 'Width', 0.5, 16, 0.5, 'px')]],
-  ['tShadow', 'Text shadow', [C('fx.tShadow.color', 'Color'), R('fx.tShadow.alpha', 'Opacity', 0, 1, 0.01), R('fx.tShadow.blur', 'Blur', 0, 40, 1, 'px'), R('fx.tShadow.x', 'Offset X', -30, 30, 0.5, 'px'), R('fx.tShadow.y', 'Offset Y', -30, 30, 0.5, 'px')]],
-  ['tGlow', 'Text glow', [C('fx.tGlow.color', 'Color'), R('fx.tGlow.size', 'Size', 1, 50, 1, 'px')]],
-  ['Extras'],
-  ['sweep', 'Light sweep', [SEL('fx.sweep.layer', 'Layer', [['under', 'On the button, under the text'], ['over', 'Over button and text']], on),
-    SEL('fx.sweep.area', 'Show on', [['fill', 'The whole face'], ['edges', 'Edges only (rim light)']], on),
-    R('fx.sweep.edgeInset', 'Rim inset', 0, 30, 0.5, 'px', d => on(d) && d.fx.sweep.area === 'edges'),
-    R('fx.sweep.edgeW', 'Rim width', 0.5, 16, 0.5, 'px', d => on(d) && d.fx.sweep.area === 'edges'),
-    R('fx.sweep.blur', 'Rim softness', 0, 12, 0.5, 'px', d => on(d) && d.fx.sweep.area === 'edges'), C('fx.sweep.color', 'Color'), R('fx.sweep.pos', 'Position', 0, 100, 1, '%'), R('fx.sweep.width', 'Width', 2, 200, 1, 'px'), R('fx.sweep.angle', 'Tilt', -180, 180, 1, '°'), R('fx.sweep.alpha', 'Strength', 0, 1, 0.01)]],
-  ['sparkles', 'Sparkles', [CHK('fx.sparkles.inside', 'Inside the button (glints)'), C('fx.sparkles.color', 'Color'), R('fx.sparkles.count', 'Count', 1, 16, 1), R('fx.sparkles.size', 'Size', 4, 60, 1, 'px'), R('fx.sparkles.vary', 'Size variety', 0, 1, 0.01), R('fx.sparkles.sharp', 'Sharpness', 0, 100, 1, '%'), SEL('fx.sparkles.points', 'Points', [['4', '4 points'], ['6', '6 points'], ['8', '8 points (twinkle)']]), R('fx.sparkles.rotate', 'Rotation', 0, 360, 1, '°'), R('fx.sparkles.glow', 'Glow', 0, 40, 1, 'px'), R('fx.sparkles.seed', 'Shuffle', 1, 99, 1)]],
-];
-const TRANSFORM = { title: 'Transform & perspective', open: false, fields: [
-  R('tf.rot', 'Rotate', -180, 180, 1, '°'),
-  R('tf.skewX', 'Slant all', -45, 45, 0.5, '°'),
-  R('tf.tiltX', 'Tilt back', -100, 100, 1, '%'),
-  R('tf.tiltY', 'Turn sideways', -100, 100, 1, '%'),
-  { t: 'note', text: 'Tilt is applied to PNG exports. SVG keeps rotate and slant.' },
-] };
 
 let fieldSeq = 0;
 const allFields = [];
@@ -2287,13 +2384,15 @@ function fieldHTML(f) {
   if (f.t === 'slice') { groupVis.push(['sliceWrap', f.s]); return sliceHTML(); }
   if (f.t === 'cursorgal') return `<div class="ip-grid" id="curGrid" role="group" aria-label="Cursor gallery"></div>`;
   if (f.t === 'corners') { groupVis.push(['cornerEd', f.s]); return cornerHTML(); }
+  if (f.t === 'shapes') { groupVis.push(['shpGrid', f.s]); return `<div class="shp-grid" id="shpGrid" role="group" aria-label="Button shape">${SHAPES.map(([v, l]) => `<button type="button" class="shp" data-shape="${v}" title="${l}" aria-pressed="false"><svg viewBox="0 0 34 16" aria-hidden="true">${SHAPE_PIC[v]}</svg><span>${SHAPE_SHORT[v]}</span></button>`).join('')}</div>`; }
   if (f.t === 'curup') { const id = 'f' + (++fieldSeq); groupVis.push([id, f.s]); return `<div class="ip-row" id="${id}"><button type="button" class="btn sm" id="curUpload">Upload cursor image…</button><span class="note-sm">The top-left corner is the click point.</span></div>`; }
   const id = 'f' + (++fieldSeq); f.id = id; allFields.push(f);
   const wrap = inner => `<div class="fld" id="${id}-w">${inner}</div>`;
-  const lab = `${f.l}${f.u ? ` <small>${f.u}</small>` : ''}`;
-  if (f.t === 'font') return wrap(`<label for="${id}">Font</label><div class="fp-wrap"><button type="button" class="fp-btn" id="${id}" aria-haspopup="listbox" aria-expanded="false"><span class="fp-name"></span><span class="fp-caret" aria-hidden="true"></span></button><div class="fp-pop" id="fpPop" hidden><input type="search" id="fpSearch" placeholder="Search ${ALL_GOOGLE.length}+ fonts" aria-label="Search fonts"><div class="fp-list" id="fpList" role="listbox" aria-label="Fonts"></div></div></div>`);
+  const lab = `${FIELD_ICON[f.k] ? `<svg class="fic" viewBox="0 0 16 16" aria-hidden="true">${FIELD_ICON[f.k]}</svg>` : ''}${f.l}${f.u ? ` <small>${f.u}</small>` : ''}`;
+  if (f.t === 'font') return wrap(`<label for="${id}">Font</label><div class="fp-wrap"><button type="button" class="fp-btn" id="${id}" aria-haspopup="listbox" aria-expanded="false"><span class="fp-name"></span><span class="fp-sample" aria-hidden="true"></span><span class="fp-caret" aria-hidden="true"></span></button><div class="fp-pop" id="fpPop" hidden><input type="search" id="fpSearch" placeholder="Search ${ALL_GOOGLE.length}+ fonts" aria-label="Search fonts"><div class="fp-list" id="fpList" role="listbox" aria-label="Fonts"></div></div></div>`);
   if (f.t === 'range') return wrap(`<label for="${id}">${lab}</label><input type="range" id="${id}" data-k="${f.k}" min="${f.min}" max="${f.max}" step="${f.step}"><input type="number" class="num" id="${id}-n" data-for="${id}" step="${f.step}" aria-label="${f.l} value">`);
   if (f.t === 'color') return wrap(`<label for="${id}">${f.l}</label><span class="sw"><input type="color" id="${id}" data-k="${f.k}"></span><code id="${id}-o"></code>`);
+  if (f.t === 'seg') return wrap(`<span class="flab">${f.l}</span><span class="seg segf" id="${id}" role="group" aria-label="${f.l}">${f.o.map(([v, l, pic]) => `<button type="button" data-segv='${JSON.stringify(v)}' aria-pressed="false"${pic ? ` title="${l}" aria-label="${l}"` : ''}>${pic ? `<svg viewBox="0 0 16 16" aria-hidden="true">${pic}</svg>` : l}</button>`).join('')}</span>`);
   if (f.t === 'select') return wrap(`<label for="${id}">${f.l}</label><select id="${id}" data-k="${f.k}"></select>`);
   if (f.t === 'check') return `<label class="chk" id="${id}-w"><input type="checkbox" id="${id}" data-k="${f.k}">${f.l}</label>`;
   if (f.t === 'grad') return `<div class="ge" id="${id}-w" data-k="${f.k}">
@@ -2354,25 +2453,43 @@ function sliceHTML() {
     <div class="note-sm">Drag the blue lines. The shaded sides keep their shape; the middle stretches to fit the text. Effects that need a shape (stroke, depth, bevel) are off for images.</div>
   </div>`;
 }
-function buildPanel() {
-  const sec = (s, i) => { const id = 'sec' + i; if (s.s) groupVis.push([id, s.s]); return `<details class="sec" id="${id}" data-title="${s.title}" ${s.open ? 'open' : ''}><summary>${s.title}<span class="st"></span></summary><div class="sec-body">${s.fields.map(fieldHTML).join('')}</div></details>`; };
-  let html = SECTIONS.map(sec).join('');
-  html += `<details class="sec" id="secFx" open><summary>Effects<span class="st" id="fxCount"></span></summary><div class="sec-body"><div class="fxbar"><span class="seg" role="group" aria-label="Show effects"><button type="button" data-fxf="all" aria-pressed="true">All effects</button><button type="button" data-fxf="on" aria-pressed="false">Only active</button></span></div><div class="fx-empty" id="fxEmpty" hidden>No effects are on. Switch to "All effects" to add one.</div>`;
-  for (const e of EFFECTS) {
-    if (e.length <= 2) { const id = 'fxg' + (++fieldSeq); e.id = id; if (e[1]) groupVis.push([id, e[1]]); html += `<div class="fx-group" id="${id}">${e[0]}</div>`; continue; }
-    const [key, label, fields, show] = e;
-    const tg = { k: `fx.${key}.on`, t: 'check' }; const id = 'f' + (++fieldSeq); tg.id = id; allFields.push(tg);
-    if (show) groupVis.push(['fx-' + key, show]);
-    html += `<details class="fx" id="fx-${key}"><summary><input type="checkbox" class="tg" id="${id}" data-k="fx.${key}.on" aria-label="${label} on or off"><span>${label}</span></summary><div class="fx-body">${fields.map(fieldHTML).join('')}</div></details>`;
-  }
-  html += `</div></details>` + sec(TRANSFORM, 99);
-  $('#controls').innerHTML = html;
+function fxRowHTML(key) {
+  const [label, fields] = FX_DEF[key], k = fxOnK(key);
+  const tg = { k, t: 'check' }; const id = 'f' + (++fieldSeq); tg.id = id; allFields.push(tg);
+  return `<details class="fx" id="fx-${key}" hidden><summary><span class="fxth" aria-hidden="true">${FX_THUMB[key] || ''}</span><span class="fxl">${label}</span><input type="checkbox" class="tg" id="${id}" data-k="${k}" aria-label="${label} on or off"><button type="button" class="fxrm" data-fxrm="${key}" title="Remove ${label}" aria-label="Remove ${label}"><svg viewBox="0 0 16 16"><path d="M4 8h8"/></svg></button></summary><div class="fx-body">${fields.map(fieldHTML).join('')}</div></details>`;
 }
+function buildPanel() {
+  const sec = s => {
+    const id = 'sec' + (++fieldSeq); if (s.s) groupVis.push([id, s.s]);
+    const add = s.fx ? `<button type="button" class="fxadd" data-fxadd="${s.fx}" aria-haspopup="menu">+ Add</button>` : '';
+    const body = s.fx
+      ? FX_GROUPS[s.fx].flatMap(g => g[1]).map(fxRowHTML).join('') + `<div class="fx-empty" id="fxEmpty-${s.fx}">No ${s.fx} effects yet. Use + Add.</div>`
+      : s.fields.map(fieldHTML).join('');
+    return `<details class="sec" id="${id}" data-title="${s.title}" ${s.open ? 'open' : ''}><summary>${s.title}<span class="st"></span>${add}</summary><div class="sec-body">${body}</div></details>`;
+  };
+  const rows = LAYERS.map(L => `<button type="button" class="layer" role="tab" id="ly-${L.id}" data-layer="${L.id}" aria-controls="lp-${L.id}" aria-selected="false"><span class="lic"><svg viewBox="0 0 24 24" aria-hidden="true">${LAYER_PIC[L.id]}</svg></span><span class="lnm">${L.name}</span><span class="lsum" id="lsum-${L.id}"></span></button>`).join('');
+  const pages = LAYERS.map(L => `<div class="lpage" role="tabpanel" id="lp-${L.id}" data-page="${L.id}" aria-labelledby="ly-${L.id}" hidden>${L.secs.map(sec).join('')}</div>`).join('');
+  $('#controls').innerHTML = `<div class="layers" role="tablist" aria-label="What you are editing" aria-orientation="vertical"><div class="layers-h">Layers</div>${rows}</div>${pages}`;
+  showLayer(curLayer);
+}
+const STORE_LAYER = 'ctaforge.layer';
+let curLayer = (() => { try { const v = localStorage.getItem(STORE_LAYER); return LAYERS.some(L => L.id === v) ? v : 'text'; } catch (e) { return 'text'; } })();
+function showLayer(id, focus) {
+  curLayer = id; try { localStorage.setItem(STORE_LAYER, id); } catch (e) {}
+  document.querySelectorAll('#controls .layer').forEach(b => { const s = b.dataset.layer === id; b.setAttribute('aria-selected', s); b.tabIndex = s ? 0 : -1; if (s && focus) b.focus(); });
+  document.querySelectorAll('#controls .lpage').forEach(p => p.hidden = p.dataset.page !== id);
+  if (typeof updFoldLabel === 'function') updFoldLabel();
+}
+// effects that are on, plus ones just added or switched off in this design, keep their row
+const FX_LISTED = new Set(); let fxListFor = null;
+function fxCount(d, group) { return FX_GROUPS[group].flatMap(g => g[1]).filter(k => fxShows(d, k) && fxIsOn(d, k)).length; }
+function firstLine() { return (($('#ctaText') || {}).value || '').split(/\n|\|/)[0].trim(); }
 function syncUI() {
   for (const f of allFields) {
     const el = document.getElementById(f.id); const v = getK(D, f.k);
     if (f.t === 'grad') { const g = document.getElementById(f.id + '-w'); if (g) geRender(g); continue; }
     if (!el) continue;
+    if (f.t === 'seg') { const cur = JSON.stringify(typeof f.o[0][0] === 'boolean' ? !!v : v); el.querySelectorAll('[data-segv]').forEach(b => b.setAttribute('aria-pressed', b.dataset.segv === cur)); continue; }
     if (f.t === 'font') {
       const nm = el.querySelector('.fp-name'); const missing = NOT_GOOGLE[v] && !customFonts[v];
       nm.textContent = missing ? `${v} (upload to use)` : v; nm.style.fontFamily = `"${v}", "${D.font.fallback}", sans-serif`; continue;
@@ -2384,42 +2501,52 @@ function syncUI() {
     const o = document.getElementById(f.id + '-o');
     if (o) o.textContent = String(v).toUpperCase();
   }
-  syncIconPicker(); syncSlice(); syncCorners(); syncCursorGal();
+  syncIconPicker(); syncSlice(); syncCorners(); syncCursorGal(); syncShapes();
   refreshVisibility();
 }
 function refreshVisibility() {
   for (const f of allFields) if (f.s) { const w = document.getElementById(f.id + '-w'); if (w) w.hidden = !f.s(D); }
-  // start every effect and heading visible; the rules below hide what they need to
-  for (const e of EFFECTS) { const el = document.getElementById(e.length > 2 ? 'fx-' + e[0] : e.id); if (el) el.hidden = false; }
   for (const [id, fn] of groupVis) { const el = document.getElementById(id); if (el) el.hidden = !fn(D); }
-  for (const e of EFFECTS) if (e.length > 2) document.getElementById('fx-' + e[0]).classList.toggle('on', !!D.fx[e[0]].on);
-  // effects filter: hide effects that are off, and group headings left with nothing under them
-  let active = 0, shown = 0, head = null, headHas = false;
-  const closeGroup = () => { if (head && fxFilter === 'on' && !headHas) head.hidden = true; };
-  for (const e of EFFECTS) {
-    if (e.length <= 2) { closeGroup(); head = document.getElementById(e.id); headHas = false; continue; }
-    const el = document.getElementById('fx-' + e[0]); if (el.hidden) continue;
-    const isOn = !!D.fx[e[0]].on; if (isOn) active++;
-    if (fxFilter === 'on' && !isOn) el.hidden = true; else { shown++; headHas = true; }
+  // a new design starts with only its own effects listed
+  if (fxListFor !== D) { FX_LISTED.clear(); fxListFor = D; }
+  for (const group of Object.keys(FX_GROUPS)) {
+    let shown = 0;
+    for (const key of FX_GROUPS[group].flatMap(g => g[1])) {
+      const el = document.getElementById('fx-' + key), isOn = fxIsOn(D, key);
+      if (isOn) FX_LISTED.add(key);
+      el.hidden = !(FX_LISTED.has(key) && fxShows(D, key)); el.classList.toggle('on', isOn);
+      if (!el.hidden) shown++;
+    }
+    $('#fxEmpty-' + group).hidden = shown > 0;
   }
-  closeGroup();
-  const fc = $('#fxCount'); fc.textContent = active ? `${active} on` : 'none on'; fc.classList.toggle('on', active > 0);
-  $('#fxEmpty').hidden = !(fxFilter === 'on' && !shown);
-  document.querySelectorAll('.sec[data-title]').forEach(el => {
+  document.querySelectorAll('#controls .sec[data-title]').forEach(el => {
     const fn = SEC_STATUS[el.dataset.title], st = el.querySelector('.st'); if (!fn) return;
     const [txt, isOn] = fn(D); st.textContent = txt || ''; st.classList.toggle('on', !!isOn);
   });
+  updLayerSums(); syncFontSample();
 }
-let fxFilter = 'all';
+const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
+const fxStatus = g => d => { const n = fxCount(d, g); return [n ? `${n} on` : '', n > 0]; };
 const SEC_STATUS = {
-  'Text': d => [d.font.family, true],
+  'Typography': d => [d.font.family, true],
   'Text color': d => [d.font.grad ? 'Gradient' : 'Solid', true],
-  'Icon': d => d.icon.type === 'none' ? ['Off', false] : [d.icon.type === 'vector' ? (ICONS[d.icon.id] || ICONS.play)[0] : d.icon.type === 'emoji' ? d.icon.char : 'My image', true],
-  'Cursor': d => d.cursor.type === 'none' ? ['Off', false] : [d.cursor.type === 'custom' ? 'My image' : CURSORS[d.cursor.type]?.name, true],
-  'Button': d => d.box.on ? [SHAPES.find(x => x[0] === d.box.shape)?.[1], true] : ['Off, text only', false],
+  'Shape of the words': d => (d.font.arc || d.font.skew) ? ['On', true] : ['Straight', false],
+  'Text effects': fxStatus('text'),
+  'Shape': d => d.box.on ? [SHAPES.find(x => x[0] === d.box.shape)?.[1], true] : ['Off, text only', false],
   'Fill': d => [{ solid: 'Solid', gradient: 'Gradient', image: 'My image' }[d.box.fill], true],
-  'Transform & perspective': d => (d.tf.rot || d.tf.skewX || d.tf.tiltX || d.tf.tiltY) ? ['On', true] : ['Off', false],
+  'Button effects': fxStatus('button'),
+  'Rotate & tilt': d => (d.tf.rot || d.tf.skewX || d.tf.tiltX || d.tf.tiltY) ? ['On', true] : ['Off', false],
 };
+const LAYER_SUM = {
+  text: d => { const t = firstLine(), n = fxCount(d, 'text'); return [(t ? `"${d.font.upper ? t.toUpperCase() : t}"` : 'No text') + (n ? ` · ${plural(n, 'effect')}` : ''), true]; },
+  button: d => { if (!d.box.on) return ['Off, text only', false]; const n = fxCount(d, 'button'); return [[SHAPE_SHORT[d.box.shape], { solid: 'solid', gradient: 'gradient', image: 'image' }[d.box.fill], n ? plural(n, 'effect') : ''].filter(Boolean).join(' · '), true]; },
+  icon: d => d.icon.type === 'none' ? ['Add +', false] : [d.icon.type === 'vector' ? (ICONS[d.icon.id] || ICONS.play)[0] : d.icon.type === 'emoji' ? d.icon.char : 'My image', true],
+  cursor: d => d.cursor.type === 'none' ? ['Add +', false] : [d.cursor.type === 'custom' ? 'My image' : CURSORS[d.cursor.type]?.name, true],
+  whole: d => { const t = d.tf, p = [t.rot && 'rotated', t.skewX && 'slanted', (t.tiltX || t.tiltY) && 'tilted'].filter(Boolean); return p.length ? [p.join(' · '), true] : ['Straight', false]; },
+};
+function updLayerSums() {
+  for (const L of LAYERS) { const el = document.getElementById('lsum-' + L.id); if (!el) continue; const [t, isOn] = LAYER_SUM[L.id](D); el.textContent = t; el.classList.toggle('add', !isOn); }
+}
 $('#controls').addEventListener('input', e => {
   const el = e.target;
   if (el.closest('.ge')) { geInput(el); return; }
@@ -2732,17 +2859,58 @@ function stepHist(dir) {
   hi = n; D = full(JSON.parse(hist[hi])); syncUI(); persist(); requestRender(); updUndo();
 }
 $('#undoBtn').onclick = () => stepHist(-1);
-function updFoldLabel() { const anyOpen = !!document.querySelector('#controls details[open]'); $('#foldBtn span').textContent = anyOpen ? 'Fold all' : 'Unfold all'; }
+function updFoldLabel() { const anyOpen = !!document.querySelector('#controls .lpage:not([hidden]) details[open]'); $('#foldBtn span').textContent = anyOpen ? 'Fold all' : 'Unfold all'; }
 $('#foldBtn').onclick = () => {
-  const anyOpen = !!document.querySelector('#controls details[open]');
-  document.querySelectorAll(anyOpen ? '#controls details' : '#controls details.sec').forEach(d => d.open = !anyOpen);
+  const pg = '#controls .lpage:not([hidden]) ', anyOpen = !!document.querySelector(pg + 'details[open]');
+  document.querySelectorAll(pg + (anyOpen ? 'details' : 'details.sec')).forEach(d => d.open = !anyOpen);
   updFoldLabel();
 };
 $('#controls').addEventListener('toggle', updFoldLabel, true);
 $('#controls').addEventListener('click', e => {
-  const b = e.target.closest('[data-fxf]'); if (!b) return;
-  fxFilter = b.dataset.fxf; document.querySelectorAll('[data-fxf]').forEach(x => x.setAttribute('aria-pressed', x === b)); refreshVisibility();
+  const ly = e.target.closest('[data-layer]'); if (ly) { showLayer(ly.dataset.layer); return; }
+  const sg = e.target.closest('[data-segv]'); if (sg) { const f = allFields.find(x => x.id === sg.parentElement.id); if (f) { setK(D, f.k, JSON.parse(sg.dataset.segv)); syncUI(); changed(); } return; }
+  const sh = e.target.closest('[data-shape]'); if (sh) { setShape(sh.dataset.shape); syncUI(); changed(); return; }
+  const rm = e.target.closest('[data-fxrm]');
+  if (rm) { e.preventDefault(); const key = rm.dataset.fxrm; setK(D, fxOnK(key), false); FX_LISTED.delete(key); $('#fx-' + key).open = false; syncUI(); changed(); return; }
+  const ad = e.target.closest('[data-fxadd]'); if (ad) { e.preventDefault(); openFxPicker(ad); }
 });
+// arrow keys move between layers
+$('#controls').addEventListener('keydown', e => {
+  const ly = e.target.closest('.layer'); if (!ly || !['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(e.key)) return;
+  e.preventDefault(); const ids = LAYERS.map(L => L.id), i = ids.indexOf(ly.dataset.layer);
+  showLayer(ids[e.key === 'Home' ? 0 : e.key === 'End' ? ids.length - 1 : (i + (e.key === 'ArrowDown' ? 1 : ids.length - 1)) % ids.length], true);
+});
+function setShape(v) {
+  if (v === 'custom' && D.box.shape !== 'custom') {
+    const cs = cornerSet(D.box, 240, 80);
+    D.box.corners = { tl: { ...cs[0] }, tr: { ...cs[1] }, br: { ...cs[2] }, bl: { ...cs[3] } };
+    Object.values(D.box.corners).forEach(c => c.r = Math.round(Math.min(c.r, 60)));
+  }
+  D.box.shape = v;
+}
+function syncShapes() { document.querySelectorAll('#shpGrid [data-shape]').forEach(b => b.setAttribute('aria-pressed', b.dataset.shape === D.box.shape)); }
+function syncFontSample() {
+  const s = document.querySelector('#controls .fp-sample'); if (!s) return;
+  let t = firstLine() || 'Aa'; if (t.length > 12) t = t.slice(0, 11) + '…';
+  s.textContent = D.font.upper ? t.toUpperCase() : t;
+  Object.assign(s.style, { fontFamily: `"${D.font.family}", "${D.font.fallback}", sans-serif`, fontWeight: D.font.weight, fontStyle: D.font.italic ? 'italic' : '' });
+}
+// the + Add picker: a grid of pictures, grouped; effects already in the list are greyed out
+function openFxPicker(btn) {
+  const items = [];
+  for (const [head, keys] of FX_GROUPS[btn.dataset.fxadd]) {
+    const avail = keys.filter(k => fxShows(D, k)); if (!avail.length) continue;
+    items.push({ head });
+    for (const k of avail) {
+      const listed = !$('#fx-' + k).hidden;
+      items.push({ label: FX_DEF[k][0], thumb: FX_THUMB[k], disabled: listed, title: listed ? 'Already in the list' : '', run: () => {
+        setK(D, fxOnK(k), true); FX_LISTED.add(k); syncUI();
+        const d = $('#fx-' + k); d.open = true; d.closest('details.sec').open = true; d.scrollIntoView({ block: 'nearest' }); changed();
+      } });
+    }
+  }
+  openMenu(btn, items, 'tiles');
+}
 $('#pinBtn').onclick = () => { const g = $('#stagegrid'), un = g.classList.toggle('unpinned'); $('#pinBtn').setAttribute('aria-pressed', !un); $('#pinBtn').textContent = un ? 'Pin preview' : 'Unpin preview'; };
 $('#redoBtn').onclick = () => stepHist(1);
 document.addEventListener('keydown', e => {
@@ -3025,6 +3193,7 @@ function setView(v) {
 $('#tab-single').onclick = () => setView('single');
 $('#tab-batch').onclick = () => setView('batch');
 const ta = $('#ctaText');
+ta.addEventListener('input', () => { updLayerSums(); syncFontSample(); });
 function autoGrow() { ta.style.height = 'auto'; ta.style.height = Math.min(200, ta.scrollHeight + 2) + 'px'; }
 ta.addEventListener('input', () => { autoGrow(); requestRender(); });
 $('#batchText').addEventListener('input', requestRender);
@@ -4569,9 +4738,9 @@ async function withProgress(label, fn) { const p = progress(label); try { return
 /* ---------- menus ---------- */
 // items: { label, icon, run, disabled, danger, sub: () => items } | 'sep' | { head }
 let menuCleanup = null;
-function openMenu(at, items) {
+function openMenu(at, items, cls = '') {
   closeMenu();
-  const m = $('#menu'), stack = [];
+  const m = $('#menu'), stack = []; m.className = 'menu' + (cls ? ' ' + cls : '');
   const draw = list => {
     m.replaceChildren();
     if (stack.length) { const back = document.createElement('button'); back.type = 'button'; back.setAttribute('role', 'menuitem'); back.innerHTML = '<span class="mi">‹</span>Back'; back.onclick = () => { draw(stack.pop()); }; m.append(back, document.createElement('hr')); }
@@ -4580,7 +4749,8 @@ function openMenu(at, items) {
       if (it.head) { const h = document.createElement('div'); h.className = 'mh'; h.textContent = it.head; m.append(h); continue; }
       const b = document.createElement('button'); b.type = 'button'; b.setAttribute('role', 'menuitem');
       b.innerHTML = `<span class="mi"></span><span class="ml"></span>${it.sub ? '<span class="sub">›</span>' : ''}`;
-      b.querySelector('.mi').textContent = it.icon || ''; b.querySelector('.ml').textContent = it.label;
+      if (it.thumb) b.querySelector('.mi').innerHTML = it.thumb; else b.querySelector('.mi').textContent = it.icon || '';
+      b.querySelector('.ml').textContent = it.label;
       if (it.title) b.title = it.title;
       if (it.danger) b.classList.add('danger');
       if (it.disabled) b.disabled = true;
@@ -5086,7 +5256,6 @@ resizer($('#folderGrip'), '--ftw', 210, () => 150, () => Math.max(200, document.
 
 /* ================= boot ================= */
 buildPanel();
-if (matchMedia('(max-width: 860px)').matches) document.querySelectorAll('#controls details.sec').forEach((d, i) => { if (i > 0) d.open = false; });
 syncUI();
 syncExp();
 updFoldLabel();
@@ -5101,6 +5270,4 @@ pushHist();
 })();
 document.fonts.addEventListener?.('loadingdone', () => requestRender());
 </script>
-
-</body>
-</html>
+</body></html>
