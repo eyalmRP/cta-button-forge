@@ -49,7 +49,16 @@ body { background: var(--bg); color: var(--fg); font-family: var(--ui); font-siz
 button, input, select, textarea { font: inherit; color: inherit; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-.app { height: 100%; display: grid; grid-template-columns: 360px minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+.app { height: 100%; display: grid; grid-template-columns: var(--rail, 360px) minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+.app > .panel { grid-column: 1; grid-row: 2; }
+.app > .work { grid-column: 2; grid-row: 2; }
+/* drag handles for resizable panels */
+.grip { position: relative; z-index: 20; width: 10px; cursor: col-resize; touch-action: none; }
+.grip::after { content: ""; position: absolute; top: 0; bottom: 0; left: 4px; width: 2px; border-radius: 1px; background: transparent; transition: background .15s; }
+.grip:hover::after, .grip:focus-visible::after, .grip.drag::after { background: var(--accent); }
+.grip:focus-visible { outline: none; }
+.app > .railgrip { grid-column: 1; grid-row: 2; justify-self: end; margin-right: -5px; }
+body.resizing { cursor: col-resize; user-select: none; }
 .top { grid-column: 1 / -1; display: flex; align-items: center; gap: 16px; padding-block: 10px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); border-bottom: 1px solid var(--line); background: var(--panel); }
 .brand { font-weight: 700; font-size: 15px; letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
 .brand i { display: inline-block; width: 22px; height: 12px; border-radius: 6px; background: var(--accent); box-shadow: 0 3px 0 color-mix(in srgb, var(--accent) 55%, #000); }
@@ -249,8 +258,15 @@ select.sm, input.sm { padding: 6px 8px; border: 1px solid var(--line); border-ra
 .mine { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .mine input[type="text"] { padding: 6px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); width: 170px; }
 .gfilter { display: flex; gap: 6px; }
-.libgrid { display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: 14px; margin-top: 10px; align-items: start; }
-.ftree { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 6px; display: grid; gap: 1px; position: sticky; top: 8px; max-height: 80vh; overflow: auto; }
+.libgrid { display: grid; grid-template-columns: var(--ftw, 210px) 14px minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); grid-template-areas: ". . bar" "tree grip gal"; margin-top: 10px; }
+.libgrid > .libbar { grid-area: bar; }
+.libgrid > .ftree { grid-area: tree; }
+.libgrid > .fgrip { grid-area: grip; justify-self: center; }
+.libgrid > .gallery { grid-area: gal; align-content: start; }
+/* the folders panel runs the full height of the designs; its list stays in view while scrolling */
+.ftree { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 6px; min-width: 0; }
+.ftin { position: sticky; top: calc(var(--modes-h, 0px) + 8px); display: grid; gap: 1px; }
+.libgrid > .fgrip { z-index: 1; }
 .ftree .fh { display: flex; justify-content: space-between; align-items: center; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); padding: 8px 8px 4px; }
 .ftree .fh button { border: 0; background: none; color: var(--accent); cursor: pointer; font-size: 12px; font-weight: 600; text-transform: none; letter-spacing: 0; padding: 2px 4px; border-radius: 5px; }
 .frow { display: flex; align-items: center; gap: 2px; border-radius: 7px; }
@@ -297,7 +313,7 @@ select.sm, input.sm { padding: 6px 8px; border: 1px solid var(--line); border-ra
 .progress .fill { position: absolute; inset: 0 auto 0 0; width: 0; background: var(--accent); border-radius: 3px; transition: width .25s; }
 .progress.ind .fill { width: 35%; animation: indet 1.1s ease-in-out infinite; }
 @keyframes indet { from { left: -35%; } to { left: 100%; } }
-@media (max-width: 760px) { .libgrid { grid-template-columns: 1fr; } .ftree { position: static; max-height: none; grid-template-columns: 1fr; } }
+@media (max-width: 760px) { .libgrid { grid-template-columns: minmax(0, 1fr); grid-template-areas: "bar" "tree" "gal"; row-gap: 10px; } .libgrid > .fgrip { display: none; } .ftin { position: static; } }
 .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; }
 .gcard { position: relative; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); overflow: hidden; min-width: 0; }
 .gcard:hover { border-color: var(--accent); }
@@ -338,6 +354,7 @@ input.tg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
 @media (max-width: 860px) {
   html, body { height: auto; }
   .app { display: flex; flex-direction: column; height: auto; }
+  .app > .railgrip { display: none; }
   .work, #view-single { display: contents; }
   .top { order: 0; flex-wrap: wrap; gap: 8px 12px; }
   .top .hint { display: none; }
@@ -388,6 +405,7 @@ input.tg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
     </span>
   </header>
 
+  <div class="grip railgrip" id="railGrip" role="separator" aria-orientation="vertical" aria-label="Resize the controls panel (arrow keys; double-click to reset)" tabindex="0"></div>
   <aside class="panel" id="panel" aria-label="Design controls">
     <div class="tools">
       <button id="undoBtn" title="Undo (Ctrl/Cmd+Z)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>Undo</button>
@@ -531,8 +549,6 @@ Start</textarea>
       </div>
       <input type="file" id="importFile" accept=".json,application/json" hidden>
       <div class="libgrid">
-        <nav class="ftree" id="folderTree" aria-label="Folders"></nav>
-        <div class="libmain">
           <div class="libbar">
             <div class="crumb" id="crumb"></div>
             <div class="gfilter seg" role="group" aria-label="Show">
@@ -542,8 +558,9 @@ Start</textarea>
               <button data-gf="starter" aria-pressed="false">Starters</button>
             </div>
           </div>
-          <div class="gallery" id="gallery"></div>
-        </div>
+        <nav class="ftree" aria-label="Folders"><div class="ftin" id="folderTree"></div></nav>
+        <div class="grip fgrip" id="folderGrip" role="separator" aria-orientation="vertical" aria-label="Resize the folders panel (arrow keys; double-click to reset)" tabindex="0"></div>
+        <div class="gallery" id="gallery"></div>
       </div>
     </div>
   </section>
@@ -4519,7 +4536,11 @@ function storeFolders(list) { try { localStorage.setItem(STORE_FOLDERS, JSON.str
 const curFolder = () => gFolder && gFolder !== '__none' ? gFolder : '';
 const FOLDER_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 6.5A2.5 2.5 0 0 1 5.5 4h4.2l2 2h6.8A2.5 2.5 0 0 1 21 8.5v9a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17.5z"/></svg>';
 const ALL_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true" style="color:var(--muted)"><path fill="currentColor" d="M4 4h7v7H4zm9 0h7v7h-7zM4 13h7v7H4zm9 0h7v7h-7z"/></svg>';
-const STARTER_FOLDER_SET = new Set(Object.values(STARTER_FOLDERS));
+/* starters are built in, so changes to them (name, folder, design, deleting) are kept in this browser, by their original name */
+const STORE_STARTER = 'ctaforge.starterEdits';
+function loadStarterEdits() { try { return JSON.parse(localStorage.getItem(STORE_STARTER) || '{}'); } catch (e) { return {}; } }
+function editStarter(key, patch) { const all = loadStarterEdits(); all[key] = { ...(all[key] || {}), ...patch }; try { localStorage.setItem(STORE_STARTER, JSON.stringify(all)); } catch (e) { toast('This browser blocked saving.'); } renderGallery(); }
+function resetStarter(key) { const all = loadStarterEdits(); delete all[key]; try { localStorage.setItem(STORE_STARTER, JSON.stringify(all)); } catch (e) {} thumbCache.clear(); renderGallery(); }
 
 /* ---------- progress: one bar for everything that takes a moment ---------- */
 const PROG = { jobs: new Map(), n: 0 };
@@ -4588,8 +4609,10 @@ function openMenu(at, items) {
   };
   setTimeout(() => { document.addEventListener('pointerdown', onDown); }, 0);
   document.addEventListener('keydown', onKey);
-  addEventListener('scroll', closeMenu, { once: true, capture: true });
-  menuCleanup = () => { document.removeEventListener('pointerdown', onDown); document.removeEventListener('keydown', onKey); };
+  // when the page scrolls (or shifts as thumbnails load), a menu follows its button; a right-click menu closes
+  const onScroll = e => { if (m.contains(e.target)) return; if (at.getBoundingClientRect && at.isConnected) place(); else closeMenu(); };
+  addEventListener('scroll', onScroll, true);
+  menuCleanup = () => { document.removeEventListener('pointerdown', onDown); document.removeEventListener('keydown', onKey); removeEventListener('scroll', onScroll, true); };
 }
 function closeMenu() { const m = $('#menu'); if (!m.hidden) m.hidden = true; if (menuCleanup) { menuCleanup(); menuCleanup = null; } }
 
@@ -4621,12 +4644,13 @@ const askName = async (title, value, ok = 'Save') => { const r = await ask({ tit
 /* ---------- library items ---------- */
 function libItems() {
   const hidden = loadHidden();
-  const starters = PRESETS.filter(([name]) => !hidden.includes(name)).map(([name, p, sample]) => ({ kind: 'starter', name, design: p, sample, folder: STARTER_FOLDERS[name] || '' }));
+  const ed = loadStarterEdits();
+  const starters = PRESETS.filter(([name]) => !hidden.includes(name)).map(([name, p, sample]) => { const e = ed[name] || {}; return { kind: 'starter', key: name, edited: !!ed[name], name: e.name || name, design: e.design || p, sample: e.sample ?? sample, folder: e.folder ?? STARTER_FOLDERS[name] ?? '' }; });
   const mine = loadMine().map((m, i) => ({ kind: 'mine', name: m.name, design: m.design, sample: m.sample, idx: i, folder: m.folder || '' }));
   const team = TEAM.ready ? TEAM.docs.map(t => ({ kind: 'team', name: t.name || 'Untitled', design: t.design, sample: t.sample || undefined, team: t, folder: t.folder || '' })) : [];
   return { starters, mine, team };
 }
-const canChange = it => it.kind === 'mine' || (it.kind === 'team' && TEAM.canWrite);
+const canChange = it => it.kind === 'mine' || it.kind === 'starter' || (it.kind === 'team' && TEAM.canWrite);
 function allFolderNames() {
   const { starters, mine, team } = libItems();
   return [...new Set([...loadFolders(), ...[...mine, ...team, ...starters].map(it => it.folder).filter(Boolean)])].sort((a, b) => a.localeCompare(b));
@@ -4655,12 +4679,14 @@ function setMine(fn) { const l = loadMine(); fn(l); if (storeMine(l)) renderGall
 async function renameItem(it) {
   const v = await askName(`Rename ${it.name}`, it.name, 'Rename'); if (!v || v === it.name) return;
   if (it.kind === 'mine') { setMine(l => { l[it.idx].name = v; }); toast(`Renamed to ${v}`); }
+  else if (it.kind === 'starter') { editStarter(it.key, { name: v }); toast(`Renamed to ${v}`); }
   else teamChange('Renaming…', () => { tdoc(it).name = v; }, () => teamOps.update(it.team.id, { name: v }), `Renamed to ${v}`);
 }
 function moveItem(it, folder) {
   if ((it.folder || '') === (folder || '')) return;
   const msg = folder ? `Moved ${it.name} to ${folder}` : `Took ${it.name} out of its folder`;
   if (it.kind === 'mine') { setMine(l => { l[it.idx].folder = folder || undefined; }); toast(msg); }
+  else if (it.kind === 'starter') { editStarter(it.key, { folder: folder || '' }); toast(msg); }
   else if (it.kind === 'team') teamChange('Moving…', () => { tdoc(it).folder = folder || ''; }, () => teamOps.update(it.team.id, { folder: folder || '' }), msg);
 }
 async function newFolderThen(fn) {
@@ -4669,9 +4695,10 @@ async function newFolderThen(fn) {
   fn ? fn(v) : (gFolder = v, renderGallery(), toast(`Folder ${v} made. Saves go into it while it's open.`, 3500));
 }
 async function deleteItem(it) {
-  const r = await ask({ title: `Delete ${it.name}?`, text: it.kind === 'team' ? 'It is removed from the team library for everyone.' : 'It is removed from My designs in this browser.', buttons: [{ label: 'Cancel', value: 'cancel' }, { label: 'Delete', value: 'del', danger: true }] });
+  const r = await ask({ title: `Delete ${it.name}?`, text: it.kind === 'team' ? 'It is removed from the team library for everyone.' : it.kind === 'starter' ? 'It is removed from your library in this browser. More ⋯ → Restore deleted starters brings it back.' : 'It is removed from My designs in this browser.', buttons: [{ label: 'Cancel', value: 'cancel' }, { label: 'Delete', value: 'del', danger: true }] });
   if (!r || r.choice !== 'del') return;
-  if (it.kind === 'mine') { setMine(l => { l.splice(it.idx, 1); }); toast(`Deleted ${it.name}`); }
+  if (it.kind === 'starter') { const h = loadHidden(); if (!h.includes(it.key)) storeHidden([...h, it.key]); renderGallery(); toast(`Deleted ${it.name}`); }
+  else if (it.kind === 'mine') { setMine(l => { l.splice(it.idx, 1); }); toast(`Deleted ${it.name}`); }
   else teamChange('Deleting…', () => { TEAM.docs = TEAM.docs.filter(d => d.id !== it.team.id); }, () => teamOps.remove(it.team.id), `Deleted ${it.name} from the team library`);
 }
 function duplicateItem(it) {
@@ -4683,6 +4710,7 @@ async function overwriteItem(it) {
   const r = await ask({ title: `Replace ${it.name} with the current design?`, text: it.kind === 'team' ? 'Everyone on the team sees the change.' : '', buttons: [{ label: 'Cancel', value: 'cancel' }, { label: 'Replace', value: 'ok', primary: true }] });
   if (!r || r.choice !== 'ok') return;
   if (it.kind === 'mine') { setMine(l => { l[it.idx].design = clone(D); }); thumbCache.clear(); renderGallery(); toast(`Saved the current design as ${it.name}`); return; }
+  if (it.kind === 'starter') { editStarter(it.key, { design: clone(D), sample: currentSample() }); thumbCache.clear(); toast(`Saved the current design as ${it.name}`); return; }
   if (needName()) return;
   const body = teamRecord(it.name, D, currentSample()); if (!body) return tooBig();
   teamChange('Saving…', () => { Object.assign(tdoc(it), { design: body.design, sample: body.sample, by: body.by, updatedAt: body.updatedAt }); }, () => teamOps.update(it.team.id, { design: body.design, sample: body.sample, by: body.by, updatedAt: body.updatedAt }), `Saved the current design as ${it.name} for the team`);
@@ -4708,7 +4736,7 @@ function openItem(it) {
   toast(it.kind === 'starter' ? `Opened ${it.name}. Edit it, then Save to keep your version.` : `Opened ${it.name}. Edit it, then use ⋯ → Save current design here to keep the changes.`, 3500);
 }
 function moveMenu(it) {
-  const names = allFolderNames().filter(f => !(STARTER_FOLDER_SET.has(f) && !loadFolders().includes(f) && ![...libItems().mine, ...libItems().team].some(x => x.folder === f)) || true);
+  const names = allFolderNames();
   return [
     ...names.map(f => ({ label: f, icon: f === it.folder ? '✓' : '📁', disabled: f === it.folder, run: () => moveItem(it, f) })),
     'sep',
@@ -4723,7 +4751,7 @@ function itemMenu(it) {
   if (ch) items.push({ label: 'Save current design here', icon: '⤓', title: 'Replace this saved design with what is in the editor now', run: () => overwriteItem(it) });
   if (it.kind === 'mine' && TEAM.kind && TEAM.canWrite) items.push({ label: 'Share with team', icon: '👥', run: () => shareToTeam(it.name, it.design, it.sample, it.folder) });
   items.push('sep', { label: 'Copy design code', icon: '⎘', run: () => copyCode(it.design, it.name) }, { label: 'Download PNG', icon: '⬇', run: () => downloadPng(it) }, { label: 'Download .json', icon: '⬇', run: () => saveFile(`${fileBase(it.name)}.json`, new Blob([JSON.stringify({ name: it.name, design: it.design }, null, 2)], { type: 'application/json' })) });
-  if (it.kind === 'starter') items.push('sep', { label: 'Hide this starter', icon: '◌', run: () => { const h = loadHidden(); if (!h.includes(it.name)) h.push(it.name); storeHidden(h); renderGallery(); toast(`Hid ${it.name}. More ⋯ → Show hidden starters brings it back.`, 3500); } });
+  if (it.kind === 'starter' && it.edited) items.push('sep', { label: 'Reset to the original starter', icon: '↺', run: () => { resetStarter(it.key); toast(`${it.key} is back to the original`); } });
   if (ch) items.push('sep', { label: 'Delete…', icon: '🗑', danger: true, run: () => deleteItem(it) });
   return items;
 }
@@ -4744,36 +4772,38 @@ const teamIn = f => TEAM.ready && TEAM.canWrite ? TEAM.docs.filter(d => (d.folde
 async function renameFolder(f) {
   const v = await askName(`Rename folder ${f}`, f, 'Rename'); if (!v || v === f) return;
   setMine(l => l.forEach(m => { if (m.folder === f) m.folder = v; }));
+  for (const st of libItems().starters) if (st.folder === f) editStarter(st.key, { folder: v });
   storeFolders([...new Set(loadFolders().map(x => x === f ? v : x))]);
   if (gFolder === f) gFolder = v;
   renderGallery();
   if (await teamBulk('Renaming folder…', teamIn(f), () => ({ folder: v }))) toast(`Renamed the folder to ${v}`);
 }
 async function deleteFolder(f) {
-  const mineN = loadMine().filter(m => m.folder === f).length, teamDocs = teamIn(f), n = mineN + teamDocs.length;
+  const stIn = libItems().starters.filter(st => st.folder === f);
+  const mineN = loadMine().filter(m => m.folder === f).length + stIn.length, teamDocs = teamIn(f), n = mineN + teamDocs.length;
   const r = await ask({ title: `Delete the folder ${f}?`, text: n ? `It holds ${n} design${n > 1 ? 's' : ''}${teamDocs.length ? ` (${teamDocs.length} shared with the team)` : ''}.` : 'It is empty.',
     buttons: n ? [{ label: 'Cancel', value: 'cancel' }, { label: 'Keep the designs', value: 'keep', primary: true }, { label: `Delete folder and ${n} design${n > 1 ? 's' : ''}`, value: 'all', danger: true }] : [{ label: 'Cancel', value: 'cancel' }, { label: 'Delete folder', value: 'keep', danger: true }] });
   if (!r || r.choice === 'cancel') return;
   const all = r.choice === 'all';
   setMine(l => { for (let i = l.length - 1; i >= 0; i--) if (l[i].folder === f) { if (all) l.splice(i, 1); else l[i].folder = undefined; } });
+  if (all) storeHidden([...new Set([...loadHidden(), ...stIn.map(st => st.key)])]);
+  else for (const st of stIn) editStarter(st.key, { folder: '' });
   storeFolders(loadFolders().filter(x => x !== f));
   if (gFolder === f) gFolder = '';
   renderGallery();
   const ok = await teamBulk(all ? 'Deleting designs…' : 'Emptying folder…', teamDocs, () => ({ folder: '' }), all);
   if (ok) toast(all ? `Deleted ${f} and its designs` : n ? `Deleted ${f}. Its designs are now in No folder.` : `Deleted ${f}`, 4000);
 }
-function folderMenu(f, builtin) {
-  if (builtin) return [{ label: 'Built-in folder of starters', icon: '🔒', disabled: true }, { label: 'Hide these starters', icon: '◌', run: () => { const h = loadHidden(); for (const [n2] of PRESETS) if (STARTER_FOLDERS[n2] === f && !h.includes(n2)) h.push(n2); storeHidden(h); renderGallery(); toast(`Hid the ${f} starters. More ⋯ → Show hidden starters brings them back.`, 3500); } }];
+function folderMenu(f) {
   return [{ label: 'Open', icon: '↗', run: () => { gFolder = f; renderGallery(); } }, { label: 'Rename…', icon: '✎', run: () => renameFolder(f) }, 'sep', { label: 'Delete folder…', icon: '🗑', danger: true, run: () => deleteFolder(f) }];
 }
 // drop a dragged design on a folder to move it there
 let dragItem = null;
 function folderTree(view) {
-  const nav = $('#folderTree'), counts = new Map(), userF = new Set(loadFolders());
+  const nav = $('#folderTree'), counts = new Map();
   for (const it of view) if (it.folder) counts.set(it.folder, (counts.get(it.folder) || 0) + 1);
-  for (const it of view) if (it.folder && it.kind !== 'starter') userF.add(it.folder);
   for (const f of loadFolders()) if (!counts.has(f)) counts.set(f, 0);
-  const unfiled = view.filter(it => !it.folder && it.kind !== 'starter').length;
+  const unfiled = view.filter(it => !it.folder).length;
   if (gFolder && gFolder !== '__none' && !counts.has(gFolder)) gFolder = '';
   if (gFolder === '__none' && !unfiled) gFolder = '';
   const row = (val, label, n, icon, menu) => {
@@ -4794,8 +4824,7 @@ function folderTree(view) {
   const add = document.createElement('button'); add.type = 'button'; add.textContent = '+ New'; add.title = 'Make a folder'; add.onclick = () => newFolderThen(); head.append(add);
   const kids = [row('', 'All designs', view.length, ALL_SVG), head];
   for (const [f, n] of [...counts].sort((a, b) => a[0].localeCompare(b[0]))) {
-    const builtin = STARTER_FOLDER_SET.has(f) && !userF.has(f);
-    kids.push(row(f, f, n, FOLDER_SVG, () => folderMenu(f, builtin)));
+    kids.push(row(f, f, n, FOLDER_SVG, () => folderMenu(f)));
   }
   if (unfiled) kids.push(row('__none', 'No folder', unfiled, FOLDER_SVG.replace('#e0a526', '').replace('<svg', '<svg style="color:var(--muted)"')));
   nav.replaceChildren(...kids);
@@ -4809,7 +4838,7 @@ async function renderGallery() {
   const { starters, mine, team } = libItems();
   const viewAll = gFilter === 'mine' ? mine : gFilter === 'starter' ? starters : gFilter === 'team' ? team : [...team, ...mine, ...starters];
   folderTree(viewAll);
-  const items = !gFolder ? viewAll : viewAll.filter(it => gFolder === '__none' ? !it.folder && it.kind !== 'starter' : it.folder === gFolder);
+  const items = !gFolder ? viewAll : viewAll.filter(it => gFolder === '__none' ? !it.folder : it.folder === gFolder);
   if (!items.length) {
     g.innerHTML = `<div class="empty" style="grid-column:1/-1"></div>`;
     g.firstChild.textContent = gFolder ? 'This folder is empty here. Save or share while it is open, drag a design onto it, or use ⋯ → Move to folder.' : gFilter === 'team' ? 'No team designs yet. Press "Share with team" to add the current design.' : 'No saved designs yet. Name your design above and press Save.';
@@ -5029,10 +5058,31 @@ $('#libMore').onclick = () => {
     { label: 'Download .json', icon: '⬇', run: () => saveFile(`${fileBase(cur)}.json`, new Blob([JSON.stringify({ name: cur, design: D }, null, 2)], { type: 'application/json' })) },
     'sep',
     { label: 'New folder…', icon: '+', run: () => newFolderThen() },
-    ...(hidden ? [{ label: `Show ${hidden} hidden starter${hidden > 1 ? 's' : ''}`, icon: '◉', run: () => { storeHidden([]); renderGallery(); toast('All starters are back'); } }] : []),
+    ...(hidden ? [{ label: `Restore ${hidden} deleted starter${hidden > 1 ? 's' : ''}`, icon: '↺', run: () => { storeHidden([]); renderGallery(); toast('Deleted starters are back'); } }] : []),
+    ...(Object.keys(loadStarterEdits()).length ? [{ label: 'Reset all starters to the originals', icon: '↺', run: async () => { const r = await ask({ title: 'Reset all starters?', text: 'Renames, moves and saved changes to starters are undone. Deleted starters stay deleted.', buttons: [{ label: 'Cancel', value: 'no' }, { label: 'Reset', value: 'ok', primary: true }] }); if (r && r.choice === 'ok') { try { localStorage.removeItem(STORE_STARTER); } catch (e) {} thumbCache.clear(); renderGallery(); toast('Starters are back to the originals'); } } }] : []),
     ...(TEAM.canConnect ? [{ label: 'Connect team library…', icon: '🔗', run: () => { $('#teamUrlBox').hidden = false; $('#teamUrl').focus(); } }] : []),
   ]);
 };
+
+/* resizable panels: drag the handle, use the arrow keys, or double-click to reset; widths are remembered */
+function resizer(grip, cssVar, def, min, max, store, target = document.documentElement, edgeOf = () => 0) {
+  const get = () => parseFloat(getComputedStyle(target).getPropertyValue(cssVar)) || def;
+  const set = w => { w = Math.round(Math.max(min(), Math.min(max(), w))); target.style.setProperty(cssVar, w + 'px'); grip.setAttribute('aria-valuenow', w); return w; };
+  const save = w => { try { localStorage.setItem(store, String(w)); } catch (e) {} };
+  try { const v = parseFloat(localStorage.getItem(store)); if (v) set(v); } catch (e) {}
+  grip.addEventListener('pointerdown', e => {
+    e.preventDefault(); grip.setPointerCapture(e.pointerId); grip.classList.add('drag'); document.body.classList.add('resizing');
+    const move = ev => set(ev.clientX - edgeOf());
+    const up = () => { grip.removeEventListener('pointermove', move); grip.classList.remove('drag'); document.body.classList.remove('resizing'); save(get()); };
+    grip.addEventListener('pointermove', move); grip.addEventListener('pointerup', up, { once: true }); grip.addEventListener('pointercancel', up, { once: true });
+  });
+  grip.addEventListener('keydown', e => { if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { e.preventDefault(); save(set(get() + (e.key === 'ArrowLeft' ? -16 : 16))); } });
+  grip.addEventListener('dblclick', () => { target.style.removeProperty(cssVar); save(def); set(def); });
+}
+// the folder list stays in view below the sticky Single/Batch bar
+{ const mo = document.querySelector('.modes'); if (mo && window.ResizeObserver) new ResizeObserver(() => document.documentElement.style.setProperty('--modes-h', mo.offsetHeight + 'px')).observe(mo); }
+resizer($('#railGrip'), '--rail', 360, () => 260, () => Math.max(300, innerWidth * 0.6), 'ctaforge.railW', document.querySelector('.app'), () => document.querySelector('.app').getBoundingClientRect().left);
+resizer($('#folderGrip'), '--ftw', 210, () => 150, () => Math.max(200, document.querySelector('.libgrid').clientWidth * 0.5), 'ctaforge.folderW', document.querySelector('.libgrid'), () => document.querySelector('.libgrid').getBoundingClientRect().left);
 
 /* ================= boot ================= */
 buildPanel();
