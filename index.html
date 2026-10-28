@@ -249,6 +249,12 @@ select.sm, input.sm { padding: 6px 8px; border: 1px solid var(--line); border-ra
 .mine { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .mine input[type="text"] { padding: 6px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); width: 170px; }
 .gfilter { display: flex; gap: 6px; }
+.folders { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 8px 0 4px; }
+.folders button { border: 1px solid var(--line); background: var(--panel); color: var(--fg); border-radius: 999px; padding: 3px 10px; font-size: 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; }
+.folders button[aria-pressed="true"] { border-color: var(--accent); background: var(--accent); color: #fff; }
+.folders button small { opacity: .7; }
+.folders input { font-size: 12px; padding: 3px 8px; border: 1px solid var(--accent); border-radius: 999px; background: var(--panel); color: var(--fg); width: 140px; }
+.gcard .name select { flex: 1; min-width: 0; font-size: 12px; }
 .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; }
 .gcard { position: relative; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); overflow: hidden; min-width: 0; }
 .gcard:hover { border-color: var(--accent); }
@@ -490,6 +496,7 @@ Start</textarea>
         <button data-gf="mine" aria-pressed="false">My designs</button>
         <button data-gf="starter" aria-pressed="false">Starters</button>
       </div>
+      <div class="folders" id="folderBar" role="group" aria-label="Folders"></div>
       <button class="btn sm" id="showHidden" hidden></button>
       <div class="gallery" id="gallery"></div>
       <details class="share">
@@ -829,6 +836,13 @@ function migrate(d) {
 const full = d => merge(BASE, migrate(d));
 
 const PRESETS = [
+  // imported from the team's Figma components (Copy as code → CSS), at Figma's own pixel sizes
+  ['CTA Main', { font: { family: 'Poppins', fallback: 'Montserrat', weight: '700', size: 16, spacing: 0, lineHeight: 1.13, upper: true, grad: false, color: '#ffffff' },
+    box: { shape: 'pill', padX: 8, padY: 16, minW: 160, fill: 'gradient', gradient: { type: 'linear', angle: 192.99, stops: [{ o: 0, c: '#371eb7', a: 1 }, { o: 0.7937, c: '#303aff', a: 1 }] } },
+    fx: { innerShadow: { on: true, color: '#000000', alpha: 0.35, blur: 3.5, x: 0, y: 2.5 }, innerShadow2: { on: true, color: '#e0d4ff', alpha: 0.33, blur: 3.5, x: 0, y: -3.5 } } }, 'CLAIM'],
+  ['CTA Secondary', { font: { family: 'Poppins', fallback: 'Montserrat', weight: '700', size: 14, spacing: 0, lineHeight: 1, upper: true, grad: false, color: '#333333' },
+    box: { shape: 'pill', padX: 16, padY: 15, minW: 189, fill: 'gradient', gradient: { type: 'linear', angle: 3.81, stops: [{ o: 0.0229, c: '#63fe80', a: 1 }, { o: 0.885, c: '#00987c', a: 1 }] } },
+    fx: { innerShadow: { on: true, color: '#000000', alpha: 0.5, blur: 8, x: 0, y: 2 }, innerShadow2: { on: true, color: '#96ffa2', alpha: 0.77, blur: 3, x: -1, y: -4 } } }, 'CLAIM'],
   // neumorphism: the button is the page color, lifted by a dark shadow one way and a light shadow the other (use on #e9ecf2)
   ['Soft Search', { font: { family: 'Inter', fallback: 'Montserrat', weight: '400', size: 22, spacing: 0, color: '#7b8496', upper: false, align: 'left' },
     box: { shape: 'pill', padX: 30, padY: 22, minW: 470, fill: 'solid', c1: '#e9ecf2' },
@@ -1000,6 +1014,17 @@ const PRESETS = [
     box: { on: false, padX: 14, padY: 14 },
     fx: { tStroke: { on: true, color: '#ffffff', width: 6 }, tShadow: { on: true, color: '#3a0a22', alpha: 0.35, blur: 6, y: 4 }, tGloss: { on: true, alpha: 0.4, height: 40 } } }, 'Free Spins'],
 ];
+// the folder each starter sits in
+const STARTER_FOLDERS = Object.fromEntries(Object.entries({
+  'Figma CTAs': ['CTA Main', 'CTA Secondary'],
+  'Neumorphism': ['Soft Search', 'Soft Pill', 'Soft Round Icon'],
+  'Glass': ['Clear Glass', 'Glass Capsule', 'Glassmorphism', 'Frosted Glass', 'Aqua Glass', 'Amethyst Glass', 'Glass Rim', 'Ghost Glass'],
+  'Icons & badges': ['Badge Download', 'Split Cart', 'Panel Play', 'Speech Bubble'],
+  'Text art': ['Bubble Text', 'Gold 3D Perspective', 'Fire Text', 'Sunset Retro', 'Sticker'],
+  'Game & promo': ['Green Play', 'Click Me', 'Candy Pop', 'Gold Rush', 'Chrome Steel', 'Jackpot', 'Ticket Pop', 'Comic Pow', 'Arcade Green', 'Pixel Arcade', 'Lava Slant', 'Ruby Gem', 'Royal Purple', 'Ocean Bubble', 'Scoop Corners', 'Tilted Promo'],
+  'Neon': ['Neon Night', 'Neon Pink'],
+  'Clean': ['Clean Blue', 'Mint Fresh'],
+}).flatMap(([f, ns]) => ns.map(n => [n, f])));
 
 const STORE_CUR = 'ctaforge.v3.current';
 let D;
@@ -4423,7 +4448,65 @@ function loadMine() { try { return JSON.parse(localStorage.getItem(STORE_MINE) |
 function storeMine(list) { try { localStorage.setItem(STORE_MINE, JSON.stringify(list)); return true; } catch (e) { toast('This browser blocked saving (storage may be full). Use Download .json instead.', 4000); return false; } }
 function applyDesign(d) { D = full(d); syncUI(); changed(); }
 const thumbCache = new Map();
-let gseq = 0, gFilter = 'all';
+let gseq = 0, gFilter = 'all', gFolder = '';
+/* folders: every saved design can sit in one. A starter's folder is fixed; empty folders you make are kept in this browser. */
+const STORE_FOLDERS = 'ctaforge.folders';
+function loadFolders() { try { return JSON.parse(localStorage.getItem(STORE_FOLDERS) || '[]'); } catch (e) { return []; } }
+function storeFolders(list) { try { localStorage.setItem(STORE_FOLDERS, JSON.stringify(list)); } catch (e) { /* convenience only */ } }
+// where new saves go: the folder being viewed
+const curFolder = () => gFolder && gFolder !== '__none' ? gFolder : '';
+function folderBar(items) {
+  const bar = $('#folderBar'), counts = new Map();
+  for (const it of items) if (it.folder) counts.set(it.folder, (counts.get(it.folder) || 0) + 1);
+  for (const f of loadFolders()) if (!counts.has(f)) counts.set(f, 0);
+  const unfiled = items.filter(it => !it.folder && !it.starter).length;
+  if (gFolder && gFolder !== '__none' && !counts.has(gFolder)) gFolder = '';
+  if (gFolder === '__none' && !unfiled) gFolder = '';
+  const chip = (val, label, n, removable) => {
+    const b = document.createElement('button'); b.type = 'button'; b.setAttribute('aria-pressed', gFolder === val);
+    b.innerHTML = `<span></span>${n != null ? `<small>${n}</small>` : ''}`; b.firstChild.textContent = label;
+    b.onclick = () => { gFolder = val; renderGallery(); };
+    if (removable) { b.title = 'Empty folder. Double-click to remove it.'; b.ondblclick = () => { storeFolders(loadFolders().filter(f => f !== val)); if (gFolder === val) gFolder = ''; renderGallery(); }; }
+    return b;
+  };
+  const kids = [chip('', 'All folders')];
+  for (const [f, n] of [...counts].sort((a, b) => a[0].localeCompare(b[0]))) kids.push(chip(f, f, n, n === 0));
+  if (unfiled && counts.size) kids.push(chip('__none', 'No folder', unfiled));
+  const add = document.createElement('button'); add.type = 'button'; add.textContent = '+ New folder'; add.title = 'Make a folder; new saves go into the folder you are viewing';
+  add.onclick = () => {
+    const inp = document.createElement('input'); inp.placeholder = 'Folder name'; inp.setAttribute('aria-label', 'New folder name');
+    add.replaceWith(inp); inp.focus();
+    let done = false;
+    const finish = ok => { if (done) return; done = true; const v = inp.value.trim().slice(0, 40); if (ok && v) { const l = loadFolders(); if (!l.includes(v)) storeFolders([...l, v]); gFolder = v; toast(`Folder ${v} made. Saves go into it while it's selected.`, 3500); } renderGallery(); };
+    inp.onkeydown = e => { if (e.key === 'Enter') finish(true); if (e.key === 'Escape') finish(false); };
+    inp.onblur = () => finish(true);
+  };
+  kids.push(add);
+  bar.replaceChildren(...kids);
+}
+// a select in place of the card's name: pick a folder, "No folder", or a new one
+function moveUI(nameEl, tagEl, current, apply) {
+  const sel = document.createElement('select'); sel.setAttribute('aria-label', 'Move to folder');
+  const names = [...new Set([...loadFolders(), ...allFolders()])].sort((a, b) => a.localeCompare(b));
+  sel.innerHTML = `<option value="">No folder</option>` + names.map(f => `<option></option>`).join('') + `<option value="__new">New folder…</option>`;
+  names.forEach((f, i) => { const o = sel.options[i + 1]; o.value = f; o.textContent = f; });
+  sel.value = current || '';
+  nameEl.replaceChildren(sel, tagEl); sel.focus();
+  let done = false;
+  const finish = v => { if (done) return; done = true; if (v === null || v === (current || '')) renderGallery(); else apply(v); };
+  sel.onchange = () => {
+    if (sel.value !== '__new') { finish(sel.value); return; }
+    const inp = document.createElement('input'); inp.placeholder = 'Folder name'; inp.setAttribute('aria-label', 'New folder name');
+    sel.replaceWith(inp); inp.focus(); done = true;
+    let fin = false;
+    const end = ok => { if (fin) return; fin = true; const v = inp.value.trim().slice(0, 40); if (ok && v) { const l = loadFolders(); if (!l.includes(v)) storeFolders([...l, v]); apply(v); } else renderGallery(); };
+    inp.onkeydown = e => { if (e.key === 'Enter') end(true); if (e.key === 'Escape') end(false); };
+    inp.onblur = () => end(true);
+  };
+  sel.onblur = () => setTimeout(() => { if (document.activeElement !== sel && sel.isConnected) finish(null); }, 150);
+  sel.onkeydown = e => { if (e.key === 'Escape') finish(null); };
+}
+const allFolders = () => [...loadMine().map(m => m.folder), ...(TEAM.ready ? TEAM.docs.map(t => t.folder) : [])].filter(Boolean);
 function confirmBtn(btn, label, run) {
   if (!btn.classList.contains('confirm')) { const old = btn.textContent; btn.classList.add('confirm'); btn.textContent = label; btn.closest('.acts')?.classList.add('keep'); setTimeout(() => { btn.classList.remove('confirm'); btn.textContent = old; btn.closest('.acts')?.classList.remove('keep'); }, 3000); return; }
   run();
@@ -4431,11 +4514,14 @@ function confirmBtn(btn, label, run) {
 async function renderGallery() {
   const my = ++gseq, g = $('#gallery');
   const hidden = loadHidden();
-  const starters = PRESETS.filter(([name]) => !hidden.includes(name)).map(([name, p, sample]) => ({ name, design: p, sample, starter: true }));
+  const starters = PRESETS.filter(([name]) => !hidden.includes(name)).map(([name, p, sample]) => ({ name, design: p, sample, starter: true, folder: STARTER_FOLDERS[name] || '' }));
   const sh = $('#showHidden'); sh.hidden = !hidden.length; sh.textContent = `Show ${hidden.length} hidden starter${hidden.length === 1 ? '' : 's'}`;
-  const mine = loadMine().map((m, i) => ({ name: m.name, design: m.design, sample: m.sample, idx: i }));
-  const team = TEAM.ready ? TEAM.docs.map(t => ({ name: t.name || 'Untitled', design: t.design, sample: t.sample || undefined, team: t })) : [];
-  const items = gFilter === 'mine' ? mine : gFilter === 'starter' ? starters : gFilter === 'team' ? team : [...team, ...mine, ...starters];
+  const mine = loadMine().map((m, i) => ({ name: m.name, design: m.design, sample: m.sample, idx: i, folder: m.folder || '' }));
+  const team = TEAM.ready ? TEAM.docs.map(t => ({ name: t.name || 'Untitled', design: t.design, sample: t.sample || undefined, team: t, folder: t.folder || '' })) : [];
+  const all = gFilter === 'mine' ? mine : gFilter === 'starter' ? starters : gFilter === 'team' ? team : [...team, ...mine, ...starters];
+  folderBar(all);
+  const items = !gFolder ? all : all.filter(it => gFolder === '__none' ? !it.folder && !it.starter : it.folder === gFolder);
+  if (!items.length && gFolder) { g.innerHTML = `<div class="empty" style="grid-column:1/-1">Nothing in ${gFolder === '__none' ? 'this view without a folder' : 'the folder ' + esc(gFolder) + ' here'} yet. Saving or sharing while it's selected puts the design in it, or use Move on a card.</div>`; return; }
   if (!items.length) { g.innerHTML = `<div class="empty" style="grid-column:1/-1">${gFilter === 'team' ? 'No team designs yet. Press "Share with team" to add the current design.' : 'No saved designs yet. Name your design above and press "Save to gallery".'}</div>`; return; }
   const cards = items.map(it => {
     const card = document.createElement('div'); card.className = 'gcard';
@@ -4457,7 +4543,7 @@ async function renderGallery() {
     if (it.team) {
       const id = it.team.id;
       const copyT = document.createElement('button'); copyT.type = 'button'; copyT.textContent = 'Copy'; copyT.title = 'Save a private copy to My designs';
-      copyT.onclick = () => { const l = loadMine(); l.unshift({ name: `${it.name} copy`, design: clone(it.design), sample: it.sample }); if (storeMine(l)) { renderGallery(); toast(`Saved ${it.name} copy to My designs`); } };
+      copyT.onclick = () => { const l = loadMine(); l.unshift({ name: `${it.name} copy`, design: clone(it.design), sample: it.sample, folder: it.folder || undefined }); if (storeMine(l)) { renderGallery(); toast(`Saved ${it.name} copy to My designs`); } };
       if (TEAM.canWrite) {
         const ren = document.createElement('button'); ren.type = 'button'; ren.textContent = 'Rename';
         const upd = document.createElement('button'); upd.type = 'button'; upd.textContent = 'Update'; upd.title = 'Replace this team design with the current one';
@@ -4472,13 +4558,15 @@ async function renderGallery() {
         };
         upd.onclick = () => confirmBtn(upd, 'Replace?', () => { if (needName()) return; const body = teamRecord(it.name, D, currentSample()); if (!body) return tooBig(); teamWrite(() => teamOps.update(id, { design: body.design, sample: body.sample, by: body.by, updatedAt: body.updatedAt }), `Updated ${it.name} for the team`); });
         del.onclick = () => confirmBtn(del, 'Delete?', () => teamWrite(() => teamOps.remove(id), `Deleted ${it.name} from the team library`));
-        acts.append(ren, upd, del);
+        const mv = document.createElement('button'); mv.type = 'button'; mv.textContent = 'Move'; mv.title = 'Put it in a folder (for the whole team)';
+        mv.onclick = () => moveUI(name, t, it.folder, v => teamWrite(() => teamOps.update(id, { folder: v }), v ? `Moved ${it.name} to ${v}` : `Took ${it.name} out of its folder`));
+        acts.append(ren, upd, mv, del);
       }
       acts.append(copyT);
     } else if (it.starter) {
       const copy = document.createElement('button'); copy.type = 'button'; copy.textContent = 'Copy'; copy.title = 'Add a copy to My designs, where you can rename, update or delete it';
       const hide = document.createElement('button'); hide.type = 'button'; hide.textContent = 'Hide'; hide.title = 'Hide this starter from the gallery (you can show it again)';
-      copy.onclick = () => { const l = loadMine(); let nm = `${it.name} copy`, n = 2; while (l.some(x => x.name === nm)) nm = `${it.name} copy ${n++}`; l.unshift({ name: nm, design: clone(it.design), sample: it.sample }); if (storeMine(l)) { renderGallery(); toast(`Saved ${nm} to My designs`); } };
+      copy.onclick = () => { const l = loadMine(); let nm = `${it.name} copy`, n = 2; while (l.some(x => x.name === nm)) nm = `${it.name} copy ${n++}`; l.unshift({ name: nm, design: clone(it.design), sample: it.sample, folder: curFolder() || it.folder || undefined }); if (storeMine(l)) { renderGallery(); toast(`Saved ${nm} to My designs`); } };
       hide.onclick = () => { const h2 = loadHidden(); if (!h2.includes(it.name)) h2.push(it.name); storeHidden(h2); renderGallery(); toast(`Hid ${it.name}`); };
       acts.append(copy, hide);
     } else {
@@ -4494,8 +4582,10 @@ async function renderGallery() {
       };
       upd.onclick = () => confirmBtn(upd, 'Replace?', () => { const l = loadMine(); l[it.idx].design = clone(D); storeMine(l); thumbCache.clear(); renderGallery(); toast(`Updated ${it.name}`); });
       del.onclick = () => confirmBtn(del, 'Delete?', () => { const l = loadMine(); l.splice(it.idx, 1); storeMine(l); renderGallery(); toast(`Deleted ${it.name}`); });
-      acts.append(ren, upd, del);
-      if (TEAM.kind && TEAM.canWrite) { const sh = document.createElement('button'); sh.type = 'button'; sh.textContent = 'Share'; sh.title = 'Add it to the team library'; sh.onclick = () => shareToTeam(it.name, it.design, it.sample); acts.append(sh); }
+      const mv = document.createElement('button'); mv.type = 'button'; mv.textContent = 'Move'; mv.title = 'Put it in a folder';
+      mv.onclick = () => moveUI(name, t, it.folder, v => { const l = loadMine(); l[it.idx].folder = v || undefined; storeMine(l); renderGallery(); toast(v ? `Moved ${it.name} to ${v}` : `Took ${it.name} out of its folder`); });
+      acts.append(ren, upd, mv, del);
+      if (TEAM.kind && TEAM.canWrite) { const sh = document.createElement('button'); sh.type = 'button'; sh.textContent = 'Share'; sh.title = 'Add it to the team library'; sh.onclick = () => shareToTeam(it.name, it.design, it.sample, it.folder); acts.append(sh); }
     }
     it.thumb = thumb; return card;
   });
@@ -4519,8 +4609,8 @@ const TEAM = { kind: null, db: null, user: null, me: null, docs: [], names: {}, 
 const currentSample = () => ta.value.replace(/\n/g, '|');
 const tooBig = () => toast('This design holds uploaded images too large to share. Remove them, or use Download .json.', 4500);
 const myName = () => { try { return (localStorage.getItem(STORE_MYNAME) || '').trim(); } catch (e) { return ''; } };
-function teamRecord(name, design, sample) {
-  const body = { name, design: clone(design), sample: sample || null, by: TEAM.kind === 'sheet' ? myName() : TEAM.me, updatedAt: Date.now() };
+function teamRecord(name, design, sample, folder) {
+  const body = { name, design: clone(design), sample: sample || null, folder: folder || '', by: TEAM.kind === 'sheet' ? myName() : TEAM.me, updatedAt: Date.now() };
   return JSON.stringify(body).length > (TEAM.kind === 'sheet' ? 48000 : 240000) ? null : body;
 }
 // the Sheet's web app: GET lists, POST changes (plain text body, so the browser sends it without a preflight)
@@ -4550,11 +4640,11 @@ function needName() {
   toast('Add your name first, so the team can see who shared it.', 3500);
   return true;
 }
-function shareToTeam(name, design, sample) {
+function shareToTeam(name, design, sample, folder) {
   if (!TEAM.kind || needName()) return;
-  const body = teamRecord(name, design, sample);
+  const body = teamRecord(name, design, sample, folder ?? curFolder());
   if (!body) return tooBig();
-  teamWrite(() => teamOps.add(body), `Shared ${name} with your team`);
+  teamWrite(() => teamOps.add(body), `Shared ${name} with your team${body.folder ? ' in ' + body.folder : ''}`);
 }
 $('#shareBtn').onclick = () => shareToTeam($('#saveName').value.trim() || `Team design ${TEAM.docs.length + 1}`, D, currentSample());
 $('#myName').value = myName();
@@ -4664,9 +4754,9 @@ document.querySelectorAll('[data-gf]').forEach(b => b.onclick = () => { gFilter 
 $('#saveBtn').onclick = () => {
   const name = $('#saveName').value.trim() || `My design ${loadMine().length + 1}`;
   const list = loadMine(); const i = list.findIndex(x => x.name === name);
-  const rec = { name, design: clone(D), sample: $('#ctaText').value.includes('\n') ? $('#ctaText').value.replace(/\n/g, '|') : undefined };
+  const rec = { name, design: clone(D), sample: $('#ctaText').value.includes('\n') ? $('#ctaText').value.replace(/\n/g, '|') : undefined, folder: curFolder() || (i >= 0 ? list[i].folder : undefined) || undefined };
   if (i >= 0) list[i] = rec; else list.unshift(rec);
-  if (storeMine(list)) { thumbCache.clear(); renderGallery(); toast(i >= 0 ? `Updated ${name}` : `Saved ${name} to the gallery`); }
+  if (storeMine(list)) { thumbCache.clear(); renderGallery(); toast(i >= 0 ? `Updated ${name}` : `Saved ${name} to the gallery${rec.folder ? ' in ' + rec.folder : ''}`); }
 };
 $('#exportJson').onclick = () => {
   const name = ($('#saveName').value.trim() || 'cta-design').replace(/[^\p{L}\p{N}]+/gu, '-');

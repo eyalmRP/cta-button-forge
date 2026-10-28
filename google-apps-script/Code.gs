@@ -9,7 +9,7 @@
  */
 const SHEET_NAME = 'Designs';
 const FOLDER_NAME = 'CTA Button Forge exports';
-const HEADERS = ['id', 'name', 'by', 'updatedAt', 'createdAt', 'sample', 'design'];
+const HEADERS = ['id', 'name', 'by', 'updatedAt', 'createdAt', 'sample', 'design', 'folder'];
 // A sheet cell holds at most 50,000 characters.
 const MAX_DESIGN = 49000;
 
@@ -27,7 +27,7 @@ function doPost(e) {
       const design = JSON.stringify(q.design || null);
       if (design.length > MAX_DESIGN) return out_({ ok: false, error: 'too_big' });
       const id = Utilities.getUuid();
-      sh.appendRow([id, text_(q.name, 120), text_(q.by, 60), now, now, text_(q.sample, 500), design]);
+      sh.appendRow([id, text_(q.name, 120), text_(q.by, 60), now, now, text_(q.sample, 500), design, text_(q.folder, 40)]);
       return out_({ ok: true, id });
     }
     if (q.action === 'update') {
@@ -36,6 +36,7 @@ function doPost(e) {
       if (q.name != null) sh.getRange(r, 2).setValue(text_(q.name, 120));
       if (q.by != null) sh.getRange(r, 3).setValue(text_(q.by, 60));
       if (q.sample !== undefined) sh.getRange(r, 6).setValue(text_(q.sample, 500));
+      if (q.folder !== undefined) sh.getRange(r, 8).setValue(text_(q.folder, 40));
       if (q.design) {
         const design = JSON.stringify(q.design);
         if (design.length > MAX_DESIGN) return out_({ ok: false, error: 'too_big' });
@@ -85,6 +86,9 @@ function sheet_() {
     sh = ss.insertSheet(SHEET_NAME);
     sh.appendRow(HEADERS);
     sh.setFrozenRows(1);
+  } else if (sh.getRange(1, 8).getValue() !== 'folder') {
+    // sheets made by the first version of this script get the folder column
+    sh.getRange(1, 8).setValue('folder');
   }
   return sh;
 }
@@ -105,7 +109,7 @@ function list_() {
   const rows = sheet_().getDataRange().getValues().slice(1);
   return rows.filter(r => r[0]).map(r => ({
     id: String(r[0]), name: String(r[1] || 'Untitled'), by: String(r[2] || ''),
-    updatedAt: Number(r[3]) || 0, createdAt: Number(r[4]) || 0, sample: r[5] ? String(r[5]) : null, design: parse_(r[6]),
+    updatedAt: Number(r[3]) || 0, createdAt: Number(r[4]) || 0, sample: r[5] ? String(r[5]) : null, design: parse_(r[6]), folder: r[7] ? String(r[7]) : '',
   })).filter(r => r.design).sort((a, b) => b.updatedAt - a.updatedAt);
 }
 

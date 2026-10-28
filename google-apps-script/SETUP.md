@@ -37,5 +37,6 @@ To let the team open it from the app's **Open team folder** link: right-click th
 
 - **Who can change things:** anyone with the app's link can add, rename, update and delete team designs. If something is deleted by mistake, restore it from the Sheet: **File → Version history**.
 - **Your name:** the first time someone shares a design, the app asks for their name. It's shown on their team designs.
+- **Folders:** team designs remember their folder in the Sheet's `folder` column (added automatically). Sheets set up with the first version of the script need the script updated once (below) for team folders to be kept.
 - **Updating the script later:** paste the new code, then **Deploy → Manage deployments → Edit (pencil) → Version: New version → Deploy**. The URL stays the same.
 - **Size limit:** a design with large uploaded images may be too big for a Sheet cell. The app says so; use **Download .json** for those.
