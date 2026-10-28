@@ -4358,7 +4358,7 @@ async function renderGallery() {
 /* team library: designs the whole team shares, and a Drive folder for exported files.
    Two stores: a Google Sheet behind a small Apps Script web app (works for anyone with the app's link, set
    SHEET_URL below), or, inside claude.ai only, the page's own db (names from claude.ai accounts). The Sheet wins. */
-const SHEET_URL = '';
+const SHEET_URL = 'https://script.google.com/macros/s/AKfycbwrShhOvfcph23VrEbsUx7qnzr65ZhzgR3gqwwiLZnAOLhomZbSt8zuMmBlFTa7BPSt4g/exec';
 const STORE_SHEET = 'ctaforge.sheetUrl', STORE_MYNAME = 'ctaforge.myName';
 const TEAM = { kind: null, db: null, user: null, me: null, docs: [], names: {}, canWrite: true, ready: false, folderUrl: '', url: '' };
 const currentSample = () => ta.value.replace(/\n/g, '|');
