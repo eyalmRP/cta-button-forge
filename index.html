@@ -170,6 +170,9 @@ input[type="color"] { width: 100%; height: 26px; padding: 0 2px; border: 1px sol
 .teamurl { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 6px 0 10px; font-size: 12px; }
 .teamurl input { flex: 1 1 260px; min-width: 0; }
 .refctl { display: inline-flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.cssbox { display: grid; gap: 6px; }
+.cssbox textarea { width: 100%; font: 12px/1.4 'IBM Plex Mono', monospace; resize: vertical; }
+.cssbox .row { display: flex; gap: 8px; }
 .hints { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; font-size: 12px; }
 .hints label { display: inline-flex; align-items: center; gap: 5px; }
 .hints input, .hints select { max-width: 150px; }
@@ -301,10 +304,10 @@ input.tg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
   #view-batch { order: 3; }
   .panel { order: 5; border-right: 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); overflow: visible; }
   .refbar { order: 6; }
-  .hints { order: 6; }
+  .hints, .cssbox { order: 6; }
   #view-single > .exportbox { order: 7; }
   .lib { order: 8; }
-  .textrow, .refbar, .hints, .stagegrid, #view-single > .bar, #view-single > .exportbox { margin-inline: max(12px, env(safe-area-inset-left, 0px)) max(12px, env(safe-area-inset-right, 0px)); margin-block: 6px; }
+  .textrow, .refbar, .hints, .cssbox, .stagegrid, #view-single > .bar, #view-single > .exportbox { margin-inline: max(12px, env(safe-area-inset-left, 0px)) max(12px, env(safe-area-inset-right, 0px)); margin-block: 6px; }
   .stage { min-height: 140px; height: 32vh; padding: 10px; }
   .stage canvas { max-width: 100%; max-height: 100%; object-fit: contain; }
   .stage canvas.real { max-width: none; max-height: none; }
@@ -365,6 +368,7 @@ input.tg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
       </div>
       <div class="refbar">
         <button class="btn sm" id="refBtn">Match a reference image…</button>
+        <button class="btn sm" id="cssBtn" title="Paste the CSS Figma gives for the button and its text: the exact colors, gradient, shadows, corners, font and padding">Paste Figma CSS…</button>
         <input type="file" id="refFile" accept="image/*" hidden>
         <span class="refctl" id="refCtl" hidden>
           <button class="btn primary sm" id="autoMatch">Auto-match design</button>
@@ -375,6 +379,11 @@ input.tg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
           <button class="btn sm" id="refClose">Remove reference</button>
         </span>
         <span class="meta" id="refHint">or paste an image (Ctrl/Cmd+V). Auto-match runs in your browser.</span>
+      </div>
+      <div class="cssbox" id="cssBox" hidden>
+        <label class="meta" for="cssIn">In Figma, select the button, then right-click → Copy/Paste as → Copy as code → CSS (or copy it from Dev Mode). Include the text layer. With a reference image loaded, the icon and anything the CSS doesn't say come from the image.</label>
+        <textarea id="cssIn" rows="6" spellcheck="false" placeholder="/* CTA */&#10;background: linear-gradient(…);&#10;border-radius: 24px;&#10;…&#10;/* Label */&#10;font-family: 'Poppins';&#10;…"></textarea>
+        <div class="row"><button class="btn sm primary" id="cssGo">Apply CSS</button><button class="btn sm" id="cssCancel">Cancel</button></div>
       </div>
       <div class="hints" id="refHints" hidden>
         <span class="meta">Help the mimic (optional):</span>
@@ -787,7 +796,8 @@ const BASE = {
     hilite:      { on: false, color: '#ffffff', alpha: 0.9, blur: 16, x: -6, y: -6 },
     stroke:      { on: false, color: '#ffffff', alpha: 1, width: 4, gap: 0, grad: false, gradient: G2('#ffd27a', '#e8701a') },
     depth:       { on: false, size: 8, angle: 180, persp: 0, vpx: 0, vpy: 0, gradient: G2('#b3124a', '#6e0a2e') },
-    innerShadow: { on: false, color: '#000000', alpha: 0.35, blur: 8, y: -4 },
+    innerShadow: { on: false, color: '#000000', alpha: 0.35, blur: 8, x: 0, y: -4 },
+    innerShadow2: { on: false, color: '#ffffff', alpha: 0.5, blur: 6, x: 0, y: 4 },
     bevel:       { on: false, size: 6, light: 0.55, dark: 0.35 },
     gloss:       { on: false, style: 'shape', height: 46, inset: 6, offset: 0, alpha: 0.45, fade: 0.06, blur: 0 },
     inner:       { on: false, color: '#ffffff', alpha: 0.5, inset: 5, width: 2 },
@@ -1723,9 +1733,10 @@ function drawButtonCanvas(ctx, d, S, x, y, w, h, bgImg, P) {
 }
 function innerFx(c, d, S, x, y, w, h, face) {
   const fx = d.fx, b = d.box;
-  if (face && fx.innerShadow.on) {
+  // two inner shadows (e.g. a dark one at the bottom and a light one at the top, as design tools export)
+  for (const k of ['innerShadow', 'innerShadow2']) if (face && fx[k].on) {
     const ring = new Path2D(); ring.rect(x - 300, y - 300, w + 600, h + 600); ring.addPath(face);
-    shadowOnly(c, S, () => c.fill(ring, 'evenodd'), rgba(fx.innerShadow.color, fx.innerShadow.alpha), fx.innerShadow.blur, 0, -fx.innerShadow.y);
+    shadowOnly(c, S, () => c.fill(ring, 'evenodd'), rgba(fx[k].color, fx[k].alpha), fx[k].blur, -(fx[k].x || 0), -fx[k].y);
   }
   if (face && fx.bevel.on) {
     // light from the top, shade at the bottom: one soft pass each (a soft pass takes one color)
@@ -1868,9 +1879,9 @@ async function buildSVG(d, text, opt = {}) {
       const ci = uid('c'); defs.push(`<clipPath id="${ci}"><path d="${faceD}"/></clipPath>`);
       clipAttr = `clip-path="url(#${ci})"`;
       if (P.badge && ['segment', 'panel'].includes(P.badge.type)) out.push(`<g ${clipAttr}>${segPanelSvg()}</g>`);
-      if (fx.innerShadow.on) {
+      for (const k of ['innerShadow', 'innerShadow2']) if (fx[k].on) {
         const ring = `M${x - 300} ${y - 300}h${w + 600}v${h + 600}h${-(w + 600)}Z` + faceD;
-        inner.push(`<path d="${ring}" fill-rule="evenodd" fill="${fx.innerShadow.color}" fill-opacity="${fx.innerShadow.alpha}" transform="translate(0 ${-fx.innerShadow.y})" filter="${blurF(fx.innerShadow.blur / 2)}"/>`);
+        inner.push(`<path d="${ring}" fill-rule="evenodd" fill="${fx[k].color}" fill-opacity="${fx[k].alpha}" transform="translate(${-(fx[k].x || 0)} ${-fx[k].y})" filter="${blurF(fx[k].blur / 2)}"/>`);
       }
       if (fx.bevel.on) inner.push(`<path d="${faceD}" fill="none" stroke-width="${fx.bevel.size * 2}" stroke="${linStops(x, y, x, y + h, S2([[0, '#ffffff', fx.bevel.light], [0.5, '#ffffff', 0], [0.5, '#000000', 0], [1, '#000000', fx.bevel.dark]]))}" filter="${blurF(fx.bevel.size * 0.45)}"/>`);
       if (b.shape === 'ticket' && b.perf) {
@@ -2146,7 +2157,8 @@ const EFFECTS = [
   ['depth', '3D depth', [GR('fx.depth.gradient', 'Near → far colors'), R('fx.depth.size', 'Depth', 1, 40, 1, 'px'), R('fx.depth.angle', 'Direction', 0, 360, 1, '°'), ...PERSP('depth')], shapeFx],
   ['gloss', 'Gloss (3D light)', [SEL('fx.gloss.style', 'Shape', [['shape', 'Follows button shape'], ['ellipse', 'Ellipse'], ['band', 'Flat band']]), R('fx.gloss.height', 'Height', 5, 100, 1, '%'), R('fx.gloss.inset', 'Inset', 0, 40, 0.5, 'px'), R('fx.gloss.offset', 'Move down', -30, 40, 0.5, 'px'), R('fx.gloss.alpha', 'Top strength', 0, 1, 0.01), R('fx.gloss.fade', 'Bottom strength', 0, 1, 0.01), R('fx.gloss.blur', 'Softness', 0, 20, 0.5, 'px')], on],
   ['bevel', 'Bevel', [R('fx.bevel.size', 'Size', 1, 24, 0.5, 'px'), R('fx.bevel.light', 'Highlight', 0, 1, 0.01), R('fx.bevel.dark', 'Shade', 0, 1, 0.01)], shapeFx],
-  ['innerShadow', 'Inner shadow', [C('fx.innerShadow.color', 'Color'), R('fx.innerShadow.alpha', 'Opacity', 0, 1, 0.01), R('fx.innerShadow.blur', 'Blur', 0, 40, 1, 'px'), R('fx.innerShadow.y', 'Offset Y', -30, 30, 1, 'px')], shapeFx],
+  ['innerShadow', 'Inner shadow', [C('fx.innerShadow.color', 'Color'), R('fx.innerShadow.alpha', 'Opacity', 0, 1, 0.01), R('fx.innerShadow.blur', 'Blur', 0, 40, 1, 'px'), R('fx.innerShadow.x', 'Offset X', -30, 30, 1, 'px'), R('fx.innerShadow.y', 'Offset Y', -30, 30, 1, 'px')], shapeFx],
+  ['innerShadow2', 'Inner shadow 2', [C('fx.innerShadow2.color', 'Color'), R('fx.innerShadow2.alpha', 'Opacity', 0, 1, 0.01), R('fx.innerShadow2.blur', 'Blur', 0, 40, 1, 'px'), R('fx.innerShadow2.x', 'Offset X', -30, 30, 1, 'px'), R('fx.innerShadow2.y', 'Offset Y', -30, 30, 1, 'px')], shapeFx],
   ['inner', 'Inner line', [C('fx.inner.color', 'Color'), R('fx.inner.alpha', 'Opacity', 0, 1, 0.01), R('fx.inner.inset', 'Inset', 1, 30, 0.5, 'px'), R('fx.inner.width', 'Width', 0.5, 10, 0.5, 'px')], shapeFx],
   ['Text effects'],
   ['tExtrude', '3D extrusion', [GR('fx.tExtrude.gradient', 'Near → far colors'), R('fx.tExtrude.depth', 'Depth', 1, 60, 1, 'px'), R('fx.tExtrude.angle', 'Direction', 0, 360, 1, '°'), ...PERSP('tExtrude'), CHK('fx.tExtrude.outline', 'Include text stroke width')]],
@@ -3015,7 +3027,13 @@ $('#refBtn').onclick = () => $('#refFile').click();
 $('#refFile').addEventListener('change', async e => { const f = e.target.files[0]; if (f) openCrop(await readAsDataURL(f)); e.target.value = ''; });
 document.addEventListener('paste', async e => {
   const item = [...(e.clipboardData?.items || [])].find(i => i.type.startsWith('image/'));
-  if (!item) return; e.preventDefault();
+  if (!item) {
+    // CSS copied from Figma, pasted onto the page (not into a text field)
+    const tx = e.clipboardData?.getData('text/plain') || '', el = document.activeElement;
+    if (looksLikeCss(tx) && !(el && (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT' || el.isContentEditable))) { e.preventDefault(); if (view !== 'single') setView('single'); importFigmaCss(tx); }
+    return;
+  }
+  e.preventDefault();
   if (view !== 'single') setView('single');
   openCrop(await readAsDataURL(item.getAsFile()));
 });
@@ -3168,7 +3186,7 @@ function analyzeRef() {
 // the angle of a long button's main axis (degrees, clockwise), or null when it sits level
 function refTilt() {
   const c = REF.canvas, W = c.width, H = c.height, d = REF.data, px = i => [d[i * 4], d[i * 4 + 1], d[i * 4 + 2], d[i * 4 + 3]];
-  const cs = [0, W - 1, (H - 1) * W, H * W - 1].map(px), bg = avgOf(cs), transparent = cs.reduce((q, p) => q + p[3], 0) / 4 < 40;
+  const cs = [0, W - 1, (H - 1) * W, H * W - 1].map(cssPx), bg = avgOf(cs), transparent = cs.reduce((q, p) => q + p[3], 0) / 4 < 40;
   // only clearly-colored pixels, so soft shadows and glows don't pull the axis
   let n = 0, sx = 0, sy = 0, sxx = 0, syy = 0, sxy = 0;
   for (let y = 0; y < H; y += 2) for (let x = 0; x < W; x += 2) {
@@ -3234,7 +3252,7 @@ function analyzeRefCore() {
   const nd = clone(D), fx = nd.fx;
   // a font named in the hints is the one the text is measured for
   if (REF.hints?.font) nd.font.family = REF.hints.font;
-  ['glow', 'shadow', 'hilite', 'stroke', 'depth', 'innerShadow', 'bevel', 'gloss', 'sweep', 'inner', 'sparkles', 'tExtrude', 'tBevel', 'tGloss', 'tStroke', 'tShadow', 'tGlow'].forEach(k => fx[k].on = false);
+  ['glow', 'shadow', 'hilite', 'stroke', 'depth', 'innerShadow', 'innerShadow2', 'bevel', 'gloss', 'sweep', 'inner', 'sparkles', 'tExtrude', 'tBevel', 'tGloss', 'tStroke', 'tShadow', 'tGlow'].forEach(k => fx[k].on = false);
   Object.assign(nd.font, { arc: 0, skew: 0, block: false, italic: false }); nd.font.alt.on = false; nd.icon.type = 'none'; nd.icon.bg = 'none';
   nd.tf = clone(BASE.tf); nd.cursor.type = 'none'; nd.box.tail.on = false; nd.box.minW = 0; nd.box.slantL = false; nd.icon.line = 0; nd.icon.edge = false; nd.icon.dy = 0; nd.font.align = 'center'; nd.fx.stroke.gap = 0; nd.fx.stroke.grad = false;
   if (nd.box.fill === 'image') nd.box.fill = 'gradient';
@@ -4160,6 +4178,143 @@ $('#autoMatch').onclick = runMimic;
   $('#hClear').onclick = () => { for (const id of ids) $('#' + id).value = ''; sync(); if (REF.matched) runMimic(); };
 }
 
+/* ================= Figma CSS import =================
+   Figma's "Copy as code → CSS" lists each layer as a comment with its name and then its properties. The button's
+   frame gives the fill, corners, border, shadows, padding and size; the text layer gives the font. Values are kept at
+   Figma's own pixel sizes, so a 189 × 40 frame comes out 189 × 40 (exports then scale it). */
+const looksLikeCss = t => /[a-z-]+\s*:\s*[^;\n]+;/i.test(t) && /(font-family|border-radius|background|box-shadow)\s*:/i.test(t);
+function splitTop(str, sep = ',') {
+  const out = []; let depth = 0, cur = '';
+  for (const ch of str) { if (ch === '(') depth++; if (ch === ')') depth--; if (ch === sep && !depth) { out.push(cur.trim()); cur = ''; } else cur += ch; }
+  if (cur.trim()) out.push(cur.trim()); return out;
+}
+const NAMED = { white: '#ffffff', black: '#000000', transparent: '#00000000', red: '#ff0000', green: '#008000', blue: '#0000ff' };
+function cssColor(v) {
+  v = (v || '').trim().toLowerCase(); if (NAMED[v]) v = NAMED[v];
+  let m = v.match(/^#([0-9a-f]{3,8})$/);
+  if (m) { let h = m[1]; if (h.length <= 4) h = [...h].map(c => c + c).join(''); return { c: '#' + h.slice(0, 6), a: h.length === 8 ? parseInt(h.slice(6), 16) / 255 : 1 }; }
+  m = v.match(/^rgba?\(([^)]+)\)$/);
+  if (m) { const p = m[1].split(/[\s,/]+/).filter(Boolean).map(x => x.endsWith('%') ? parseFloat(x) * 2.55 : parseFloat(x)); return { c: toHex(p.slice(0, 3)), a: p.length > 3 ? (m[1].includes('%') && p[3] > 1 ? p[3] / 255 : p[3]) : 1 }; }
+  return null;
+}
+const cssPx = v => { const n = parseFloat(v); return Number.isFinite(n) ? n : 0; };
+const SIDES = { 'to top': 0, 'to right': 90, 'to bottom': 180, 'to left': 270, 'to top right': 45, 'to right top': 45, 'to bottom right': 135, 'to right bottom': 135, 'to bottom left': 225, 'to left bottom': 225, 'to top left': 315, 'to left top': 315 };
+function cssGradient(v) {
+  const m = v.match(/^(?:repeating-)?(linear|radial)-gradient\((.*)\)$/s); if (!m) return null;
+  const args = splitTop(m[2]); let angle = 180;
+  if (/deg|turn|rad|^to /.test(args[0]) || (m[1] === 'radial' && !cssColor(args[0].split(/\s+(?=[\d.])/)[0]))) {
+    const a = args.shift().trim();
+    if (/deg$/.test(a)) angle = parseFloat(a); else if (/turn$/.test(a)) angle = parseFloat(a) * 360; else if (/rad$/.test(a)) angle = parseFloat(a) / RAD; else if (SIDES[a] != null) angle = SIDES[a];
+  }
+  const stops = args.map(st => { const mm = st.match(/^(.*?\))\s*(.*)$|^(\S+)\s*(.*)$/); const col = cssColor(mm[1] || mm[3]); const pos = (mm[2] || mm[4] || '').trim(); return col ? { c: col.c, a: col.a, o: pos.endsWith('%') ? parseFloat(pos) / 100 : null } : null; }).filter(Boolean);
+  if (stops.length < 2) return null;
+  stops.forEach((st, i) => { if (st.o == null) st.o = i / (stops.length - 1); st.o = Math.max(0, Math.min(1, st.o)); });
+  return { type: m[1], angle: ((angle % 360) + 360) % 360, stops };
+}
+function cssShadows(v) {
+  return splitTop(v).map(sh => {
+    const inset = /\binset\b/.test(sh); sh = sh.replace(/\binset\b/, '').trim();
+    const cm = sh.match(/(rgba?\([^)]*\)|#[0-9a-f]{3,8}\b|\b(?:white|black|transparent)\b)/i), col = cssColor(cm ? cm[1] : '#000000') || { c: '#000000', a: 1 };
+    const n = sh.replace(cm ? cm[1] : '', '').trim().split(/\s+/).filter(Boolean).map(cssPx);
+    return { inset, x: n[0] || 0, y: n[1] || 0, blur: n[2] || 0, spread: n[3] || 0, ...col };
+  });
+}
+function parseCssLayers(text) {
+  const lines = text.replace(/\r/g, '').split('\n'), layers = []; let cur = null;
+  for (let i = 0; i < lines.length; i++) {
+    const ln = lines[i].trim();
+    const cm = ln.match(/^\/\*\s*(.*?)\s*\*\/$/);
+    // a layer starts with its name as a comment on a line of its own, followed by a blank line (or at the very top)
+    if (cm && (!cur || (lines[i + 1] !== undefined && !lines[i + 1].trim()))) { cur = { name: cm[1], p: {} }; layers.push(cur); continue; }
+    const pm = ln.replace(/\/\*.*?\*\//g, '').match(/^([a-z-]+)\s*:\s*(.+?);?$/i);
+    if (pm) { if (!cur) { cur = { name: '', p: {} }; layers.push(cur); } cur.p[pm[1].toLowerCase()] = pm[2].trim(); }
+  }
+  return layers.filter(l => Object.keys(l.p).length);
+}
+const GENERIC_NAME = /^(text|label|title|button|cta|frame|group|rectangle|layer|copy|content|txt)\b/i;
+async function importFigmaCss(text) {
+  const layers = parseCssLayers(text);
+  const isText = l => l.p['font-family'] || l.p['font-size'];
+  const tl = layers.find(isText), bl = layers.find(l => !isText(l) && (l.p.background || l.p['background-color'] || l.p['border-radius'] || l.p['box-shadow'] || l.p.border || l.p.padding));
+  if (!tl && !bl) { toast('No button styles found in that CSS. Copy the button frame and its text layer from Figma.', 4500); return; }
+  const used = [], warn = [];
+  // with a reference image loaded, start from the mimic's reading (icon, effects the CSS can't express)
+  const base = REF.data ? analyzeRef().design : null;
+  const d = full(base || {});
+  if (!base) { d.icon.type = 'none'; d.cursor.type = 'none'; }
+  for (const k of ['shadow', 'hilite', 'glow', 'stroke', 'innerShadow', 'innerShadow2', 'bevel', 'gloss', 'inner', 'depth', 'tShadow', 'tStroke', 'tGlow']) d.fx[k].on = false;
+  Object.assign(d.font, { arc: 0, skew: 0, align: 'center' }); d.tf = clone(BASE.tf);
+  let W = 0, H = 0, padT = null, padB = null;
+  if (bl) {
+    const p = bl.p; d.box.on = true;
+    W = cssPx(p.width); H = cssPx(p.height);
+    const bgs = splitTop(p.background || p['background-color'] || '');
+    const g = bgs.map(cssGradient).find(Boolean), solid = bgs.map(cssColor).find(Boolean);
+    if (g) { Object.assign(d.box, { fill: 'gradient', gradient: { type: g.type, angle: g.angle, stops: g.stops.map(st => ({ o: +st.o.toFixed(4), c: st.c, a: +st.a.toFixed(3) })) } }); used.push(`${g.stops.length}-color gradient`); }
+    else if (solid) { Object.assign(d.box, { fill: 'solid', c1: solid.c }); if (solid.a < 1) d.box.opacity = +solid.a.toFixed(2); used.push('fill'); }
+    if (p['border-radius']) {
+      const r = p['border-radius'].split(/\s+/).map(cssPx), [tl2, tr = tl2, br = tl2, bl2 = tr] = r;
+      if (r.length === 1 || (tl2 === tr && tr === br && br === bl2)) { if (H && tl2 >= H / 2 - 0.5) d.box.shape = 'pill'; else Object.assign(d.box, { shape: tl2 ? 'rounded' : 'square', radius: tl2 }); }
+      else Object.assign(d.box, { shape: 'custom', corners: { tl: { t: 'round', r: tl2 }, tr: { t: 'round', r: tr }, br: { t: 'round', r: br }, bl: { t: 'round', r: bl2 } } });
+      used.push('corners');
+    }
+    const bw = p.border ? p.border.match(/([\d.]+)px/) : null, bc = p.border ? cssColor((p.border.match(/(rgba?\([^)]*\)|#[0-9a-f]{3,8})/i) || [])[1]) : null;
+    if (bw && bc && cssPx(bw[1]) > 0) { Object.assign(d.fx.stroke, { on: true, width: cssPx(bw[1]), color: bc.c, alpha: +bc.a.toFixed(2), grad: false, gap: 0 }); used.push('border'); }
+    if (p['box-shadow']) {
+      const sh = cssShadows(p['box-shadow']), outer = sh.filter(x => !x.inset), inner = sh.filter(x => x.inset);
+      const out1 = outer[0], out2 = outer[1];
+      if (out1) Object.assign(d.fx.shadow, { on: true, color: out1.c, alpha: +out1.a.toFixed(2), blur: out1.blur, x: out1.x, y: out1.y });
+      if (out2) { if (!out2.x && !out2.y) Object.assign(d.fx.glow, { on: true, color: out2.c, size: Math.max(1, out2.blur / 2), strength: 1 }); else Object.assign(d.fx.hilite, { on: true, color: out2.c, alpha: +out2.a.toFixed(2), blur: out2.blur, x: out2.x, y: out2.y }); }
+      inner.slice(0, 2).forEach((x, i) => Object.assign(d.fx[i ? 'innerShadow2' : 'innerShadow'], { on: true, color: x.c, alpha: +x.a.toFixed(2), blur: x.blur, x: -x.x, y: -x.y }));
+      if (sh.length) used.push(`${sh.length} shadow${sh.length > 1 ? 's' : ''}`);
+      if (outer.length > 2 || inner.length > 2) warn.push('only the first two outer and two inner shadows are used');
+      if (sh.some(x => x.spread)) warn.push('shadow spread is ignored');
+    }
+    if (p.opacity) d.box.opacity = Math.max(0, Math.min(1, parseFloat(p.opacity)));
+    if (p.padding) { const v = p.padding.split(/\s+/).map(cssPx), [t, r = t, b = t, l = r] = v; d.box.padX = Math.round((l + r) / 2); padT = t; padB = b; used.push('padding'); }
+    if (p.gap) d.icon.gap = cssPx(p.gap);
+    if (W) { d.box.minW = Math.round(W); }
+  }
+  let sample = null;
+  if (tl) {
+    const p = tl.p, f = d.font;
+    if (p['font-family']) {
+      const fam = splitTop(p['font-family'])[0].replace(/^['"]|['"]$/g, '').trim();
+      const hit = ALL_GOOGLE.find(n => n.toLowerCase() === fam.toLowerCase()) || Object.keys(customFonts).find(n => n.toLowerCase() === fam.toLowerCase());
+      if (hit) { f.family = hit; used.push(hit); } else warn.push(`the font "${fam}" isn't in the app: upload its file from the Font menu`);
+    }
+    if (p['font-weight']) { const w = { normal: '400', bold: '700' }[p['font-weight']] || String(Math.round(parseFloat(p['font-weight']) / 100) * 100); if (/^[1-9]00$/.test(w)) f.weight = w; }
+    if (p['font-size']) f.size = cssPx(p['font-size']);
+    if (p['font-style']) f.italic = /italic|oblique/.test(p['font-style']);
+    if (p['text-transform']) f.upper = p['text-transform'] === 'uppercase';
+    if (p['letter-spacing']) { const v = p['letter-spacing']; f.spacing = /em$/.test(v) ? +(parseFloat(v) * f.size).toFixed(2) : /%$/.test(v) ? +(parseFloat(v) / 100 * f.size).toFixed(2) : v === 'normal' ? 0 : cssPx(v); }
+    if (p['line-height'] && p['line-height'] !== 'normal') { const v = p['line-height']; f.lineHeight = +(/px$/.test(v) ? cssPx(v) / f.size : /%$/.test(v) ? parseFloat(v) / 100 : parseFloat(v)).toFixed(2); }
+    const tg = (p['background-clip'] || p['-webkit-background-clip'] || '').includes('text') ? cssGradient(splitTop(p.background || '')[0] || '') : null;
+    if (tg) { f.grad = true; f.gradient = { type: tg.type, angle: tg.angle, stops: tg.stops.map(st => ({ o: st.o, c: st.c, a: st.a })) }; }
+    else if (p.color) { const c = cssColor(p.color); if (c) { f.grad = false; f.color = c.c; } }
+    if (p['text-shadow']) { const t = cssShadows(p['text-shadow'])[0]; if (t) Object.assign(d.fx.tShadow, { on: true, color: t.c, alpha: +t.a.toFixed(2), blur: t.blur, x: t.x, y: t.y }); }
+    const ts = p['-webkit-text-stroke']; if (ts) { const w = ts.match(/([\d.]+)px/), c = cssColor((ts.match(/(rgba?\([^)]*\)|#[0-9a-f]{3,8})/i) || [])[1]); if (w && c) Object.assign(d.fx.tStroke, { on: true, width: cssPx(w[1]), color: c.c }); }
+    used.push(`${f.size}px ${({ 400: 'Regular', 500: 'Medium', 600: 'SemiBold', 700: 'Bold', 800: 'ExtraBold', 900: 'Black' })[f.weight] || f.weight}`);
+    if (tl.name && !GENERIC_NAME.test(tl.name) && tl.name.length <= 40) sample = tl.name;
+  }
+  if (sample && view === 'single') { ta.value = sample; autoGrow(); }
+  if (tl) await loadFont(d.font, ta.value || 'A');
+  // the frame's height: Figma centres the text, so the padding above and below is whatever makes it that tall
+  if (H) {
+    let Lay = await getLayout(full(d), ta.value || 'Play Now');
+    d.box.padY = Math.max(0, +(d.box.padY + (H - Lay.h) / 2).toFixed(1));
+    Lay = await getLayout(full(d), ta.value || 'Play Now');
+    if (Math.abs(Lay.h - H) > 0.5) d.box.padY = Math.max(0, +(d.box.padY + (H - Lay.h) / 2).toFixed(1));
+  } else if (padT != null) d.box.padY = Math.round((padT + padB) / 2);
+  const icons = layers.filter(l => l !== tl && l !== bl && !isText(l));
+  if (icons.length && d.icon.type === 'none') warn.push('the CSS has another layer (an icon?): pick it in the Icon section, or load a PNG of the button too');
+  D = full(d); syncUI(); changed();
+  $('#cssBox').hidden = true;
+  toast(`Imported from Figma${W && H ? ` (${Math.round(W)} × ${Math.round(H)})` : ''}: ${used.join(', ')}.${warn.length ? ' Note: ' + warn.join('; ') + '.' : ''}`, 7000);
+}
+$('#cssBtn').onclick = () => { const b = $('#cssBox'); b.hidden = !b.hidden; if (!b.hidden) $('#cssIn').focus(); };
+$('#cssCancel').onclick = () => { $('#cssBox').hidden = true; };
+$('#cssGo').onclick = () => { const t = $('#cssIn').value; if (!looksLikeCss(t)) { toast('That doesn\'t look like CSS from Figma. Copy it with Copy as code → CSS.', 4000); return; } importFigmaCss(t); };
 /* AI match: Claude looks at the reference, starting from the pixel measurements, and returns only the settings to change */
 const AI_ENUMS = {
   'box.shape': SHAPES.map(x => x[0]), 'box.fill': ['solid', 'gradient'], 'font.weight': ['100', '200', '300', '400', '500', '600', '700', '800', '900'],
@@ -4234,7 +4389,7 @@ Rules:
 - Allowed values: ${Object.entries(AI_ENUMS).map(([k, v]) => k + ' = ' + v.join('|')).join('; ')}.
 - icon.id must be one of: ${Object.keys(ICONS).join(', ')} (icon.type "vector"); for an emoji use icon.type "emoji" and icon.char.
 - Turn an effect on with "on": true and set its values; turn effects that are not in the image off.
-- Effects: glow (outer glow), shadow (drop shadow), hilite (second, light shadow for neumorphism), stroke (border; grad + gradient for a rim that shades from top to bottom), depth (3D slab under the button), innerShadow, bevel, gloss (glossy highlight on the top part), inner (thin line inside the edge), sweep (diagonal light streak), sparkles, tExtrude (3D text), tBevel, tGloss, tStroke (text outline), tShadow, tGlow.
+- Effects: glow (outer glow), shadow (drop shadow), hilite (second, light shadow for neumorphism), stroke (border; grad + gradient for a rim that shades from top to bottom), depth (3D slab under the button), innerShadow and innerShadow2 (inset shadows; x/y are the CSS offsets negated), bevel, gloss (glossy highlight on the top part), inner (thin line inside the edge), sweep (diagonal light streak), sparkles, tExtrude (3D text), tBevel, tGloss, tStroke (text outline), tShadow, tGlow.
 - If a mouse cursor or hand pointer is drawn on the button, set cursor.type and its x/y (percent across the button), size and rot.
 - "notes": one short sentence on what you changed.`;
     aiCtl = new AbortController();
