@@ -167,6 +167,8 @@ input[type="color"] { width: 100%; height: 26px; padding: 0 2px; border: 1px sol
 .view { display: flex; flex-direction: column; gap: 12px; padding-block: 16px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
 .textrow textarea { width: 100%; font-size: 18px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); resize: vertical; min-height: 50px; line-height: 1.4; display: block; }
 .refbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.teamurl { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 6px 0 10px; font-size: 12px; }
+.teamurl input { flex: 1 1 260px; min-width: 0; }
 .refctl { display: inline-flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .hints { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; font-size: 12px; }
 .hints label { display: inline-flex; align-items: center; gap: 5px; }
@@ -409,6 +411,8 @@ input.tg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
         </span>
         <span class="sizectl" id="sizeSingle"></span>
         <span class="meta grow" id="fmtNote"></span>
+        <a class="meta" id="driveLink" hidden target="_blank" rel="noopener">Open team folder</a>
+        <button class="btn" id="driveOne" hidden title="Save this export into the team's shared Google Drive folder">Save to team Drive</button>
         <button class="btn primary" id="exportOne">Export PNG</button>
       </div>
     </div>
@@ -444,6 +448,7 @@ Start</textarea>
           <option value="zip">One ZIP file</option>
           <option value="folder">Into a folder…</option>
           <option value="files">Separate files</option>
+          <option value="drive" id="destDrive" hidden disabled>Team Drive folder</option>
         </select>
         <span class="grow"></span>
         <button class="btn primary" id="exportAll">Export all</button>
@@ -456,12 +461,19 @@ Start</textarea>
         <div class="mine">
           <input type="text" id="saveName" placeholder="Name this design" aria-label="Design name">
           <button class="btn sm primary" id="saveBtn">Save to gallery</button>
-          <button class="btn sm" id="shareBtn" hidden title="Add the current design to the team library everyone on this page sees">Share with team</button>
+          <button class="btn sm" id="shareBtn" hidden title="Add the current design to the team library everyone sees">Share with team</button>
+          <input type="text" id="myName" hidden placeholder="Your name" aria-label="Your name, shown on designs you share" title="Shown on designs you share with the team" size="12">
+          <button class="btn sm" id="teamConnect" hidden title="Connect the team's shared Google Sheet">Connect team library…</button>
           <button class="btn sm" id="exportJson">Download .json</button>
           <label class="btn sm" for="importFile">Import .json</label>
           <input type="file" id="importFile" accept=".json,application/json" hidden>
           <button class="btn sm" id="copyCode">Copy design code</button>
         </div>
+      </div>
+      <div class="teamurl" id="teamUrlBox" hidden>
+        <label for="teamUrl">Team library link (the Apps Script web app URL)</label>
+        <input type="url" id="teamUrl" placeholder="https://script.google.com/macros/s/…/exec">
+        <button class="btn sm primary" id="teamUrlGo">Connect</button>
       </div>
       <div class="gfilter seg" role="group" aria-label="Show">
         <button data-gf="all" aria-pressed="true">All</button>
@@ -587,9 +599,8 @@ const GSPEC = {
   'Figtree': 'ital,wght@0,300..900;1,300..900', 'Oswald': 'wght@200..700', 'Heebo': 'wght@100..900', 'Assistant': 'wght@200..800',
   'Playfair Display': 'ital,wght@0,400..900;1,400..900', 'Inter': 'ital,opsz,wght@0,14..32,100..900;1,14..32,100..900',
 };
-const NOT_GOOGLE = { 'Neulis Sans': 'Adobe Fonts' };
+const NOT_GOOGLE = {};
 const FONT_GROUPS = [
-  ['Adobe Fonts (upload the file once)', ['Neulis Sans']],
   ['Chunky & game', ['Lilita One', 'Luckiest Guy', 'Titan One', 'Bowlby One', 'Bowlby One SC', 'Rammetto One', 'Chewy', 'Paytone One', 'Passion One', 'Bungee', 'Bungee Inline', 'Bungee Shade', 'Carter One', 'Changa One', 'Dela Gothic One', 'Bangers', 'Russo One', 'Baloo 2', 'Shrikhand', 'Sigmar One', 'Knewave', 'Lemon', 'Spicy Rice', 'Skranji', 'Chango', 'Coiny', 'Erica One', 'Fugaz One', 'Galindo', 'Kavoon', 'Londrina Solid', 'Modak', 'Oi', 'Poller One', 'Racing Sans One', 'Rubik Mono One', 'Sonsie One', 'Ultra', 'Wendy One', 'Black Han Sans', 'Rowdies', 'Gluten', 'Grandstander', 'Mochiy Pop One', 'Nerko One', 'Original Surfer', 'Boogaloo', 'Bubblegum Sans', 'Freckle Face', 'Frijole', 'Creepster', 'Holtwood One SC', 'Vast Shadow', 'Patua One', 'Concert One', 'Days One', 'Squada One']],
   ['Clean sans', ['Montserrat', 'Poppins', 'Figtree', 'Inter', 'Inter Tight', 'Roboto', 'Open Sans', 'Lato', 'Raleway', 'Work Sans', 'Manrope', 'Plus Jakarta Sans', 'Outfit', 'Urbanist', 'Lexend', 'Sora', 'DM Sans', 'Space Grotesk', 'Kanit', 'Prompt', 'Mulish', 'Nunito Sans', 'Red Hat Display', 'Epilogue', 'Syne', 'Unbounded', 'League Spartan', 'Josefin Sans', 'Bricolage Grotesque', 'Onest', 'Albert Sans', 'Be Vietnam Pro', 'Chivo', 'Hanken Grotesk', 'Jost', 'Karla', 'Libre Franklin', 'Public Sans', 'Titillium Web', 'Ubuntu', 'Archivo', 'Archivo Black', 'Rubik', 'Barlow', 'Exo 2', 'IBM Plex Sans', 'Fira Sans', 'Source Sans 3', 'Noto Sans', 'PT Sans', 'Cabin', 'Asap', 'Mukta', 'Hind', 'Overpass', 'Signika', 'Catamaran', 'Maven Pro', 'Dosis', 'Sofia Sans', 'Golos Text']],
   ['Condensed & tall', ['Oswald', 'Bebas Neue', 'Anton', 'Barlow Condensed', 'Fjalla One', 'Roboto Condensed', 'Fira Sans Condensed', 'Saira Condensed', 'Teko', 'Staatliches', 'Antonio', 'Pathway Gothic One', 'Big Shoulders Display', 'Six Caps', 'League Gothic', 'Sofia Sans Condensed', 'Archivo Narrow', 'Yanone Kaffeesatz']],
@@ -857,7 +868,7 @@ const PRESETS = [
       gloss: { on: true, style: 'ellipse', height: 44, inset: 8, alpha: 0.65, fade: 0, blur: 1 },
       sweep: { on: true, area: 'edges', layer: 'over', edgeInset: 3, edgeW: 2, blur: 1, pos: 62, width: 70, angle: 30, alpha: 1, color: '#ffffff' },
       shadow: { on: true, color: '#2a0660', alpha: 0.4, blur: 20, y: 10 }, tShadow: { on: true, color: '#3b0a7a', alpha: 0.55, blur: 6, x: 0, y: 2 } } }, 'Claim Bonus'],
-  ['Green Play', { font: { family: 'Neulis Sans', fallback: 'Montserrat', weight: '800', size: 34, spacing: 0 },
+  ['Green Play', { font: { family: 'Poppins', fallback: 'Montserrat', weight: '700', size: 34, spacing: 0 },
     box: { shape: 'pill', padX: 40, padY: 22, fill: 'gradient', gradient: GS(GRAD_PRESETS.Green, 175) },
     fx: { tShadow: { on: true, color: '#00602a', alpha: 0.6, blur: 10, x: 0, y: 2 } } }],
   ['Bubble Text', { font: { family: 'Lilita One', weight: '400', size: 64, spacing: 1, lineHeight: 1.14, arc: 22, grad: true, gradient: G2('#45f3ff', '#2b74ff'),
@@ -2862,6 +2873,7 @@ $('#exportAll').addEventListener('click', async e => {
     catch (err) { if (err?.name !== 'AbortError') toast('Folder access is blocked in this view. Choose ZIP, or open the app file directly in Chrome or Edge.', 4500); return; }
   }
   if (dest === 'zip' && typeof JSZip === 'undefined') { toast('The ZIP library did not load. Check your connection and reload.'); return; }
+  if (dest === 'drive' && TEAM.kind !== 'sheet') { toast('Connect the team library first.'); return; }
   btn.disabled = true;
   try {
     const bases = fileBases(lines), files = [];
@@ -2876,6 +2888,10 @@ $('#exportAll').addEventListener('click', async e => {
       zip.file('design.json', JSON.stringify(D, null, 2));
       btn.textContent = 'Zipping…';
       await saveFile(`${($('#prefix').value.trim() || 'cta-').replace(/-$/, '')}-buttons-${lines.length}.zip`, await zip.generateAsync({ type: 'blob' }));
+    } else if (dest === 'drive') {
+      const stamp = new Date().toISOString().slice(0, 16).replace('T', ' ').replace(':', '.');
+      const r = await saveToDrive(files, `${($('#prefix').value.trim() || 'cta-').replace(/-$/, '')} buttons ${stamp}`, (n, all) => { btn.textContent = `Uploading ${n}/${all}…`; });
+      toast(`Saved ${r.saved} files to a new folder in the team Drive folder`, 4000);
     } else if (dest === 'folder') {
       for (const f of files) { const fh = await dir.getFileHandle(f.name, { create: true }); const w = await fh.createWritable(); await w.write(f.blob); await w.close(); }
       toast(`Saved ${files.length} files to ${dir.name}`);
@@ -4284,7 +4300,7 @@ async function renderGallery() {
     const edit = document.createElement('button'); edit.type = 'button'; edit.className = 'edit'; edit.textContent = 'Edit'; edit.title = 'Load this design into the editor'; edit.onclick = load;
     acts.append(edit); card.append(acts);
     if (it.team) {
-      const id = it.team.id, ref = () => TEAM.db.doc('team/' + id);
+      const id = it.team.id;
       const copyT = document.createElement('button'); copyT.type = 'button'; copyT.textContent = 'Copy'; copyT.title = 'Save a private copy to My designs';
       copyT.onclick = () => { const l = loadMine(); l.unshift({ name: `${it.name} copy`, design: clone(it.design), sample: it.sample }); if (storeMine(l)) { renderGallery(); toast(`Saved ${it.name} copy to My designs`); } };
       if (TEAM.canWrite) {
@@ -4295,12 +4311,12 @@ async function renderGallery() {
           const inp = document.createElement('input'); inp.value = it.name; inp.setAttribute('aria-label', 'New name');
           name.replaceChildren(inp, t); inp.focus(); inp.select();
           let finished = false;
-          const done = ok => { if (finished) return; finished = true; const v = inp.value.trim(); if (ok && v && v !== it.name) teamWrite(() => ref().update({ name: v }), `Renamed to ${v}`); else renderGallery(); };
+          const done = ok => { if (finished) return; finished = true; const v = inp.value.trim(); if (ok && v && v !== it.name) teamWrite(() => teamOps.update(id, { name: v }), `Renamed to ${v}`); else renderGallery(); };
           inp.onkeydown = e => { if (e.key === 'Enter') done(true); if (e.key === 'Escape') done(false); };
           inp.onblur = () => done(true);
         };
-        upd.onclick = () => confirmBtn(upd, 'Replace?', () => { const body = teamRecord(it.name, D, currentSample()); if (!body) return tooBig(); teamWrite(() => ref().update({ design: body.design, sample: body.sample, by: body.by, updatedAt: body.updatedAt }), `Updated ${it.name} for the team`); });
-        del.onclick = () => confirmBtn(del, 'Delete?', () => teamWrite(() => ref().delete(), `Deleted ${it.name} from the team library`));
+        upd.onclick = () => confirmBtn(upd, 'Replace?', () => { if (needName()) return; const body = teamRecord(it.name, D, currentSample()); if (!body) return tooBig(); teamWrite(() => teamOps.update(id, { design: body.design, sample: body.sample, by: body.by, updatedAt: body.updatedAt }), `Updated ${it.name} for the team`); });
+        del.onclick = () => confirmBtn(del, 'Delete?', () => teamWrite(() => teamOps.remove(id), `Deleted ${it.name} from the team library`));
         acts.append(ren, upd, del);
       }
       acts.append(copyT);
@@ -4324,7 +4340,7 @@ async function renderGallery() {
       upd.onclick = () => confirmBtn(upd, 'Replace?', () => { const l = loadMine(); l[it.idx].design = clone(D); storeMine(l); thumbCache.clear(); renderGallery(); toast(`Updated ${it.name}`); });
       del.onclick = () => confirmBtn(del, 'Delete?', () => { const l = loadMine(); l.splice(it.idx, 1); storeMine(l); renderGallery(); toast(`Deleted ${it.name}`); });
       acts.append(ren, upd, del);
-      if (TEAM.db && TEAM.canWrite) { const sh = document.createElement('button'); sh.type = 'button'; sh.textContent = 'Share'; sh.title = 'Add it to the team library'; sh.onclick = () => shareToTeam(it.name, it.design, it.sample); acts.append(sh); }
+      if (TEAM.kind && TEAM.canWrite) { const sh = document.createElement('button'); sh.type = 'button'; sh.textContent = 'Share'; sh.title = 'Add it to the team library'; sh.onclick = () => shareToTeam(it.name, it.design, it.sample); acts.append(sh); }
     }
     it.thumb = thumb; return card;
   });
@@ -4339,47 +4355,152 @@ async function renderGallery() {
     it.thumb.replaceChildren(copy);
   }
 }
-/* team library: designs shared with everyone who can open this page (db), with names from their accounts (user) */
-const TEAM = { db: null, user: null, me: null, docs: [], names: {}, canWrite: true, ready: false };
+/* team library: designs the whole team shares, and a Drive folder for exported files.
+   Two stores: a Google Sheet behind a small Apps Script web app (works for anyone with the app's link, set
+   SHEET_URL below), or, inside claude.ai only, the page's own db (names from claude.ai accounts). The Sheet wins. */
+const SHEET_URL = '';
+const STORE_SHEET = 'ctaforge.sheetUrl', STORE_MYNAME = 'ctaforge.myName';
+const TEAM = { kind: null, db: null, user: null, me: null, docs: [], names: {}, canWrite: true, ready: false, folderUrl: '', url: '' };
 const currentSample = () => ta.value.replace(/\n/g, '|');
 const tooBig = () => toast('This design holds uploaded images too large to share. Remove them, or use Download .json.', 4500);
+const myName = () => { try { return (localStorage.getItem(STORE_MYNAME) || '').trim(); } catch (e) { return ''; } };
 function teamRecord(name, design, sample) {
-  const body = { name, design: clone(design), sample: sample || null, by: TEAM.me, updatedAt: Date.now() };
-  return JSON.stringify(body).length > 240000 ? null : body;
+  const body = { name, design: clone(design), sample: sample || null, by: TEAM.kind === 'sheet' ? myName() : TEAM.me, updatedAt: Date.now() };
+  return JSON.stringify(body).length > (TEAM.kind === 'sheet' ? 48000 : 240000) ? null : body;
 }
+// the Sheet's web app: GET lists, POST changes (plain text body, so the browser sends it without a preflight)
+async function sheetCall(body) {
+  const r = await fetch(TEAM.url, body ? { method: 'POST', body: JSON.stringify(body) } : {});
+  const j = await r.json();
+  if (!j.ok) { const e = new Error(j.error || 'failed'); e.code = j.error; throw e; }
+  return j;
+}
+const teamOps = {
+  add: body => TEAM.kind === 'sheet' ? sheetCall({ action: 'add', ...body }) : TEAM.db.collection('team').add({ ...body, createdAt: Date.now() }),
+  update: (id, patch) => TEAM.kind === 'sheet' ? sheetCall({ action: 'update', id, ...patch }) : TEAM.db.doc('team/' + id).update(patch),
+  remove: id => TEAM.kind === 'sheet' ? sheetCall({ action: 'delete', id }) : TEAM.db.doc('team/' + id).delete(),
+};
 async function teamWrite(fn, okMsg) {
-  try { await fn(); if (okMsg) toast(okMsg); }
+  try { await fn(); if (okMsg) toast(okMsg); if (TEAM.kind === 'sheet') sheetRefresh(); }
   catch (e) {
     const code = e && e.code;
-    if (code === 'invalid_argument') { TEAM.canWrite = false; $('#shareBtn').hidden = true; renderGallery(); toast('You can view the team library, but changing it needs Contributor access to this page.', 4500); }
+    if (code === 'too_big') tooBig();
+    else if (code === 'invalid_argument') { TEAM.canWrite = false; $('#shareBtn').hidden = true; renderGallery(); toast('You can view the team library, but changing it needs Contributor access to this page.', 4500); }
     else toast(code === 'quota_exceeded' ? 'The team library is full. Delete some team designs first.' : 'Could not reach the team library. Try again.', 4000);
   }
 }
+function needName() {
+  if (TEAM.kind !== 'sheet' || myName()) return false;
+  const inp = $('#myName'); inp.hidden = false; inp.focus();
+  toast('Add your name first, so the team can see who shared it.', 3500);
+  return true;
+}
 function shareToTeam(name, design, sample) {
-  if (!TEAM.db) return;
+  if (!TEAM.kind || needName()) return;
   const body = teamRecord(name, design, sample);
   if (!body) return tooBig();
-  teamWrite(() => TEAM.db.collection('team').add({ ...body, createdAt: Date.now() }), `Shared ${name} with your team`);
+  teamWrite(() => teamOps.add(body), `Shared ${name} with your team`);
 }
 $('#shareBtn').onclick = () => shareToTeam($('#saveName').value.trim() || `Team design ${TEAM.docs.length + 1}`, D, currentSample());
+$('#myName').value = myName();
+$('#myName').addEventListener('change', e => { try { localStorage.setItem(STORE_MYNAME, e.target.value.trim()); } catch (err) {} });
+function teamShown(docs) {
+  // redraw only on a real change, so a confirm in progress ("Delete?") isn't reset by an echo
+  const key = JSON.stringify(docs);
+  if (TEAM.ready && key === TEAM.lastKey) return false;
+  TEAM.lastKey = key; TEAM.docs = docs; return true;
+}
+let sheetBusy = false;
+async function sheetRefresh() {
+  if (sheetBusy) return; sheetBusy = true;
+  try {
+    const j = await sheetCall();
+    TEAM.folderUrl = j.folderUrl || '';
+    const docs = (j.designs || []).filter(d => d && d.id && d.design && typeof d.design === 'object');
+    TEAM.names = {}; for (const d of docs) if (d.by) TEAM.names[d.by] = d.by;
+    const first = !TEAM.ready;
+    if (teamShown(docs) || first) { TEAM.ready = true; renderGallery(); }
+    driveUI();
+    return true;
+  } catch (e) { return false; }
+  finally { sheetBusy = false; }
+}
+async function connectSheet(url) {
+  TEAM.kind = 'sheet'; TEAM.url = url; TEAM.ready = false; TEAM.lastKey = '';
+  if (!(await sheetRefresh())) { TEAM.kind = null; TEAM.url = ''; return false; }
+  $('#gfTeam').hidden = false; $('#shareBtn').hidden = false; $('#myName').hidden = false; $('#teamConnect').hidden = true;
+  return true;
+}
+// keep the list fresh while the page is in view
+setInterval(() => { if (TEAM.kind === 'sheet' && document.visibilityState === 'visible') sheetRefresh(); }, 30000);
+document.addEventListener('visibilitychange', () => { if (TEAM.kind === 'sheet' && document.visibilityState === 'visible') sheetRefresh(); });
+// connecting a Sheet by hand (before SHEET_URL is built in): paste the web app link
+$('#teamConnect').onclick = async () => {
+  const box = $('#teamUrlBox'); box.hidden = !box.hidden; if (!box.hidden) $('#teamUrl').focus();
+};
+$('#teamUrlGo').onclick = async () => {
+  const url = $('#teamUrl').value.trim();
+  if (!/^https:\/\/script\.google(usercontent)?\.com\//.test(url)) { toast('Paste the web app link from Apps Script (it starts with https://script.google.com/).', 4500); return; }
+  if (await connectSheet(url)) { try { localStorage.setItem(STORE_SHEET, url); } catch (e) {} $('#teamUrlBox').hidden = true; toast('Connected to the team library.'); }
+  else toast('Could not reach that link. Check it was deployed with access "Anyone".', 4500);
+};
 (async () => {
+  let saved = ''; try { saved = localStorage.getItem(STORE_SHEET) || ''; } catch (e) {}
+  const url = SHEET_URL || saved;
+  if (url && await connectSheet(url)) return;
   const db = window.claude?.use ? await window.claude.use('db').catch(() => null) : null;
-  if (!db) return;
-  TEAM.db = db;
+  if (!db) { $('#teamConnect').hidden = !!SHEET_URL; return; }
+  TEAM.kind = 'db'; TEAM.db = db;
   TEAM.user = await window.claude.use('user').catch(() => null);
   if (TEAM.user) { TEAM.me = await TEAM.user.id(); TEAM.canWrite = (await TEAM.user.can('data.write')) !== false; }
   $('#gfTeam').hidden = false; $('#shareBtn').hidden = !TEAM.canWrite;
-  let lastKey = '';
   db.collection('team').orderBy('updatedAt', 'desc').onSnapshot(async snap => {
-    const docs = snap.docs.map(d => ({ id: d.id, ...d.data() })), key = JSON.stringify(docs);
-    // redraw only on a real change, so a confirm in progress ("Delete?") isn't reset by an echo
-    if (TEAM.ready && key === lastKey) return;
-    lastKey = key; TEAM.docs = docs;
+    const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    if (!teamShown(docs)) return;
     const ids = [...new Set(TEAM.docs.map(d => d.by).filter(Boolean))];
     if (TEAM.user && ids.length) { const ps = await TEAM.user.profiles(ids); TEAM.names = {}; for (const id of ids) TEAM.names[id] = (ps[id] && ps[id].name) || ''; }
     TEAM.ready = true; renderGallery();
   }, () => { $('#gfTeam').hidden = true; $('#shareBtn').hidden = true; });
 })();
+
+/* team Drive folder: exported files saved for everyone (through the same Sheet web app) */
+function driveUI() {
+  const on = TEAM.kind === 'sheet';
+  $('#driveOne').hidden = !on;
+  $('#destDrive').hidden = !on; $('#destDrive').disabled = !on;
+  if (!on && $('#destSel').value === 'drive') $('#destSel').value = 'zip';
+  const a = $('#driveLink'); a.hidden = !(on && TEAM.folderUrl); if (TEAM.folderUrl) a.href = TEAM.folderUrl;
+}
+const blobB64 = blob => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(',')[1]); r.onerror = rej; r.readAsDataURL(blob); });
+// files go up a few at a time (a request has a size limit); a batch gets its own subfolder
+async function saveToDrive(files, subfolder, progress) {
+  let folderId = null, saved = 0, folderUrl = TEAM.folderUrl, chunk = [], size = 0;
+  const send = async () => {
+    if (!chunk.length) return;
+    const j = await sheetCall({ action: 'upload', files: chunk, ...(folderId ? { folderId } : subfolder ? { subfolder } : {}) });
+    if (subfolder) folderId = j.folderId;
+    folderUrl = j.folderUrl || folderUrl; saved += j.saved || 0; chunk = []; size = 0;
+    if (progress) progress(saved, files.length);
+  };
+  for (const f of files) {
+    const data = await blobB64(f.blob);
+    if (size + data.length > 8e6) await send();
+    chunk.push({ name: f.name, mime: f.blob.type || 'image/png', data }); size += data.length;
+  }
+  await send();
+  return { saved, folderUrl };
+}
+$('#driveOne').addEventListener('click', async e => {
+  const btn = e.currentTarget; btn.disabled = true;
+  try {
+    const text = $('#ctaText').value || 'button';
+    const [it] = await planExport([text]);
+    const name = `${fileBases([text.replace(/\n/g, ' ')])[0]}.${fmtOne}`;
+    await saveToDrive([{ name, blob: await makeBlob(it, fmtOne) }]);
+    toast(`Saved ${name} to the team Drive folder`);
+  } catch (err) { toast('Could not save to the team Drive folder. Try again.', 4000); }
+  finally { btn.disabled = false; }
+});
 const STORE_HIDDEN = 'ctaforge.hiddenStarters';
 function loadHidden() { try { return JSON.parse(localStorage.getItem(STORE_HIDDEN) || '[]'); } catch (e) { return []; } }
 function storeHidden(list) { try { localStorage.setItem(STORE_HIDDEN, JSON.stringify(list)); } catch (e) { /* hiding is a convenience; ignore blocked storage */ } }
