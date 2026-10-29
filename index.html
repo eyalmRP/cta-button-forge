@@ -525,6 +525,7 @@ input.tg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
         <span class="sizectl" id="sizeSingle"></span>
         <span class="meta grow" id="fmtNote"></span>
         <a class="meta" id="driveLink" hidden target="_blank" rel="noopener">Open team folder</a>
+        <a class="meta lastexp" hidden target="_blank" rel="noopener">Open last export</a>
         <button class="btn" id="driveOne" hidden title="Save this export into the team's shared Google Drive folder">Save to team Drive</button>
         <button class="btn primary" id="exportOne">Export PNG</button>
       </div>
@@ -564,6 +565,7 @@ Start</textarea>
           <option value="drive" id="destDrive" hidden disabled>Team Drive folder</option>
         </select>
         <span class="grow"></span>
+        <a class="meta lastexp" hidden target="_blank" rel="noopener">Open last export</a>
         <button class="btn primary" id="exportAll">Export all</button>
       </div>
     </div>
@@ -3170,7 +3172,8 @@ $('#exportAll').addEventListener('click', async e => {
       const stamp = new Date().toISOString().slice(0, 16).replace('T', ' ').replace(':', '.');
       const up = progress('Uploading to the team Drive folder', files.length);
       let r; try { r = await saveToDrive(files, `${($('#prefix').value.trim() || 'cta-').replace(/-$/, '')} buttons ${stamp}`, (n, all) => { btn.textContent = `Uploading ${n}/${all}…`; up.step(n - (up.n || 0)); up.n = n; }); } finally { up.end(); }
-      toast(`Saved ${r.saved} files to a new folder in the team Drive folder`, 4000);
+      setLastExport(r.folderUrl, r.name);
+      toast(`Saved ${r.saved} files to "${r.name}" in the team Drive folder. Open it with "Open last export".`, 5000);
     } else if (dest === 'folder') {
       for (const f of files) { const fh = await dir.getFileHandle(f.name, { create: true }); const w = await fh.createWritable(); await w.write(f.blob); await w.close(); }
       toast(`Saved ${files.length} files to ${dir.name}`);
@@ -5174,15 +5177,24 @@ async function saveToDrive(files, subfolder, progress) {
     chunk.push({ name: f.name, mime: f.blob.type || 'image/png', data }); size += data.length;
   }
   await send();
-  return { saved, folderUrl };
+  return { saved, folderUrl, name: subfolder || 'team folder' };
 }
+// the Drive folder the last export went to, kept in this browser
+const STORE_LASTEXP = 'ctaforge.lastExport';
+function setLastExport(url, name) { if (!url) return; try { localStorage.setItem(STORE_LASTEXP, JSON.stringify({ url, name, at: Date.now() })); } catch (e) {} lastExpUI(); }
+function lastExpUI() {
+  let L = null; try { L = JSON.parse(localStorage.getItem(STORE_LASTEXP) || 'null'); } catch (e) {}
+  document.querySelectorAll('.lastexp').forEach(a => { a.hidden = !L?.url; if (L?.url) { a.href = L.url; a.title = `${L.name}, ${new Date(L.at).toLocaleString()}`; } });
+}
+lastExpUI();
 $('#driveOne').addEventListener('click', async e => {
   const btn = e.currentTarget; btn.disabled = true;
   try {
     const text = $('#ctaText').value || 'button';
     const [it] = await planExport([text]);
     const name = `${fileBases([text.replace(/\n/g, ' ')])[0]}.${fmtOne}`;
-    await withProgress('Saving to the team Drive folder…', async () => saveToDrive([{ name, blob: await makeBlob(it, fmtOne) }]));
+    const r = await withProgress('Saving to the team Drive folder…', async () => saveToDrive([{ name, blob: await makeBlob(it, fmtOne) }]));
+    setLastExport(r.folderUrl, r.name);
     toast(`Saved ${name} to the team Drive folder`);
   } catch (err) { toast('Could not save to the team Drive folder. Try again.', 4000); }
   finally { btn.disabled = false; }
