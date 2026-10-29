@@ -257,6 +257,7 @@ select.sm, input.sm { padding: 6px 8px; border: 1px solid var(--line); border-ra
 .btn:disabled { opacity: .5; cursor: progress; }
 .btn.off, a.off { opacity: .45; cursor: help; }
 .btn.sm { padding: 5px 10px; font-size: 12px; }
+.drvrow { display: flex; flex-wrap: wrap; gap: 10px; margin-left: auto; justify-content: flex-end; }
 /* Drive folder buttons; the last-export one pulses right after an export */
 a.btn.drv { display: inline-flex; align-items: center; gap: 7px; color: var(--fg); text-decoration: none; }
 a.btn.drv svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
@@ -533,7 +534,7 @@ input.tg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
         </span>
         <span class="sizectl" id="sizeSingle"></span>
         <span class="meta grow" id="fmtNote"></span>
-        <a class="btn drv" id="driveLink" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Team folder</a>
+        <a class="btn drv teamfolder" id="driveLink" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Team folder</a>
         <a class="btn drv lastexp" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1"/><path d="M3 7v10a2 2 0 0 0 2 2h12.5a2 2 0 0 0 1.9-1.4L22 11H7.5a2 2 0 0 0-1.9 1.4L3 19"/></svg>Open last export</a>
         <button class="btn" id="driveOne" title="Save this export into the team's shared Google Drive folder">Save to team Drive</button>
         <button class="btn primary" id="exportOne">Export PNG</button>
@@ -573,9 +574,11 @@ Start</textarea>
           <option value="files">Separate files</option>
           <option value="drive" id="destDrive" disabled>Team Drive folder</option>
         </select>
-        <span class="grow"></span>
+        <span class="drvrow">
+        <a class="btn drv teamfolder" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Team folder</a>
         <a class="btn drv lastexp" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1"/><path d="M3 7v10a2 2 0 0 0 2 2h12.5a2 2 0 0 0 1.9-1.4L22 11H7.5a2 2 0 0 0-1.9 1.4L3 19"/></svg>Open last export</a>
         <button class="btn primary" id="exportAll">Export all</button>
+        </span>
       </div>
     </div>
 
@@ -5180,8 +5183,10 @@ function driveUI() {
   const b = $('#driveOne'); b.classList.toggle('off', !on); b.dataset.why = why; b.title = on ? "Save this export into the team's shared Google Drive folder" : why;
   $('#destDrive').disabled = !on; $('#destDrive').textContent = on ? 'Team Drive folder' : 'Team Drive folder (not available here)';
   if (!on && $('#destSel').value === 'drive') $('#destSel').value = 'zip';
-  const a = $('#driveLink'); offLink(a, on ? (TEAM.folderUrl ? '' : 'The Sheet did not send its Drive folder link. Reload the page.') : why);
-  if (on && TEAM.folderUrl) { a.href = TEAM.folderUrl; a.title = 'The shared team Drive folder'; }
+  document.querySelectorAll('.teamfolder').forEach(a => {
+    offLink(a, on ? (TEAM.folderUrl ? '' : 'The Sheet did not send its Drive folder link. Reload the page.') : why);
+    if (on && TEAM.folderUrl) { a.href = TEAM.folderUrl; a.title = 'The shared team Drive folder'; }
+  });
   lastExpUI();
 }
 // a greyed-out Drive button or link explains itself instead of doing nothing
