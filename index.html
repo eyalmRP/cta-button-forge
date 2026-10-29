@@ -257,6 +257,14 @@ select.sm, input.sm { padding: 6px 8px; border: 1px solid var(--line); border-ra
 .btn:disabled { opacity: .5; cursor: progress; }
 .btn.off, a.off { opacity: .45; cursor: help; }
 .btn.sm { padding: 5px 10px; font-size: 12px; }
+/* Drive folder buttons; the last-export one pulses right after an export */
+a.btn.drv { display: inline-flex; align-items: center; gap: 7px; color: var(--fg); text-decoration: none; }
+a.btn.drv svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+a.btn.drv:not(.off) svg { color: var(--accent); }
+a.btn.drv.fresh { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); font-weight: 600; animation: drvpulse 1.2s ease-out 4; }
+@keyframes drvpulse { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 55%, transparent); } 100% { box-shadow: 0 0 0 10px transparent; } }
+.toast a { color: inherit; font-weight: 700; margin-left: 12px; padding: 3px 10px; border-radius: 6px; background: color-mix(in srgb, var(--bg) 22%, transparent); text-decoration: none; white-space: nowrap; }
+.toast.act { pointer-events: auto; }
 .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; flex: none; }
 .seg button { border: 0; background: var(--panel); padding: 6px 12px; cursor: pointer; font-weight: 600; font-size: 12px; color: var(--muted); }
 .seg button + button { border-left: 1px solid var(--line); }
@@ -525,8 +533,8 @@ input.tg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
         </span>
         <span class="sizectl" id="sizeSingle"></span>
         <span class="meta grow" id="fmtNote"></span>
-        <a class="meta" id="driveLink" target="_blank" rel="noopener">Open team folder</a>
-        <a class="meta lastexp" target="_blank" rel="noopener">Open last export</a>
+        <a class="btn drv" id="driveLink" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Team folder</a>
+        <a class="btn drv lastexp" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1"/><path d="M3 7v10a2 2 0 0 0 2 2h12.5a2 2 0 0 0 1.9-1.4L22 11H7.5a2 2 0 0 0-1.9 1.4L3 19"/></svg>Open last export</a>
         <button class="btn" id="driveOne" title="Save this export into the team's shared Google Drive folder">Save to team Drive</button>
         <button class="btn primary" id="exportOne">Export PNG</button>
       </div>
@@ -566,7 +574,7 @@ Start</textarea>
           <option value="drive" id="destDrive" disabled>Team Drive folder</option>
         </select>
         <span class="grow"></span>
-        <a class="meta lastexp" target="_blank" rel="noopener">Open last export</a>
+        <a class="btn drv lastexp" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1"/><path d="M3 7v10a2 2 0 0 0 2 2h12.5a2 2 0 0 0 1.9-1.4L22 11H7.5a2 2 0 0 0-1.9 1.4L3 19"/></svg>Open last export</a>
         <button class="btn primary" id="exportAll">Export all</button>
       </div>
     </div>
@@ -653,7 +661,12 @@ const n2 = v => +(+v).toFixed(2);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const RAD = Math.PI / 180;
 let toastT;
-function toast(msg, ms = 2600) { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), ms); }
+// act: { label, href } adds a link button to the message
+function toast(msg, ms = 2600, act) {
+  const t = $('#toast'); t.textContent = msg; t.classList.toggle('act', !!act);
+  if (act) { const a = document.createElement('a'); a.href = act.href; a.target = '_blank'; a.rel = 'noopener'; a.textContent = act.label; t.append(a); }
+  t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show', 'act'), ms);
+}
 const IMGS = new Map();
 function getImg(src) {
   if (!src) return Promise.resolve(null);
@@ -3174,7 +3187,7 @@ $('#exportAll').addEventListener('click', async e => {
       const up = progress('Uploading to the team Drive folder', files.length);
       let r; try { r = await saveToDrive(files, `${($('#prefix').value.trim() || 'cta-').replace(/-$/, '')} buttons ${stamp}`, (n, all) => { btn.textContent = `Uploading ${n}/${all}…`; up.step(n - (up.n || 0)); up.n = n; }); } finally { up.end(); }
       setLastExport(r.folderUrl, r.name);
-      toast(`Saved ${r.saved} files to "${r.name}" in the team Drive folder. Open it with "Open last export".`, 5000);
+      toast(`Saved ${r.saved} files to "${r.name}" in the team Drive folder.`, 9000, r.folderUrl && { label: 'Open folder ↗', href: r.folderUrl });
     } else if (dest === 'folder') {
       for (const f of files) { const fh = await dir.getFileHandle(f.name, { create: true }); const w = await fh.createWritable(); await w.write(f.blob); await w.close(); }
       toast(`Saved ${files.length} files to ${dir.name}`);
@@ -5194,7 +5207,12 @@ async function saveToDrive(files, subfolder, progress) {
 }
 // the Drive folder the last export went to, kept in this browser
 const STORE_LASTEXP = 'ctaforge.lastExport';
-function setLastExport(url, name) { if (!url) return; try { localStorage.setItem(STORE_LASTEXP, JSON.stringify({ url, name, at: Date.now() })); } catch (e) {} lastExpUI(); }
+let freshT;
+function setLastExport(url, name) {
+  if (!url) return; try { localStorage.setItem(STORE_LASTEXP, JSON.stringify({ url, name, at: Date.now() })); } catch (e) {} lastExpUI();
+  document.querySelectorAll('.lastexp').forEach(a => a.classList.add('fresh'));
+  clearTimeout(freshT); freshT = setTimeout(() => document.querySelectorAll('.lastexp').forEach(a => a.classList.remove('fresh')), 20000);
+}
 function lastExpUI() {
   let L = null; try { L = JSON.parse(localStorage.getItem(STORE_LASTEXP) || 'null'); } catch (e) {}
   const why = driveWhy();
@@ -5212,7 +5230,7 @@ $('#driveOne').addEventListener('click', async e => {
     const name = `${fileBases([text.replace(/\n/g, ' ')])[0]}.${fmtOne}`;
     const r = await withProgress('Saving to the team Drive folder…', async () => saveToDrive([{ name, blob: await makeBlob(it, fmtOne) }]));
     setLastExport(r.folderUrl, r.name);
-    toast(`Saved ${name} to the team Drive folder`);
+    toast(`Saved ${name} to the team Drive folder.`, 9000, r.folderUrl && { label: 'Open folder ↗', href: r.folderUrl });
   } catch (err) { toast('Could not save to the team Drive folder. Try again.', 4000); }
   finally { btn.disabled = false; }
 });
