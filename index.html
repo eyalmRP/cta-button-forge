@@ -255,6 +255,7 @@ select.sm, input.sm { padding: 6px 8px; border: 1px solid var(--line); border-ra
 .btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); font-weight: 600; }
 .btn.primary:hover { filter: brightness(1.08); }
 .btn:disabled { opacity: .5; cursor: progress; }
+.btn.off, a.off { opacity: .45; cursor: help; }
 .btn.sm { padding: 5px 10px; font-size: 12px; }
 .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; flex: none; }
 .seg button { border: 0; background: var(--panel); padding: 6px 12px; cursor: pointer; font-weight: 600; font-size: 12px; color: var(--muted); }
@@ -524,9 +525,9 @@ input.tg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
         </span>
         <span class="sizectl" id="sizeSingle"></span>
         <span class="meta grow" id="fmtNote"></span>
-        <a class="meta" id="driveLink" hidden target="_blank" rel="noopener">Open team folder</a>
-        <a class="meta lastexp" hidden target="_blank" rel="noopener">Open last export</a>
-        <button class="btn" id="driveOne" hidden title="Save this export into the team's shared Google Drive folder">Save to team Drive</button>
+        <a class="meta" id="driveLink" target="_blank" rel="noopener">Open team folder</a>
+        <a class="meta lastexp" target="_blank" rel="noopener">Open last export</a>
+        <button class="btn" id="driveOne" title="Save this export into the team's shared Google Drive folder">Save to team Drive</button>
         <button class="btn primary" id="exportOne">Export PNG</button>
       </div>
     </div>
@@ -562,10 +563,10 @@ Start</textarea>
           <option value="zip">One ZIP file</option>
           <option value="folder">Into a folder…</option>
           <option value="files">Separate files</option>
-          <option value="drive" id="destDrive" hidden disabled>Team Drive folder</option>
+          <option value="drive" id="destDrive" disabled>Team Drive folder</option>
         </select>
         <span class="grow"></span>
-        <a class="meta lastexp" hidden target="_blank" rel="noopener">Open last export</a>
+        <a class="meta lastexp" target="_blank" rel="noopener">Open last export</a>
         <button class="btn primary" id="exportAll">Export all</button>
       </div>
     </div>
@@ -5138,8 +5139,8 @@ $('#teamUrlGo').onclick = async () => {
   const url = SHEET_URL || saved;
   if (url && await connectSheet(url)) return;
   const db = window.claude?.use ? await window.claude.use('db').catch(() => null) : null;
-  if (!db) { TEAM.canConnect = !SHEET_URL; return; }
-  TEAM.kind = 'db'; TEAM.db = db;
+  if (!db) { TEAM.canConnect = !SHEET_URL; driveUI(); return; }
+  TEAM.kind = 'db'; TEAM.db = db; driveUI();
   TEAM.user = await window.claude.use('user').catch(() => null);
   if (TEAM.user) { TEAM.me = await TEAM.user.id(); TEAM.canWrite = (await TEAM.user.can('data.write')) !== false; }
   $('#gfTeam').hidden = false; $('#shareBtn').hidden = !TEAM.canWrite;
@@ -5153,13 +5154,25 @@ $('#teamUrlGo').onclick = async () => {
 })();
 
 /* team Drive folder: exported files saved for everyone (through the same Sheet web app) */
-function driveUI() {
-  const on = TEAM.kind === 'sheet';
-  $('#driveOne').hidden = !on;
-  $('#destDrive').hidden = !on; $('#destDrive').disabled = !on;
-  if (!on && $('#destSel').value === 'drive') $('#destSel').value = 'zip';
-  const a = $('#driveLink'); a.hidden = !(on && TEAM.folderUrl); if (TEAM.folderUrl) a.href = TEAM.folderUrl;
+// the Drive buttons always show; when they can't work yet they are greyed out and say why
+const TEAM_SITE = 'https://eyalmrp.github.io/cta-button-forge/';
+function driveWhy() {
+  if (TEAM.kind === 'sheet') return '';
+  if (TEAM.kind === 'db') return 'This copy uses the claude.ai library, which has no Drive folder. Team Drive works on the team site: ' + TEAM_SITE;
+  return "Not connected to the team Google Sheet yet, so there's no Drive folder. Check your internet connection and reload.";
 }
+function offLink(a, why) { a.classList.toggle('off', !!why); a.dataset.why = why || ''; if (why) { a.removeAttribute('href'); a.title = why; } }
+function driveUI() {
+  const why = driveWhy(), on = !why;
+  const b = $('#driveOne'); b.classList.toggle('off', !on); b.dataset.why = why; b.title = on ? "Save this export into the team's shared Google Drive folder" : why;
+  $('#destDrive').disabled = !on; $('#destDrive').textContent = on ? 'Team Drive folder' : 'Team Drive folder (not available here)';
+  if (!on && $('#destSel').value === 'drive') $('#destSel').value = 'zip';
+  const a = $('#driveLink'); offLink(a, on ? (TEAM.folderUrl ? '' : 'The Sheet did not send its Drive folder link. Reload the page.') : why);
+  if (on && TEAM.folderUrl) { a.href = TEAM.folderUrl; a.title = 'The shared team Drive folder'; }
+  lastExpUI();
+}
+// a greyed-out Drive button or link explains itself instead of doing nothing
+document.addEventListener('click', e => { const t = e.target.closest('.off[data-why]'); if (!t || !t.dataset.why) return; e.preventDefault(); e.stopImmediatePropagation(); toast(t.dataset.why, 6000); }, true);
 const blobB64 = blob => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(',')[1]); r.onerror = rej; r.readAsDataURL(blob); });
 // files go up a few at a time (a request has a size limit); a batch gets its own subfolder
 async function saveToDrive(files, subfolder, progress) {
@@ -5184,9 +5197,13 @@ const STORE_LASTEXP = 'ctaforge.lastExport';
 function setLastExport(url, name) { if (!url) return; try { localStorage.setItem(STORE_LASTEXP, JSON.stringify({ url, name, at: Date.now() })); } catch (e) {} lastExpUI(); }
 function lastExpUI() {
   let L = null; try { L = JSON.parse(localStorage.getItem(STORE_LASTEXP) || 'null'); } catch (e) {}
-  document.querySelectorAll('.lastexp').forEach(a => { a.hidden = !L?.url; if (L?.url) { a.href = L.url; a.title = `${L.name}, ${new Date(L.at).toLocaleString()}`; } });
+  const why = driveWhy();
+  document.querySelectorAll('.lastexp').forEach(a => {
+    offLink(a, why || (L?.url ? '' : 'Nothing exported to the team Drive from this browser yet. Use "Save to team Drive", or Save as "Team Drive folder" in Batch.'));
+    if (!a.dataset.why && L?.url) { a.href = L.url; a.title = `${L.name}, ${new Date(L.at).toLocaleString()}`; }
+  });
 }
-lastExpUI();
+driveUI();
 $('#driveOne').addEventListener('click', async e => {
   const btn = e.currentTarget; btn.disabled = true;
   try {
