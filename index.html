@@ -298,6 +298,106 @@ a.btn.drv.fresh { border-color: var(--accent); background: var(--accent-soft); c
 .stage canvas.real { outline: 1px dashed color-mix(in srgb, var(--accent) 65%, transparent); }
 .bcard canvas.real { outline: 1px dashed color-mix(in srgb, var(--accent) 65%, transparent); }
 .exportbox { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; padding: 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); }
+/* export size: size on screen, scale, empty space; batch choices */
+.exportbox.xbox { display: grid; gap: 14px; align-items: stretch; }
+.xgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.xsec { display: grid; gap: 8px; align-content: start; padding: 12px; border: 1px solid var(--line); border-radius: 10px; min-width: 0; }
+.xsec-wide { grid-column: span 2; }
+@media (max-width: 760px) { .xsec-wide { grid-column: auto; } }
+.xsec h4 { margin: 0; font-size: 13.5px; font-weight: 600; }
+.xsec h4 small { font-weight: 400; color: var(--muted); font-size: 12px; margin-left: 4px; }
+.xwh { display: flex; align-items: flex-end; gap: 8px; flex-wrap: wrap; }
+.xwh > label { display: grid; gap: 3px; font-size: 12px; color: var(--muted); }
+.xin { display: inline-flex; align-items: center; gap: 4px; border: 1px solid var(--line); border-radius: 8px; padding: 0 8px; height: 36px; background: var(--panel); }
+.xin input { width: 64px; border: 0; background: none; color: var(--fg); font: 600 15px var(--mono); outline: none; padding: 0; }
+.xin i { font-style: normal; color: var(--muted); font-size: 12px; }
+.xin:focus-within { border-color: var(--accent); }
+.xlink { width: 36px; height: 36px; border-radius: 8px; display: grid; place-items: center; cursor: pointer; border: 1px solid var(--accent); background: var(--accent-soft); color: var(--accent); padding: 0; }
+.xlink svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+.xlink .lk-off, .xlink.off .lk-on { display: none; }
+.xlink.off .lk-off { display: block; }
+.xlink.off { border-color: #e0a64a; background: #fff4e5; color: #a35b00; }
+.xwarn { background: #fff4e5; border: 1px solid #f0c27a; color: #6b4200; border-radius: 8px; padding: 7px 10px; font-size: 12.5px; line-height: 1.4; }
+.xchips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { height: 30px; padding: 0 11px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel); color: var(--fg); font-size: 12px; cursor: pointer; }
+.chip[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.xscale { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.xscale button { display: grid; justify-items: center; gap: 2px; padding: 6px 2px 7px; border: 1px solid var(--line); border-radius: 9px; background: var(--panel); color: var(--fg); cursor: pointer; }
+.xscale button b { font-size: 15px; }
+.xscale button small { font: 500 10px var(--mono); color: var(--muted); }
+.xscale svg { width: 48px; height: 26px; }
+.xscale svg rect { fill: var(--sunk); stroke: var(--muted); stroke-width: 1.2; }
+.xscale button[aria-pressed="true"] { border: 2px solid var(--accent); background: var(--accent-soft); padding: 5px 1px 6px; }
+.xscale button[aria-pressed="true"] svg rect { fill: color-mix(in srgb, var(--accent) 20%, transparent); stroke: var(--accent); }
+.xspace span { display: grid; gap: 1px; }
+.xspace small { color: var(--muted); font-size: 12px; }
+.xinfo { display: flex; gap: 16px; align-items: center; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; flex-wrap: wrap; }
+.xi-txt { display: grid; gap: 3px; flex: 1; min-width: 200px; }
+.xi-h { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.xi-name { font-family: var(--mono); font-size: 13.5px; }
+.xi-px { font: 700 21px var(--mono); color: var(--accent); }
+.xi-edge { display: grid; gap: 4px; justify-items: center; }
+.xi-edge > div { display: flex; gap: 8px; }
+.xi-edge figure { margin: 0; display: grid; gap: 3px; justify-items: center; }
+.xi-edge canvas { border: 1px solid var(--line); border-radius: 8px; background: #ffffff; }
+.xi-edge figcaption { font: 600 11px var(--mono); color: var(--muted); }
+.xi-edge figcaption.mine { color: var(--accent); }
+.xrow { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; }
+.xrow .grow { flex: 1; }
+.flash { animation: xflash 1.3s ease-out 2; border-color: var(--accent) !important; }
+@keyframes xflash { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 60%, transparent); background: var(--accent-soft); } 60% { box-shadow: 0 0 0 12px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
+.xmodes { display: grid; gap: 8px; }
+.xmode { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); }
+.xmode.on { border: 2px solid var(--accent); background: var(--accent-soft); }
+.xmode > button { display: flex; gap: 12px; align-items: center; width: 100%; padding: 8px 10px; border: 0; background: none; color: var(--fg); text-align: left; cursor: pointer; border-radius: 10px; }
+.xmode > button span { display: grid; gap: 1px; }
+.xmode > button small { color: var(--muted); font-size: 12px; line-height: 1.35; }
+.xmode svg { width: 58px; height: 49px; flex: none; }
+.xmode svg .mb { fill: #3f4fe6; }
+.xmode svg .mt { fill: #ffffff; }
+.xfit { margin: 0 10px 9px 80px; }
+.xfit button { padding: 4px 10px; font-size: 12px; }
+.xmode.on .xfit button[aria-pressed="true"] { background: var(--accent); color: #ffffff; }
+/* guides: purple = the button, orange dashed = with effects */
+.gbox { position: relative; display: inline-block; line-height: 0; }
+.gbox.on { margin: 30px 34px; }
+.gbox.space canvas { outline: 2px dashed color-mix(in srgb, var(--accent) 70%, transparent); outline-offset: 0; }
+.gd { position: absolute; pointer-events: none; box-sizing: border-box; line-height: 1; }
+.gd.gbtn { outline: 2px solid #6d3df2; outline-offset: 1px; }
+.gd.gfx { border: 2px dashed #e8590c; }
+.gdim { display: grid; place-items: center; }
+.gdim.gh { height: 18px; }
+.gdim.gv { width: 18px; }
+.gdim span { font: 600 10.5px var(--mono); color: #ffffff; padding: 2px 5px; border-radius: 4px; white-space: nowrap; position: relative; z-index: 1; }
+.gdim.gp span { background: #6d3df2; } .gdim.go span { background: #e8590c; }
+.gdim.gp.gh { border-left: 1.5px solid #6d3df2; border-right: 1.5px solid #6d3df2; background: linear-gradient(#6d3df2, #6d3df2) center / 100% 1.5px no-repeat; }
+.gdim.gp.gv { border-top: 1.5px solid #6d3df2; border-bottom: 1.5px solid #6d3df2; background: linear-gradient(#6d3df2, #6d3df2) center / 1.5px 100% no-repeat; }
+.gdim.go.gh { border-left: 1.5px solid #e8590c; border-right: 1.5px solid #e8590c; background: linear-gradient(#e8590c, #e8590c) center / 100% 1.5px no-repeat; }
+.gdim.go.gv { border-top: 1.5px solid #e8590c; border-bottom: 1.5px solid #e8590c; background: linear-gradient(#e8590c, #e8590c) center / 1.5px 100% no-repeat; }
+.glegend { display: inline-flex; gap: 12px; font-size: 12px; }
+.glegend > span { display: inline-flex; align-items: center; gap: 6px; }
+.glegend i { width: 14px; border-top: 2px solid #6d3df2; }
+.glegend .lgo i { border-top: 2px dashed #e8590c; }
+.glegend .lgp { color: #5b3fd0; } .glegend .lgo { color: #b4500f; }
+.bcard .img:has(.gbox.on) { padding: 4px 6px; }
+/* the file at real size, under the preview */
+.fileview { border: 1px solid var(--line); border-radius: 12px; background: var(--panel); overflow: hidden; }
+.fv-head { display: flex; align-items: baseline; gap: 10px; width: 100%; padding: 9px 12px; border: 0; background: none; color: var(--fg); text-align: left; cursor: pointer; flex-wrap: wrap; }
+.fv-head svg { width: 12px; height: 12px; fill: none; stroke: var(--muted); stroke-width: 1.6; stroke-linecap: round; transform: rotate(-90deg); transition: transform .2s; align-self: center; }
+.fileview.open .fv-head svg { transform: none; }
+.fv-px { font: 600 12.5px var(--mono); color: var(--accent); }
+.fv-note { margin-left: auto; font-size: 12px; color: var(--muted); }
+.fv-body { overflow: auto; transition: height .25s ease; border-top: 1px solid var(--line); background-color: var(--check-a); background-image: linear-gradient(45deg, var(--check-b) 25%, transparent 25%, transparent 75%, var(--check-b) 75%), linear-gradient(45deg, var(--check-b) 25%, transparent 25%, transparent 75%, var(--check-b) 75%); background-size: 16px 16px; background-position: 0 0, 8px 8px; }
+.fileview:not(.open) .fv-body { border-top: 0; }
+.fv-in { min-width: 100%; min-height: 100%; width: max-content; box-sizing: border-box; padding: 14px; display: grid; place-items: center; }
+.fv-file { position: relative; line-height: 0; outline: 2px solid var(--accent); }
+.fv-file canvas { display: block; max-width: none; }
+.fv-ghost { position: absolute; border: 1px dashed #8a92a3; box-sizing: border-box; pointer-events: none; }
+.fv-ghost span { position: absolute; left: 3px; top: 3px; font: 600 10px/1 var(--mono); color: #5b6375; background: rgba(255,255,255,.8); padding: 1px 3px; border-radius: 3px; }
+.fv-grip { height: 12px; display: grid; place-items: center; cursor: ns-resize; touch-action: none; border-top: 1px solid var(--line); }
+.fv-grip span { width: 44px; height: 4px; border-radius: 2px; background: var(--line); }
+.fv-grip:hover span, .fv-grip.drag span { background: var(--accent); }
+.fv-grip:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 
 /* gallery */
 .lib { border-top: 1px solid var(--line); padding-block: 14px 28px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 12px; }
@@ -522,22 +622,55 @@ input.tg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
           <button data-bg="#0d0e12" aria-pressed="false" title="Black" style="background:#0d0e12"></button>
           <input type="color" id="bg-custom" value="#2b6cb0" title="Custom background" aria-label="Custom background">
         </div>
-        <span class="seg" role="group" aria-label="Preview size"><button data-spv="design" aria-pressed="true" title="Your design at 1×, with zoom">Design size</button><button data-spv="real" aria-pressed="false" title="Exactly what the export will contain, pixel for pixel">Real export size</button></span>
+        <label class="chk"><input type="checkbox" class="guidesChk" checked>Guides</label><span class="glegend"><span class="lgp"><i></i>Button</span><span class="lgo"><i></i>With effects</span></span>
         <label class="zoom" for="zoom">Zoom <input type="range" id="zoom" min="0.5" max="3" step="0.25" value="1"><span class="meta" id="zoomOut">100%</span></label>
         <span class="meta grow" id="sizeOut"></span>
         <button class="btn sm pinbtn" id="pinBtn" aria-pressed="true">Unpin preview</button>
       </div>
-      <div class="exportbox">
+      <section class="fileview" id="fileView" aria-label="The exported file at real size">
+        <button type="button" class="fv-head" id="fvHead" aria-expanded="true" aria-controls="fvBody"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5"/></svg><b>The file</b><span class="fv-px" id="fvPx"></span><span class="fv-note" id="fvNote"></span></button>
+        <div class="fv-body" id="fvBody"><div class="fv-in" id="fvWrap"></div></div>
+        <div class="fv-grip" id="fvGrip" role="separator" aria-orientation="horizontal" aria-label="Drag to make the file view taller or shorter (arrow keys work too)" tabindex="0"><span></span></div>
+      </section>
+      <div class="exportbox xbox">
+        <div class="xgrid">
+          <section class="xsec">
+            <h4>Size on screen</h4>
+            <div class="note-sm" id="xHelpWrap">The size you'd give it in Figma or on the page. <span id="xHelp"></span></div>
+            <div class="xwh">
+              <label>Width<span class="xin"><input type="number" id="xW" min="1" step="1"><i>px</i></span></label>
+              <button type="button" class="xlink" id="xLink" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true" class="lk-on"><path d="M9 15 15 9"/><path d="M11 6.5 12.5 5a3.5 3.5 0 0 1 5 5L16 11.5"/><path d="M13 17.5 11.5 19a3.5 3.5 0 0 1-5-5L8 12.5"/></svg><svg viewBox="0 0 24 24" aria-hidden="true" class="lk-off"><path d="M11 6.5 12.5 5a3.5 3.5 0 0 1 5 5L16 11.5"/><path d="M13 17.5 11.5 19a3.5 3.5 0 0 1-5-5L8 12.5"/><path d="M4 4l3 3M20 20l-3-3"/></svg></button>
+              <label>Height<span class="xin"><input type="number" id="xH" min="1" step="1"><i>px</i></span></label>
+            </div>
+            <div class="xwarn" id="xWarn" hidden></div>
+            <div class="xchips" id="xChips"></div>
+          </section>
+          <section class="xsec">
+            <h4>Scale <small>more pixels, same size on screen</small></h4>
+            <div class="xscale" id="xScale" role="group" aria-label="Scale"></div>
+            <div class="note-sm" id="xScaleNote"></div>
+          </section>
+          <section class="xsec">
+            <label class="chk xspace"><input type="checkbox" id="xSpace"><span><b>Add empty space around it</b><small>The image gets a size you choose, with the button in the middle.</small></span></label>
+            <div class="xwh" id="xSpaceRow" hidden><span class="note-sm">Image size</span><span class="xin"><input type="number" id="xSW" min="1" step="1" aria-label="Image width"></span>×<span class="xin"><input type="number" id="xSH" min="1" step="1" aria-label="Image height"><i>px</i></span></div>
+            <div class="xwarn" id="xSpaceWarn" hidden></div>
+          </section>
+        </div>
+        <div class="xinfo" id="xInfo">
+          <div class="xi-txt"><span class="xi-h">Export</span><b class="xi-name" id="xName"></b><span class="xi-px" id="xPx"></span><span class="note-sm" id="xStory"></span><span class="note-sm" id="fmtNote"></span></div>
+          <div class="xi-edge"><div><figure><canvas id="xL0"></canvas><figcaption id="xL0c"></figcaption></figure><figure><canvas id="xL1"></canvas><figcaption id="xL1c"></figcaption></figure></div><span class="note-sm">Edge, zoomed in</span></div>
+        </div>
+        <div class="xrow">
         <span class="seg" role="group" aria-label="Format">
           <button data-fmt="png" aria-pressed="true">PNG</button>
           <button data-fmt="svg" aria-pressed="false">SVG (vector)</button>
         </span>
-        <span class="sizectl" id="sizeSingle"></span>
-        <span class="meta grow" id="fmtNote"></span>
+        <span class="grow"></span>
         <a class="btn drv teamfolder" id="driveLink" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Team folder</a>
         <a class="btn drv lastexp" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1"/><path d="M3 7v10a2 2 0 0 0 2 2h12.5a2 2 0 0 0 1.9-1.4L22 11H7.5a2 2 0 0 0-1.9 1.4L3 19"/></svg>Open last export</a>
         <button class="btn" id="driveOne" title="Save this export into the team's shared Google Drive folder">Save to team Drive</button>
         <button class="btn primary" id="exportOne">Export PNG</button>
+        </div>
       </div>
     </div>
 
@@ -553,14 +686,28 @@ Start</textarea>
           <div class="note">One button per line, all with the current design. Use <b>|</b> inside a line for a line break, e.g. <code>Your next|move?</code></div>
         </div>
         <div style="display:grid;gap:10px;min-width:0">
-          <div class="bhead">
+          <div class="bhead" id="bFiles">
+            <label class="chk"><input type="checkbox" class="guidesChk" checked>Guides</label><span class="glegend"><span class="lgp"><i></i>Button</span><span class="lgo"><i></i>With effects</span></span>
             <span class="seg" role="group" aria-label="Preview size"><button data-pv="fit" aria-pressed="true">Fit to card</button><button data-pv="real" aria-pressed="false">Real size</button></span>
             <span class="meta" id="bSummary"></span>
           </div>
           <div class="bgrid" id="bgrid"></div>
         </div>
       </div>
-      <div class="exportbox"><span class="sizectl" id="sizeBatch"></span></div>
+      <div class="exportbox xbox" id="sizeBatch">
+        <div class="xgrid">
+          <section class="xsec xsec-wide">
+            <h4>Texts are different lengths. Should the buttons…</h4>
+            <div class="xmodes" id="xModes"></div>
+          </section>
+          <section class="xsec">
+            <h4 id="xBQ"></h4>
+            <div class="xwh"><span class="xin"><input type="number" id="xB" min="1" step="1"><i>px</i></span><span class="note-sm" id="xBHint"></span></div>
+            <h4 style="margin-top:8px">Scale <small>more pixels, same size on screen</small></h4>
+            <div class="xscale" id="xScaleB" role="group" aria-label="Scale"></div>
+          </section>
+        </div>
+      </div>
       <div class="exportbox">
         <span class="meta" id="batchCount"></span>
         <label class="chk"><input type="checkbox" id="bPng" checked>PNG</label>
@@ -2943,33 +3090,6 @@ function requestRender() {
   if (view === 'batch') { clearTimeout(batchTimer); batchTimer = setTimeout(renderBatch, 150); }
   updBatchHint();
 }
-let spv = 'design';
-document.querySelectorAll('[data-spv]').forEach(b => b.onclick = () => {
-  spv = b.dataset.spv;
-  document.querySelectorAll('[data-spv]').forEach(x => x.setAttribute('aria-pressed', x === b));
-  $('#zoom').disabled = spv === 'real';
-  renderSingle();
-});
-async function renderSingle() {
-  const my = ++seq;
-  if (spv === 'real') {
-    const [it] = await planExport([$('#ctaText').value]);
-    const cv = await renderItem(it);
-    if (my !== seq) return;
-    cv.style.width = cv.width + 'px'; cv.classList.add('real');
-    $('#stage').replaceChildren(cv);
-    $('#sizeOut').textContent = `Real export size: file ${cv.width} × ${cv.height}px, shown 1 file pixel per screen pixel`;
-    updateSizeInfo();
-    return;
-  }
-  const S = Math.min(6, (window.devicePixelRatio || 1) * zoom);
-  const r = await renderButton(D, $('#ctaText').value, S);
-  if (my !== seq) return;
-  r.canvas.style.width = (r.canvas.width / S * zoom) + 'px';
-  $('#stage').replaceChildren(r.canvas);
-  $('#sizeOut').textContent = `${D.box.on ? 'Button' : 'Text'} ${r.w} × ${r.h}px at design size`;
-  updateSizeInfo();
-}
 function batchLines() { return $('#batchText').value.split('\n').map(s => s.trim()).filter(Boolean); }
 function updBatchHint() { const n = batchLines().length; $('#batchHint').textContent = n ? `${n} text${n > 1 ? 's' : ''} → ${n} button${n > 1 ? 's' : ''}, same design` : 'Many texts, same design, one export'; }
 function fileBases(lines) {
@@ -2981,72 +3101,61 @@ function fileBases(lines) {
   });
 }
 /* ================= export sizing ================= */
-const EXP = { mode: 'scale', scale: 2, H: 80, W: 320, FW: 600, FH: 200, pad: 0, ruleH: 'line', ruleW: 'widest', frameRule: 'each', measure: 'button' };
-try { Object.assign(EXP, JSON.parse(localStorage.getItem('ctaforge.export') || '{}')); } catch (e) {}
-function sizeCtlHTML(batch) {
-  return `<label class="meta">Size by <select class="sm" data-exp="mode"><option value="scale">Scale</option><option value="height">Height</option><option value="width">Width</option><option value="frame">Frame W × H</option></select></label>
-  <span data-show="scale"><select class="sm" data-exp="scale" aria-label="Scale"><option value="1">1× (design size)</option><option value="2">2× (retina)</option><option value="3">3×</option><option value="4">4×</option></select></span>
-  <span data-show="height"><input type="number" class="sm" data-exp="H" min="1" step="1" aria-label="Height in px"><span class="meta">px high</span></span>
-  <span data-show="width"><input type="number" class="sm" data-exp="W" min="1" step="1" aria-label="Width in px"><span class="meta">px wide</span></span>
-  <span data-show="frame"><input type="number" class="sm" data-exp="FW" min="1" step="1" aria-label="Frame width"><span class="meta">×</span><input type="number" class="sm" data-exp="FH" min="1" step="1" aria-label="Frame height"><span class="meta">px, padding</span><input type="number" class="sm" data-exp="pad" min="0" step="1" aria-label="Frame padding" style="width:60px"></span>
-  ${batch ? `<span data-show="height"><select class="sm" data-exp="ruleH" aria-label="Height rule"><option value="line">One line = H (same text size)</option><option value="each">Every file exactly H</option></select></span>
-  <span data-show="width"><select class="sm" data-exp="ruleW" aria-label="Width rule"><option value="widest">Widest = W (same text size)</option><option value="equal">All buttons W wide (same text size)</option><option value="fit">All W wide, shrink long texts</option><option value="each">Every file exactly W</option></select></span>
-  <span data-show="frame"><select class="sm" data-exp="frameRule" aria-label="Frame rule"><option value="each">Fit each in the frame</option><option value="shared">Same text size in every frame</option></select></span>` : ''}
-  <span data-show="height width"><select class="sm" data-exp="measure" aria-label="What the size applies to"><option value="button">Size = the button</option><option value="image">Size = whole image with effects</option></select></span>`;
+// Single: the button's size on screen (linked to its shape, or width and height apart), a scale for more pixels,
+// and optional empty space around it. Batch: how buttons with longer texts behave, one size, and a scale.
+const EXP = { k: 2, by: 'design', v: 0, linked: true, uW: 240, uH: 66, space: false, SW: 600, SH: 200,
+  bmode: 'grow', fit: 'shrink', BH: 56, BW: 200, guides: true, fileOpen: true, fileH: 260 };
+try {
+  const o = JSON.parse(localStorage.getItem('ctaforge.export2') || 'null');
+  if (o) Object.assign(EXP, o);
+  else { const old = JSON.parse(localStorage.getItem('ctaforge.export') || '{}'); if (old.mode === 'scale' && old.scale) EXP.k = Math.min(4, Math.max(1, Math.round(old.scale))); }
+} catch (e) {}
+EXP.fileOpen = EXP.k > 1;
+function saveExp() { try { localStorage.setItem('ctaforge.export2', JSON.stringify(EXP)); } catch (e) {} }
+const tfOn = d => !!(d.tf && (d.tf.rot || d.tf.skewX || d.tf.tiltX || d.tf.tiltY));
+// size at 1×: the button (w, h), the whole image with effects (ow, oh) and where the button sits in it (bx, by)
+async function meas(d, t) { const r = await renderButton(d, t, 1); return { w: r.w, h: r.h, ow: r.outW, oh: r.outH, bx: tfOn(d) ? null : r.M - r.ox, by: tfOn(d) ? null : r.M - r.oy }; }
+// a copy of d whose button is tw wide: extra room at the sides, or smaller letters when the text needs more
+async function fitWidth(d, t, tw, m) {
+  const out = clone(d); out.box.minW = Math.max(d.box.minW, tw);
+  if (m.w <= tw + 0.5) return out;
+  const cr = capRatio(d.font), inner = Math.max(1, tw - 2 * d.box.padX);
+  let f = inner / Math.max(1, m.w - 2 * d.box.padX);
+  const setF = () => { out.font.size = d.font.size * f; out.box.padY = d.box.padY + (d.font.size - out.font.size) * cr / 2; };
+  setF(); const r = await meas(out, t);
+  if (r.w > tw + 0.5) { f *= inner / Math.max(1, r.w - 2 * d.box.padX); setF(); }
+  return out;
 }
-function syncExp() {
-  document.querySelectorAll('[data-exp]').forEach(el => { if (document.activeElement !== el) el.value = EXP[el.dataset.exp]; });
-  document.querySelectorAll('.sizectl [data-show]').forEach(el => el.hidden = !el.dataset.show.split(' ').includes(EXP.mode));
-}
-$('#sizeSingle').innerHTML = sizeCtlHTML(false);
-$('#sizeBatch').innerHTML = sizeCtlHTML(true);
-document.addEventListener('input', e => {
-  const k = e.target.dataset?.exp; if (!k) return;
-  const v = e.target.value;
-  if (['H', 'W', 'FW', 'FH', 'pad', 'scale'].includes(k)) { const n = parseFloat(v); if (isNaN(n) || n < (k === 'pad' ? 0 : 1)) return; EXP[k] = n; } else EXP[k] = v;
-  try { localStorage.setItem('ctaforge.export', JSON.stringify(EXP)); } catch (err) {}
-  syncExp(); updateSizeInfo(); if (view === 'single' && spv === 'real') requestRender(); if (view === 'batch') { clearTimeout(batchTimer); batchTimer = setTimeout(renderBatch, 200); }
-});
-async function meas(d, t) { const r = await renderButton(d, t, 1); return { w: r.w, h: r.h, ow: r.outW, oh: r.outH }; }
-// Work out, for each text, which design copy to render and at what scale.
+// one export: f = screen pixels per design pixel, k = file pixels per design pixel
 async function planExport(texts) {
-  const E = EXP, M = [];
-  for (const t of texts) M.push(await meas(D, t));
-  const mw = m => E.measure === 'button' ? m.w : m.ow, mh = m => E.measure === 'button' ? m.h : m.oh;
-  const same = k => texts.map((t, i) => ({ t, d: D, k, m: M[i] }));
-  if (E.mode === 'scale') return same(E.scale);
-  if (E.mode === 'height') {
-    if (E.ruleH === 'each') return texts.map((t, i) => ({ t, d: D, k: E.H / mh(M[i]), m: M[i], exact: { h: E.H } }));
-    return same(E.H / mh(await meas(D, 'H')));
-  }
-  if (E.mode === 'frame') {
-    const aw = Math.max(1, E.FW - 2 * E.pad), ah = Math.max(1, E.FH - 2 * E.pad);
-    const ks = M.map(m => Math.min(aw / m.ow, ah / m.oh)), kMin = Math.min(...ks);
-    return texts.map((t, i) => ({ t, d: D, k: E.frameRule === 'shared' ? kMin : ks[i], m: M[i], frame: { W: E.FW, H: E.FH } }));
-  }
-  // width
-  if (E.ruleW === 'each') return texts.map((t, i) => ({ t, d: D, k: E.W / mw(M[i]), m: M[i], exact: { w: E.W } }));
-  if (E.ruleW === 'widest' || !D.box.on) return same(E.W / Math.max(...M.map(mw)));
-  if (E.ruleW === 'equal') {
+  const t = texts[0], m0 = await meas(D, t), K = EXP.k;
+  let d = D, f = 1, m = m0;
+  if (!EXP.linked) { f = EXP.uH / m0.h; d = await fitWidth(D, t, EXP.uW / f, m0); m = await meas(d, t); }
+  else if (EXP.by === 'w' && EXP.v > 0) f = EXP.v / m0.w;
+  else if (EXP.by === 'h' && EXP.v > 0) f = EXP.v / m0.h;
+  const it = { t, d, k: f * K, m, m0, f };
+  if (EXP.space) it.frame = { W: Math.round(EXP.SW * K), H: Math.round(EXP.SH * K) };
+  return [it];
+}
+// split a text into two lines of about the same length
+const wrap2 = t => { const w = t.split(' '); if (w.length < 2) return t; let best = t, diff = 1e9; for (let i = 1; i < w.length; i++) { const a = w.slice(0, i).join(' '), b = w.slice(i).join(' '); if (Math.abs(a.length - b.length) < diff) { diff = Math.abs(a.length - b.length); best = a + '\n' + b; } } return best; };
+async function planBatch(texts) {
+  const K = EXP.k, M = []; for (const t of texts) M.push(await meas(D, t));
+  if (EXP.bmode === 'grow') { const f = EXP.BH / (await meas(D, 'H')).h; return texts.map((t, i) => ({ t, d: D, k: f * K, m: M[i], f })); }
+  if (EXP.bmode === 'widest' || !D.box.on) {
     const d2 = clone(D); d2.box.minW = Math.max(D.box.minW, ...M.map(m => m.w));
     const M2 = []; for (const t of texts) M2.push(await meas(d2, t));
-    const k = E.W / Math.max(...M2.map(mw));
-    return texts.map((t, i) => ({ t, d: d2, k, m: M2[i] }));
+    const f = EXP.BW / Math.max(...M2.map(m => m.w));
+    return texts.map((t, i) => ({ t, d: d2, k: f * K, m: M2[i], f }));
   }
-  // fit: the median text sets the box width; longer texts get a smaller font, same button height
-  const ws = M.map(m => m.w).sort((a, b) => a - b), ref = ws[Math.floor((ws.length - 1) / 2)];
-  const base = clone(D); base.box.minW = Math.max(D.box.minW, ref);
-  const cr = capRatio(D.font), inner = Math.max(1, ref - 2 * D.box.padX), out = [];
+  // all the same width: the middle-length text sets the width; longer ones wrap or get smaller letters
+  const ws = M.map(m => m.w).sort((a, b) => a - b), ref = ws[Math.floor((ws.length - 1) / 2)], f = EXP.BW / ref, out = [];
   for (let i = 0; i < texts.length; i++) {
-    let di = base;
-    if (M[i].w > ref + 0.5) {
-      di = clone(base); let f = inner / Math.max(1, M[i].w - 2 * D.box.padX);
-      const setF = () => { di.font.size = D.font.size * f; di.box.padY = D.box.padY + (D.font.size - di.font.size) * cr / 2; };
-      setF(); const r = await meas(di, texts[i]);
-      if (r.w > ref + 0.5) { f *= inner / Math.max(1, r.w - 2 * D.box.padX); setF(); }
-    }
-    const m = await meas(di, texts[i]);
-    out.push({ t: texts[i], d: di, k: E.W / mw(m), m, exact: { w: E.W } });
+    let t = texts[i], m = M[i], note = '';
+    if (m.w > ref + 0.5 && EXP.fit === 'wrap' && !/[\n|]/.test(t)) { const t2 = wrap2(t); if (t2 !== t) { t = t2; m = await meas(D, t); note = 'wrapped to 2 lines'; } }
+    if (m.w > ref + 0.5) note = note ? 'wrapped, letters smaller' : 'letters smaller to fit';
+    const d = await fitWidth(D, t, ref, m);
+    out.push({ t, d, k: f * K, m: await meas(d, t), f, note });
   }
   return out;
 }
@@ -3067,17 +3176,198 @@ async function renderItem(it) {
   }
   return c;
 }
+/* ----- export size controls ----- */
+// each scale button holds a drawing of its file, all four drawn to the same scale
+function scaleBtns(ow, oh, withPx) {
+  const r = Math.min(1, oh / Math.max(1, ow));
+  return [1, 2, 3, 4].map(v => {
+    const rw = 12 * v, rh = Math.max(3, Math.round(rw * r * 1.3));
+    return `<button type="button" data-xk="${v}" aria-pressed="${EXP.k === v}"><svg viewBox="0 0 56 30" aria-hidden="true"><rect x="${(56 - rw) / 2}" y="${30 - rh}" width="${rw}" height="${rh}" rx="2"/></svg><b>${v}×</b>${withPx ? `<small>${Math.round(ow * v)}×${Math.round(oh * v)}</small>` : ''}</button>`;
+  }).join('');
+}
+const SCALE_NOTE = { 1: 'Fine on most computer screens. On phones and Retina screens it can look soft.', 2: 'The usual choice: crisp on phones and Retina screens.', 3: 'For zooming in, large displays or print. Bigger files.', 4: 'For zooming in, large displays or print. Bigger files.' };
+// the batch choices: three buttons drawn with white "text" lines (short, long, short)
+function modeIcon(mode, fit) {
+  const ws = mode === 'grow' ? [24, 60, 30] : mode === 'widest' ? [60, 60, 60] : [38, 38, 38], tw = [12, mode === 'same' ? (fit === 'wrap' ? 26 : 28) : 48, 18];
+  let y = mode === 'same' && fit === 'wrap' ? 1 : 3, out = '';
+  for (let i = 0; i < 3; i++) {
+    const tall = mode === 'same' && fit === 'wrap' && i === 1, h = tall ? 21 : 13, x = (64 - ws[i]) / 2;
+    out += `<rect x="${x}" y="${y}" width="${ws[i]}" height="${h}" rx="${tall ? 7 : h / 2}" class="mb"/>`;
+    if (tall) out += `<rect x="19" y="${y + 5}" width="26" height="3" rx="1" class="mt"/><rect x="24" y="${y + 12}" width="16" height="3" rx="1" class="mt"/>`;
+    else { const lh = mode === 'same' && fit === 'shrink' && i === 1 ? 2 : 3; out += `<rect x="${32 - tw[i] / 2}" y="${y + (h - lh) / 2}" width="${tw[i]}" height="${lh}" rx="1" class="mt"/>`; }
+    y += h + 4;
+  }
+  return `<svg viewBox="0 0 64 54" aria-hidden="true">${out}</svg>`;
+}
+const MODES = [
+  ['grow', 'Grow with the text', () => 'Same height and text size. Long texts make wider buttons.'],
+  ['same', 'All the same width', () => EXP.fit === 'wrap' ? 'Long texts wrap onto 2 lines, so those buttons get taller.' : 'Long texts get smaller letters to fit.'],
+  ['widest', 'All as wide as the longest', () => 'Same text size; short texts get extra room.'],
+];
+function syncBatchExp() {
+  $('#xModes').innerHTML = MODES.map(([v, name, note]) => `<div class="xmode${EXP.bmode === v ? ' on' : ''}"><button type="button" data-bm="${v}" aria-pressed="${EXP.bmode === v}">${modeIcon(v, EXP.fit)}<span><b>${name}</b><small>${note()}</small></span></button>` +
+    (v === 'same' ? `<span class="seg xfit" role="group" aria-label="Long text"><button type="button" data-fit="shrink" aria-pressed="${EXP.fit === 'shrink'}">Shrink text</button><button type="button" data-fit="wrap" aria-pressed="${EXP.fit === 'wrap'}">Wrap text</button></span>` : '') + `</div>`).join('');
+  const grow = EXP.bmode === 'grow';
+  $('#xBQ').textContent = grow ? 'How tall are the buttons on screen?' : EXP.bmode === 'widest' ? 'How wide is the longest button?' : 'How wide are the buttons?';
+  $('#xBHint').textContent = grow ? 'Widths follow each text.' : 'Heights follow the shape.';
+  const xb = $('#xB'); xb.setAttribute('aria-label', $('#xBQ').textContent); if (document.activeElement !== xb) xb.value = grow ? EXP.BH : EXP.BW;
+}
+function flash(el) { if (!el) return; el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); }
+// a rounded edge, zoomed in, drawn with k pixels per screen pixel (smoothed like a real PNG)
+function drawLoupe(cv, k) {
+  const css = 84, dpr = window.devicePixelRatio || 1; cv.width = cv.height = Math.round(css * dpr); cv.style.width = cv.style.height = css + 'px';
+  const c = cv.getContext('2d'), N = 7 * k, s = cv.width / N, R = N * 0.95;
+  c.clearRect(0, 0, cv.width, cv.height); c.fillStyle = '#3a49e8';
+  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+    let a = 0; for (const [dx, dy] of [[.25, .25], [.75, .25], [.25, .75], [.75, .75]]) { const px = x + dx - N, py = y + dy - N; if (px * px + py * py <= R * R) a += .25; }
+    if (a) { c.globalAlpha = a; c.fillRect(Math.floor(x * s), Math.floor(y * s), Math.ceil(s), Math.ceil(s)); }
+  }
+  c.globalAlpha = 1;
+}
+// guides over a preview: purple = the button, orange = with effects (only when that is bigger); labels in screen px
+function guideLayer(host, g) {
+  if (!EXP.guides) return;
+  const add = (cls, st, label) => { const el = document.createElement('div'); el.className = 'gd ' + cls; Object.assign(el.style, st); if (label != null) { const s = document.createElement('span'); s.textContent = label; el.append(s); } host.append(el); };
+  const px = v => Math.round(v * 10) / 10 + 'px', { css, ox, oy, m, f } = g;
+  const bw = Math.round(m.w * f), bh = Math.round(m.h * f), fw = Math.round(m.ow * f), fh = Math.round(m.oh * f);
+  if (m.bx != null) {
+    const L = ox + m.bx * css, T = oy + m.by * css, W = m.w * css, H = m.h * css;
+    add('gbtn', { left: px(L), top: px(T), width: px(W), height: px(H) });
+    add('gdim gp gh', { left: px(L), top: px(T - 26), width: px(W) }, bw);
+    add('gdim gp gv', { left: px(L + W + 8), top: px(T), height: px(H) }, bh);
+  }
+  if (fw !== bw || fh !== bh || m.bx == null) {
+    const W = m.ow * css, H = m.oh * css;
+    add('gfx', { left: px(ox), top: px(oy), width: px(W), height: px(H) });
+    add('gdim go gh', { left: px(ox), top: px(oy + H + 8), width: px(W) }, `${fw} with effects`);
+    add('gdim go gv', { left: px(ox - 26), top: px(oy), height: px(H) }, fh);
+  }
+}
+function updLegend(hasFx) {
+  document.querySelectorAll('.glegend').forEach(l => { l.hidden = !EXP.guides; const o = l.querySelector('.lgo'); if (o) o.hidden = !hasFx; });
+  document.querySelectorAll('.guidesChk').forEach(c => c.checked = EXP.guides);
+}
 let sizeTimer, sizeSeq = 0;
 function updateSizeInfo() {
   clearTimeout(sizeTimer);
   sizeTimer = setTimeout(async () => {
     const my = ++sizeSeq, text = $('#ctaText').value;
     const [it] = await planExport([text]); if (my !== sizeSeq) return;
-    const e = estimate(it);
-    const m = it.m;
-    document.querySelectorAll('#sizeSingle [data-exp="scale"] option').forEach(o => { const n = +o.value; o.textContent = `${n}× · ${Math.round(m.ow * n)} × ${Math.round(m.oh * n)}px${n === 1 ? ' (design size)' : n === 2 ? ' (retina)' : ''}`; });
-    $('#fmtNote').innerHTML = `File <b>${e.fw} × ${e.fh}px</b> · ${D.box.on ? 'button' : 'text box'} ${e.bw} × ${e.bh} · text ${e.font}px` + (fmtOne === 'svg' ? (D.tf.tiltX || D.tf.tiltY ? '<br>Tilt has no vector form, so this SVG holds a sharp image of the tilted button.' : '<br>Vector shapes and editable text. Install the font where you open it.') : '');
-  }, 180);
+    const e = estimate(it), m = it.m, f = it.f, K = EXP.k;
+    const sw = Math.round(m.w * f), sh = Math.round(m.h * f);
+    const ow = it.frame ? EXP.SW : Math.round(m.ow * f), oh = it.frame ? EXP.SH : Math.round(m.oh * f);
+    const xW = $('#xW'), xH = $('#xH');
+    if (document.activeElement !== xW) xW.value = EXP.linked ? sw : EXP.uW;
+    if (document.activeElement !== xH) xH.value = EXP.linked ? sh : EXP.uH;
+    const lk = $('#xLink'); lk.setAttribute('aria-pressed', EXP.linked); lk.classList.toggle('off', !EXP.linked);
+    lk.title = lk.ariaLabel = EXP.linked ? 'Linked: keeps the shape. Click to set width and height separately.' : 'Not linked. Click to link them and keep the shape.';
+    $('#xHelp').textContent = EXP.linked ? 'Change either number; the other follows the shape.' : 'Width and height are separate now.';
+    const n0w = Math.round(it.m0.w), n0h = Math.round(it.m0.h);
+    $('#xChips').innerHTML = [['design', `As designed · ${n0w} × ${n0h}`], [40, '40 px tall'], [48, '48 px tall'], [56, '56 px tall']].map(([v, l]) => {
+      const on = EXP.linked && (v === 'design' ? EXP.by === 'design' : EXP.by === 'h' && EXP.v === v);
+      return `<button type="button" class="chip" data-chip="${v}" aria-pressed="${on}">${l}</button>`;
+    }).join('');
+    const warn = $('#xWarn');
+    if (EXP.linked) warn.hidden = true;
+    else {
+      const natW = Math.round(it.m0.w * f), squeeze = it.m0.w * f > EXP.uW + 0.5;
+      warn.hidden = false;
+      warn.textContent = squeeze ? `Too narrow for the text at this height, so the letters get smaller to fit. Its own shape at this height is ${natW} wide.`
+        : Math.abs(EXP.uW - natW) < 1 ? 'Not linked. Changing the width adds or removes room at the sides; the text keeps its size.'
+        : `Not linked: the button is ${EXP.uW > natW ? 'wider' : 'narrower'} than its shape (${natW} × ${EXP.uH}). The text keeps its size; the room at the sides changes.`;
+    }
+    $('#xSpace').checked = EXP.space; $('#xSpaceRow').hidden = !EXP.space;
+    const sp = $('#xSpaceWarn'), tooBig = EXP.space && (m.ow * f > EXP.SW + 0.5 || m.oh * f > EXP.SH + 0.5);
+    sp.hidden = !tooBig; sp.textContent = "The button doesn't fit. Make the image bigger or the button smaller.";
+    ['SW', 'SH'].forEach(k => { const el = $('#x' + k); if (document.activeElement !== el) el.value = EXP[k]; });
+    $('#xScale').innerHTML = scaleBtns(ow, oh, true);
+    $('#xScaleNote').textContent = SCALE_NOTE[K];
+    $('#xName').textContent = `${fileBases([text.replace(/\n/g, ' ')])[0]}.${fmtOne}`;
+    $('#xPx').textContent = fmtOne === 'svg' ? `${e.fw} × ${e.fh} (vector)` : `${e.fw} × ${e.fh} px`;
+    $('#xStory').textContent = (EXP.space ? `A ${EXP.SW} × ${EXP.SH} image with the ${sw} × ${sh} button in the middle` : `Shows as a ${sw} × ${sh} button`) +
+      (K === 1 ? '. One file pixel per screen pixel.' : `. ${K}× scale: ${K} × ${K} file pixels for every screen pixel, so the edges stay crisp.`);
+    $('#fmtNote').innerHTML = fmtOne === 'svg' ? (tfOn(D) && (D.tf.tiltX || D.tf.tiltY) ? 'Tilt has no vector form, so this SVG holds a sharp image of the tilted button.' : 'Vector shapes and editable text. Install the font where you open it.') : '';
+    const cmp = K === 1 ? 2 : 1, pair = cmp < K ? [cmp, K] : [K, cmp];
+    pair.forEach((v, i) => { drawLoupe($('#xL' + i), v); $('#xL' + i + 'c').textContent = v === K ? `${v}× yours` : `${v}×`; $('#xL' + i + 'c').classList.toggle('mine', v === K); });
+  }, 120);
+}
+async function renderSingle() {
+  const my = ++seq, text = $('#ctaText').value;
+  const [it] = await planExport([text]); if (my !== seq) return;
+  const f = it.f, m = it.m, dpr = window.devicePixelRatio || 1, css = f * zoom, S = Math.min(10, dpr * css);
+  const cv = await renderItem({ ...it, k: S, frame: it.frame && { W: Math.round(EXP.SW / f * S), H: Math.round(EXP.SH / f * S) } });
+  if (my !== seq) return;
+  const k = css / S; cv.style.width = cv.width * k + 'px';
+  const box = document.createElement('div'); box.className = 'gbox' + (EXP.guides ? ' on' : ''); box.append(cv);
+  let ox = 0, oy = 0;
+  if (it.frame) { box.classList.add('space'); ox = (cv.width - m.ow * S) / 2 * k; oy = (cv.height - m.oh * S) / 2 * k; }
+  guideLayer(box, { css, ox, oy, m, f });
+  $('#stage').replaceChildren(box);
+  updLegend(Math.round(m.ow * f) !== Math.round(m.w * f) || Math.round(m.oh * f) !== Math.round(m.h * f));
+  $('#sizeOut').textContent = `On screen: ${Math.round(m.w * f)} × ${Math.round(m.h * f)}` + (zoom !== 1 ? ` (zoom ${Math.round(zoom * 100)}%)` : '');
+  updateSizeInfo();
+  renderFileView(it, my);
+}
+// the export at real size: one file pixel per screen pixel; smaller scales outlined inside it
+async function renderFileView(it, my) {
+  const p = $('#fileView'), K = EXP.k, open = EXP.fileOpen;
+  p.classList.toggle('open', open); $('#fvHead').setAttribute('aria-expanded', open); $('#fvGrip').hidden = !open;
+  $('#fvBody').style.height = open ? EXP.fileH + 'px' : '0px';
+  const e = estimate(it);
+  $('#fvPx').textContent = `${e.fw} × ${e.fh} px at ${K}×`;
+  if (!open) { $('#fvNote').textContent = K === 1 ? 'Same as on screen at 1×' : 'Click to see it at real size'; $('#fvWrap').replaceChildren(); return; }
+  const cv = await renderItem(it); if (my !== seq) return;
+  cv.style.width = cv.width + 'px';
+  const wrap = document.createElement('div'); wrap.className = 'fv-file'; wrap.append(cv);
+  for (let v = K - 1; v >= 1; v--) {
+    const g = document.createElement('div'); g.className = 'fv-ghost'; const w = cv.width * v / K, h = cv.height * v / K;
+    Object.assign(g.style, { width: w + 'px', height: h + 'px', left: (cv.width - w) / 2 + 'px', top: (cv.height - h) / 2 + 'px' });
+    g.innerHTML = `<span>${v}×</span>`; wrap.append(g);
+  }
+  $('#fvWrap').replaceChildren(wrap);
+  const body = $('#fvBody');
+  $('#fvNote').textContent = cv.width > body.clientWidth - 24 || cv.height > body.clientHeight - 24 ? 'Real size, 1 file pixel = 1 screen pixel. Scroll to see all of it.' : 'Real size, 1 file pixel = 1 screen pixel';
+}
+function expChanged(opts = {}) {
+  saveExp();
+  if (opts.flash) flash(view === 'batch' ? $('#bFiles') : $('#xInfo'));
+  if (view === 'batch') { syncBatchExp(); clearTimeout(batchTimer); batchTimer = setTimeout(renderBatch, 120); }
+  else requestRender();
+  updateSizeInfo();
+}
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-xk],[data-chip],#xLink,[data-bm],[data-fit],#fvHead'); if (!t) return;
+  if (t.dataset.xk) { EXP.k = +t.dataset.xk; EXP.fileOpen = EXP.k > 1; document.querySelectorAll('[data-xk]').forEach(b => b.setAttribute('aria-pressed', +b.dataset.xk === EXP.k)); expChanged({ flash: true }); return; }
+  if (t.dataset.chip) { EXP.linked = true; if (t.dataset.chip === 'design') EXP.by = 'design'; else { EXP.by = 'h'; EXP.v = +t.dataset.chip; } expChanged(); return; }
+  if (t.id === 'xLink') {
+    if (EXP.linked) { EXP.uW = +$('#xW').value || EXP.uW; EXP.uH = +$('#xH').value || EXP.uH; EXP.linked = false; }
+    else { EXP.linked = true; EXP.by = 'h'; EXP.v = EXP.uH; }
+    expChanged(); return;
+  }
+  if (t.dataset.bm) { EXP.bmode = t.dataset.bm; expChanged(); return; }
+  if (t.dataset.fit) { EXP.fit = t.dataset.fit; EXP.bmode = 'same'; expChanged(); return; }
+  if (t.id === 'fvHead') { EXP.fileOpen = !EXP.fileOpen; saveExp(); requestRender(); }
+});
+document.addEventListener('input', e => {
+  const id = e.target.id, n = parseFloat(e.target.value), ok = n >= 1 && n <= 10000;
+  if (id === 'xW' && ok) { if (EXP.linked) { EXP.by = 'w'; EXP.v = n; } else EXP.uW = n; expChanged(); }
+  else if (id === 'xH' && ok) { if (EXP.linked) { EXP.by = 'h'; EXP.v = n; } else EXP.uH = n; expChanged(); }
+  else if ((id === 'xSW' || id === 'xSH') && ok) { EXP[id.slice(1)] = n; expChanged(); }
+  else if (id === 'xB' && ok) { if (EXP.bmode === 'grow') EXP.BH = n; else EXP.BW = n; clearTimeout(batchTimer); saveExp(); batchTimer = setTimeout(renderBatch, 200); }
+});
+document.addEventListener('change', e => {
+  if (e.target.id === 'xSpace') { EXP.space = e.target.checked; expChanged(); }
+  if (e.target.classList.contains('guidesChk')) { EXP.guides = e.target.checked; saveExp(); if (view === 'batch') renderBatch(); else requestRender(); }
+});
+// drag the handle (or use the arrow keys) to make the file view taller or shorter
+{
+  const grip = $('#fvGrip'); let drag = null;
+  const set = h => { EXP.fileH = Math.round(Math.max(110, Math.min(700, h))); $('#fvBody').style.height = EXP.fileH + 'px'; };
+  grip.addEventListener('pointerdown', e => { e.preventDefault(); grip.setPointerCapture(e.pointerId); drag = { y: e.clientY, h: EXP.fileH }; grip.classList.add('drag'); });
+  grip.addEventListener('pointermove', e => { if (drag) set(drag.h + (e.clientY - drag.y)); });
+  const up = () => { if (!drag) return; drag = null; grip.classList.remove('drag'); saveExp(); };
+  grip.addEventListener('pointerup', up); grip.addEventListener('pointercancel', up);
+  grip.addEventListener('keydown', e => { if (e.key === 'ArrowUp' || e.key === 'ArrowDown') { e.preventDefault(); set(EXP.fileH + (e.key === 'ArrowDown' ? 20 : -20)); saveExp(); } });
 }
 const range = a => { const lo = Math.min(...a), hi = Math.max(...a); return lo === hi ? `${lo}` : `${lo}–${hi}`; };
 let bseq = 0, pvMode = 'fit';
@@ -3087,32 +3377,36 @@ async function renderBatch() {
   const lines = batchLines(), names = fileBases(lines);
   $('#batchCount').textContent = lines.length ? `${lines.length} button${lines.length > 1 ? 's' : ''}` : 'Add texts on the left';
   if (!lines.length) { $('#bgrid').replaceChildren(); $('#bSummary').textContent = ''; return; }
-  const plan = await planExport(lines); if (my !== bseq) return;
+  const plan = await planBatch(lines); if (my !== bseq) return;
+  $('#xScaleB').innerHTML = scaleBtns(plan[0].m.ow, plan[0].m.oh, false);
   const est = plan.map(estimate), dpr = window.devicePixelRatio || 1;
   const fonts = est.map(e => e.font), sameFont = Math.max(...fonts) - Math.min(...fonts) < 0.6;
   $('#bSummary').innerHTML = `${lines.length} files · widths ${range(est.map(e => e.fw))}px · heights ${range(est.map(e => e.fh))}px · ` +
     (sameFont ? `text ${fonts[0]}px on all` : `<span class="warn">text size varies ${range(fonts.map(Math.round))}px</span>`);
-  const fit = Math.min(1, 270 / Math.max(...est.map(e => e.fw)));
+  const fit = Math.min(1, (EXP.guides ? 200 : 270) / Math.max(...est.map(e => e.fw)));
+  updLegend(plan.some(it => Math.round(it.m.ow * it.f) !== Math.round(it.m.w * it.f) || Math.round(it.m.oh * it.f) !== Math.round(it.m.h * it.f)));
   const cards = [];
   for (let i = 0; i < plan.length; i++) {
     const it = plan[i], e = est[i];
     let cv;
-    if (pvMode === 'real') { cv = await renderItem(it); cv.style.width = cv.width + 'px'; cv.classList.add('real'); }
+    let css;
+    if (pvMode === 'real') { cv = await renderItem(it); cv.style.width = cv.width + 'px'; cv.classList.add('real'); css = it.k; }
     else {
       const S = Math.max(0.1, dpr * it.k * fit);
-      cv = await renderItem({ ...it, k: S, frame: it.frame && { W: Math.round(it.frame.W * S / it.k), H: Math.round(it.frame.H * S / it.k) }, exact: null });
-      cv.style.width = (e.fw * fit) + 'px';
-      if (it.frame) cv.classList.add('real');
+      cv = await renderItem({ ...it, k: S, exact: null });
+      cv.style.width = (e.fw * fit) + 'px'; css = it.k * fit;
     }
     if (my !== bseq) return;
     const card = document.createElement('div'); card.className = 'bcard';
-    const img = document.createElement('div'); img.className = 'img'; img.appendChild(cv);
+    const gb = document.createElement('div'); gb.className = 'gbox' + (EXP.guides ? ' on' : ''); gb.append(cv);
+    guideLayer(gb, { css, ox: 0, oy: 0, m: it.m, f: it.f });
+    const img = document.createElement('div'); img.className = 'img'; img.appendChild(gb);
     const cap = document.createElement('div'); cap.className = 'cap';
     const a = document.createElement('span'); a.textContent = names[i];
     const b = document.createElement('span'); b.textContent = pvMode === 'real' ? `${cv.width}×${cv.height}` : `${e.fw}×${e.fh}`; b.title = pvMode === 'real' ? 'Exact file size in pixels' : 'File size in pixels';
     cap.append(a, b);
     const sub = document.createElement('div'); sub.className = 'sub';
-    sub.textContent = `${D.box.on ? 'button' : 'text box'} ${e.bw}×${e.bh} · text ${e.font}px`;
+    sub.textContent = `on screen ${Math.round(it.m.w * it.f)}×${Math.round(it.m.h * it.f)} · text ${Math.round(it.d.font.size * it.f * 10) / 10}px` + (it.note ? ` · ${it.note}` : '');
     if (!sameFont) sub.classList.add('warn');
     card.append(img, cap, sub); cards.push(card);
   }
@@ -3173,7 +3467,7 @@ $('#exportAll').addEventListener('click', async e => {
     btn.textContent = 'Measuring…';
     const pg = progress('Rendering', lines.length * fmts.length);
     try {
-      const plan = await planExport(lines);
+      const plan = await planBatch(lines);
       for (let i = 0; i < lines.length; i++) for (const f of fmts) {
         btn.textContent = `Rendering ${i + 1}/${lines.length}…`;
         files.push({ name: `${bases[i]}.${f}`, blob: await makeBlob(plan[i], f) }); pg.step();
@@ -5309,7 +5603,7 @@ resizer($('#folderGrip'), '--ftw', 210, () => 150, () => Math.max(200, document.
 /* ================= boot ================= */
 buildPanel();
 syncUI();
-syncExp();
+syncBatchExp();
 updFoldLabel();
 autoGrow();
 pushHist();
