@@ -214,6 +214,27 @@ input[type="color"] { width: 100%; height: 26px; padding: 0 2px; border: 1px sol
 .view { display: flex; flex-direction: column; gap: 12px; padding-block: 16px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
 .textrow textarea { width: 100%; font-size: 18px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); resize: vertical; min-height: 50px; line-height: 1.4; display: block; }
 .refbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+/* export: one line that always shows the result; "Size & scale" opens the settings under it */
+.xbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 12px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); }
+.xsum { display: flex; align-items: center; gap: 10px; flex: 1 1 300px; min-width: 0; padding: 8px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); color: var(--fg); cursor: pointer; text-align: left; }
+.xsum:hover { border-color: var(--accent); }
+.xsum .xs-l { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.xsum .xs-v { font: 600 13px var(--mono); color: var(--accent); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.xsum .xs-c { margin-left: auto; font-size: 12.5px; font-weight: 600; color: var(--accent); white-space: nowrap; }
+.xchev { width: 12px; height: 12px; flex: none; fill: none; stroke: var(--muted); stroke-width: 1.6; stroke-linecap: round; transform: rotate(-90deg); transition: transform .2s; }
+.xsum[aria-expanded="true"] .xchev { transform: none; }
+.xb-drv { display: flex; gap: 8px; flex-wrap: wrap; order: 9; flex-basis: 100%; justify-content: flex-end; }
+.xb-drv .btn { padding: 5px 10px; font-size: 12.5px; }
+#xBarS .xsum { flex: 1 1 380px; }
+#xBarB .xsum { flex-basis: 100%; }
+.xbar .xgo-row select { flex: none; width: auto; }
+#xBarB #exportAll { margin-left: auto; }
+.xbar .xgo-row { display: inline-flex; }
+.xmore { display: grid; gap: 12px; }
+.xmore-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; align-items: start; }
+.xmore .xinfo { background: var(--panel); border-radius: 12px; padding: 14px 16px; }
+@media (min-width: 861px) { .stagegrid .stage { min-height: 230px; padding: 22px; } }
+
 /* presets: a drawer under the "Presets…" button; picking one updates the preview right away */
 .pbtn { display: inline-flex; align-items: center; gap: 6px; }
 .pbtn svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.8; }
@@ -349,7 +370,6 @@ a.btn.drv.fresh { border-color: var(--accent); background: var(--accent-soft); c
 .xgo-drv { display: flex; flex-wrap: wrap; gap: 8px; }
 .xgo-drv > * { flex: 1 1 auto; justify-content: center; text-align: center; }
 #sizeOut { white-space: nowrap; }
-.xleft .stage { min-height: 170px; padding: 18px; }
 .stagegrid.withref .stage { min-height: 260px; }
 .xleft .xinfo { background: var(--panel); border-radius: 12px; padding: 14px 16px; }
 
@@ -575,9 +595,9 @@ input.tg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
   #view-single .xlayout, #view-single .xleft, #view-single .xright { display: contents; }
   #view-single .xleft > .bar { order: 4; }
   .presetbar { order: 2; }
-  #view-single .fileview, #view-single .xinfo, #view-single .xstep { order: 7; }
+  #view-single .xbar, #view-single .xmore { order: 7; }
   .lib { order: 8; }
-  .textrow, .refbar, .presetbar, .hints, .cssbox, .stagegrid, #view-single > .bar, #view-single .xleft > .bar, #view-single > .exportbox, #view-single .fileview, #view-single .xinfo, #view-single .xstep { margin-inline: max(12px, env(safe-area-inset-left, 0px)) max(12px, env(safe-area-inset-right, 0px)); margin-block: 6px; }
+  .textrow, .refbar, .presetbar, .hints, .cssbox, .stagegrid, #view-single > .bar, #view-single .xleft > .bar, #view-single > .exportbox, #view-single .xbar, #view-single .xmore { margin-inline: max(12px, env(safe-area-inset-left, 0px)) max(12px, env(safe-area-inset-right, 0px)); margin-block: 6px; }
   .stage { min-height: 140px; height: 32vh; padding: 10px; }
   .stage canvas { max-width: 100%; max-height: 100%; object-fit: contain; }
   .stage canvas.real { max-width: none; max-height: none; }
@@ -674,16 +694,14 @@ input.tg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
         <label>Shape <select class="sm" id="hShape"><option value="">Auto</option></select></label>
         <button class="btn sm" id="hClear" hidden>Clear hints</button>
       </div>
-      <div class="xlayout">
-        <div class="xleft">
-          <div class="stagegrid" id="stagegrid">
+      <div class="stagegrid" id="stagegrid">
             <figure class="refbox" id="refbox" hidden>
               <canvas id="refCanvas" aria-label="Reference image, click to pick a color"></canvas>
               <figcaption><span>Reference</span><span id="pickOut"></span></figcaption>
             </figure>
             <div class="stage" id="stage" data-bg="checker"></div>
           </div>
-          <div class="bar">
+      <div class="bar">
             <div class="bgs" aria-label="Preview background">
               <button data-bg="checker" aria-pressed="true" title="Transparent" style="background:conic-gradient(var(--check-b) 25%, var(--check-a) 0 50%, var(--check-b) 0 75%, var(--check-a) 0) 0 0/10px 10px"></button>
               <button data-bg="#ffffff" aria-pressed="false" title="White" style="background:#ffffff"></button>
@@ -695,17 +713,19 @@ input.tg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
             <span class="meta grow" id="sizeOut"></span>
             <button class="btn sm pinbtn" id="pinBtn" aria-pressed="true">Unpin preview</button>
           </div>
-          <section class="fileview" id="fileView" aria-label="The exported file at real size">
-            <button type="button" class="fv-head" id="fvHead" aria-expanded="true" aria-controls="fvBody"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5"/></svg><b>The file</b><span class="fv-px" id="fvPx"></span><span class="fv-note" id="fvNote"></span></button>
-            <div class="fv-body" id="fvBody"><div class="fv-in" id="fvWrap"></div></div>
-            <div class="fv-grip" id="fvGrip" role="separator" aria-orientation="horizontal" aria-label="Drag to make the file view taller or shorter (arrow keys work too)" tabindex="0"><span></span></div>
-          </section>
-            <div class="xinfo" id="xInfo" aria-live="polite">
-              <div class="xi-txt"><span class="xi-h">Export</span><b class="xi-name" id="xName"></b><span class="xi-px" id="xPx"></span><span class="note-sm" id="xStory"></span><span class="note-sm" id="fmtNote"></span></div>
-              <div class="xi-edge"><div><figure><canvas id="xL0"></canvas><figcaption id="xL0c"></figcaption></figure><figure><canvas id="xL1"></canvas><figcaption id="xL1c"></figcaption></figure></div><span class="note-sm">Edge, zoomed in</span></div>
-            </div>
-        </div>
-        <aside class="xright" aria-label="Export size">
+      <section class="xbar" id="xBarS">
+        <button type="button" class="xsum" id="xSumS" aria-expanded="false" aria-controls="xMoreS"><svg class="xchev" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5"/></svg><span class="xs-l">Export</span><b class="xs-v" id="xSumTxt"></b><span class="xs-c">Size &amp; scale</span></button>
+        <span class="seg" role="group" aria-label="Format">
+              <button data-fmt="png" aria-pressed="true">PNG</button>
+              <button data-fmt="svg" aria-pressed="false">SVG (vector)</button>
+            </span>
+        <span class="xb-drv"><a class="btn drv teamfolder" id="driveLink" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Team folder</a>
+            <a class="btn drv lastexp" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1"/><path d="M3 7v10a2 2 0 0 0 2 2h12.5a2 2 0 0 0 1.9-1.4L22 11H7.5a2 2 0 0 0-1.9 1.4L3 19"/></svg>Open last export</a>
+            <button class="btn" id="driveOne" title="Save this export into the team's shared Google Drive folder">Save to team Drive</button></span>
+        <button class="btn primary" id="exportOne">Export PNG</button>
+      </section>
+      <section class="xmore" id="xMoreS" hidden>
+        <div class="xmore-grid">
           <section class="xstep">
             <h4><span class="xn">1</span>How big is the button on screen?</h4>
                 <div class="note-sm" id="xHelpWrap">The size you'd give it in Figma or on the page. <span id="xHelp"></span></div>
@@ -727,28 +747,21 @@ input.tg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
                 <div class="xwh" id="xSpaceRow" hidden><span class="note-sm">Image size</span><span class="xin"><input type="number" id="xSW" min="1" step="1" aria-label="Image width"></span>×<span class="xin"><input type="number" id="xSH" min="1" step="1" aria-label="Image height"><i>px</i></span></div>
                 <div class="xwarn" id="xSpaceWarn" hidden></div>
           </section>
-          <section class="xstep xgo">
-            <div class="xgo-top">
-            <span class="seg" role="group" aria-label="Format">
-              <button data-fmt="png" aria-pressed="true">PNG</button>
-              <button data-fmt="svg" aria-pressed="false">SVG (vector)</button>
-            </span>
-            </div>
-            <button class="btn primary xbig" id="exportOne">Export PNG</button>
-            <div class="xgo-drv">
-            <a class="btn drv teamfolder" id="driveLink" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Team folder</a>
-            <a class="btn drv lastexp" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1"/><path d="M3 7v10a2 2 0 0 0 2 2h12.5a2 2 0 0 0 1.9-1.4L22 11H7.5a2 2 0 0 0-1.9 1.4L3 19"/></svg>Open last export</a>
-            <button class="btn" id="driveOne" title="Save this export into the team's shared Google Drive folder">Save to team Drive</button>
-            </div>
+        </div>
+        <section class="fileview" id="fileView" aria-label="The exported file at real size">
+            <button type="button" class="fv-head" id="fvHead" aria-expanded="true" aria-controls="fvBody"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5"/></svg><b>The file</b><span class="fv-px" id="fvPx"></span><span class="fv-note" id="fvNote"></span></button>
+            <div class="fv-body" id="fvBody"><div class="fv-in" id="fvWrap"></div></div>
+            <div class="fv-grip" id="fvGrip" role="separator" aria-orientation="horizontal" aria-label="Drag to make the file view taller or shorter (arrow keys work too)" tabindex="0"><span></span></div>
           </section>
-        </aside>
-      </div>
+        <div class="xinfo" id="xInfo" aria-live="polite">
+              <div class="xi-txt"><span class="xi-h">Export</span><b class="xi-name" id="xName"></b><span class="xi-px" id="xPx"></span><span class="note-sm" id="xStory"></span><span class="note-sm" id="fmtNote"></span></div>
+              <div class="xi-edge"><div><figure><canvas id="xL0"></canvas><figcaption id="xL0c"></figcaption></figure><figure><canvas id="xL1"></canvas><figcaption id="xL1c"></figcaption></figure></div><span class="note-sm">Edge, zoomed in</span></div>
+            </div>
+      </section>
     </div>
 
     <div class="view" id="view-batch" hidden>
-      <div class="xlayout">
-        <div class="xleft">
-          <div class="batch stacked">
+      <div class="batch">
             <div>
               <textarea id="batchText" spellcheck="false" aria-label="Batch button texts">Play Now
 Claim Your Bonus
@@ -767,8 +780,24 @@ Start</textarea>
               <div class="bgrid" id="bgrid"></div>
             </div>
           </div>
-        </div>
-        <aside class="xright" aria-label="Export size">
+      <section class="xbar" id="xBarB">
+        <button type="button" class="xsum" id="xSumB" aria-expanded="false" aria-controls="xMoreB"><svg class="xchev" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5"/></svg><span class="xs-l">Export</span><b class="xs-v" id="xSumTxtB"></b><span class="xs-c">Long texts, size &amp; scale</span></button>
+        <div class="xgo-row"><span class="meta" id="batchCount"></span><label class="chk"><input type="checkbox" id="bPng" checked>PNG</label><label class="chk"><input type="checkbox" id="bSvg">SVG</label></div>
+        <div class="xgo-row"><label class="meta" for="prefix">File prefix</label><input id="prefix" type="text" value="cta-" class="sm" style="width:90px"></div>
+        <div class="xgo-row"><label class="meta" for="destSel">Save as</label>
+            <select class="sm" id="destSel">
+              <option value="zip">One ZIP file</option>
+              <option value="folder">Into a folder…</option>
+              <option value="files">Separate files</option>
+              <option value="drive" id="destDrive" disabled>Team Drive folder</option>
+            </select>
+            </div>
+        <span class="xb-drv"><a class="btn drv teamfolder" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Team folder</a>
+            <a class="btn drv lastexp" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1"/><path d="M3 7v10a2 2 0 0 0 2 2h12.5a2 2 0 0 0 1.9-1.4L22 11H7.5a2 2 0 0 0-1.9 1.4L3 19"/></svg>Open last export</a></span>
+        <button class="btn primary" id="exportAll">Export all</button>
+      </section>
+      <section class="xmore" id="xMoreB" hidden>
+        <div class="xmore-grid">
           <section class="xstep">
             <h4><span class="xn">1</span>Texts are different lengths. Should the buttons…</h4>
             <div class="xmodes" id="xModes"></div>
@@ -781,25 +810,8 @@ Start</textarea>
             <h4><span class="xn">3</span>Scale <small>more pixels, same size on screen</small></h4>
             <div class="xscale" id="xScaleB" role="group" aria-label="Scale"></div>
           </section>
-          <section class="xstep xgo">
-            <div class="xgo-row"><span class="meta" id="batchCount"></span><label class="chk"><input type="checkbox" id="bPng" checked>PNG</label><label class="chk"><input type="checkbox" id="bSvg">SVG</label></div>
-            <div class="xgo-row"><label class="meta" for="prefix">File prefix</label><input id="prefix" type="text" value="cta-" class="sm" style="width:90px"></div>
-            <div class="xgo-row"><label class="meta" for="destSel">Save as</label>
-            <select class="sm" id="destSel">
-              <option value="zip">One ZIP file</option>
-              <option value="folder">Into a folder…</option>
-              <option value="files">Separate files</option>
-              <option value="drive" id="destDrive" disabled>Team Drive folder</option>
-            </select>
-            </div>
-            <button class="btn primary xbig" id="exportAll">Export all</button>
-            <div class="xgo-drv">
-            <a class="btn drv teamfolder" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Team folder</a>
-            <a class="btn drv lastexp" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1"/><path d="M3 7v10a2 2 0 0 0 2 2h12.5a2 2 0 0 0 1.9-1.4L22 11H7.5a2 2 0 0 0-1.9 1.4L3 19"/></svg>Open last export</a>
-            </div>
-          </section>
-        </aside>
-      </div>
+        </div>
+      </section>
     </div>
 
     <div class="lib">
@@ -3177,7 +3189,7 @@ function fileBases(lines) {
 // Single: the button's size on screen (linked to its shape, or width and height apart), a scale for more pixels,
 // and optional empty space around it. Batch: how buttons with longer texts behave, one size, and a scale.
 const EXP = { k: 2, by: 'design', v: 0, linked: true, uW: 240, uH: 66, space: false, SW: 600, SH: 200,
-  bmode: 'grow', fit: 'shrink', BH: 56, BW: 200, guides: true, fileOpen: true, fileH: 190 };
+  bmode: 'grow', fit: 'shrink', BH: 56, BW: 200, guides: true, fileOpen: true, fileH: 190, open: false };
 try {
   const o = JSON.parse(localStorage.getItem('ctaforge.export2') || 'null');
   if (o) Object.assign(EXP, o);
@@ -3357,7 +3369,8 @@ function updateSizeInfo() {
     $('#xScaleNote').textContent = SCALE_NOTE[K];
     $('#xName').textContent = `${fileBases([text.replace(/\n/g, ' ')])[0]}.${fmtOne}`;
     $('#xPx').textContent = fmtOne === 'svg' ? `${e.fw} × ${e.fh} (vector)` : `${e.fw} × ${e.fh} px`;
-    $('#exportOne').textContent = `Export ${fmtOne.toUpperCase()} · ${e.fw} × ${e.fh}`;
+    $('#exportOne').textContent = `Export ${fmtOne.toUpperCase()}`;
+    $('#xSumTxt').textContent = `${sw} × ${sh} on screen · ${K}× → ${e.fw} × ${e.fh} px` + (EXP.space ? ` (image ${EXP.SW} × ${EXP.SH})` : '');
     $('#xStory').textContent = (EXP.space ? `A ${EXP.SW} × ${EXP.SH} image with the ${sw} × ${sh} button in the middle` : `Shows as a ${sw} × ${sh} button`) +
       (K === 1 ? '. One file pixel per screen pixel.' : `. ${K}× scale: ${K} × ${K} file pixels for every screen pixel, so the edges stay crisp.`);
     $('#fmtNote').innerHTML = fmtOne === 'svg' ? (tfOn(D) && (D.tf.tiltX || D.tf.tiltY) ? 'Tilt has no vector form, so this SVG holds a sharp image of the tilted button.' : 'Vector shapes and editable text. Install the font where you open it.') : '';
@@ -3384,6 +3397,7 @@ async function renderSingle() {
 }
 // the export at real size: one file pixel per screen pixel; smaller scales outlined inside it
 async function renderFileView(it, my) {
+  if (!EXP.open) return;
   const p = $('#fileView'), K = EXP.k, open = EXP.fileOpen;
   p.classList.toggle('open', open); $('#fvHead').setAttribute('aria-expanded', open); $('#fvGrip').hidden = !open;
   $('#fvBody').style.height = open ? EXP.fileH + 'px' : '0px';
@@ -3402,15 +3416,19 @@ async function renderFileView(it, my) {
   const body = $('#fvBody');
   $('#fvNote').textContent = cv.width > body.clientWidth - 24 || cv.height > body.clientHeight - 24 ? 'Real size, 1 file pixel = 1 screen pixel. Scroll to see all of it.' : 'Real size, 1 file pixel = 1 screen pixel';
 }
+function syncFold() {
+  [['#xSumS', '#xMoreS'], ['#xSumB', '#xMoreB']].forEach(([b, m]) => { $(m).hidden = !EXP.open; $(b).setAttribute('aria-expanded', EXP.open); });
+}
 function expChanged(opts = {}) {
   saveExp();
-  if (opts.flash) flash(view === 'batch' ? $('#bFiles') : $('#xInfo'));
+  if (opts.flash) flash(EXP.open ? (view === 'batch' ? $('#bFiles') : $('#xInfo')) : (view === 'batch' ? $('#xBarB') : $('#xBarS')));
   if (view === 'batch') { syncBatchExp(); clearTimeout(batchTimer); batchTimer = setTimeout(renderBatch, 120); }
   else requestRender();
   updateSizeInfo();
 }
 document.addEventListener('click', e => {
-  const t = e.target.closest('[data-xk],[data-chip],#xLink,[data-bm],[data-fit],#fvHead'); if (!t) return;
+  const t = e.target.closest('[data-xk],[data-chip],#xLink,[data-bm],[data-fit],#fvHead,.xsum'); if (!t) return;
+  if (t.classList.contains('xsum')) { EXP.open = !EXP.open; saveExp(); syncFold(); if (view === 'batch') { syncBatchExp(); renderBatch(); } else requestRender(); return; }
   if (t.dataset.xk) { EXP.k = +t.dataset.xk; EXP.fileOpen = EXP.k > 1; document.querySelectorAll('[data-xk]').forEach(b => b.setAttribute('aria-pressed', +b.dataset.xk === EXP.k)); expChanged({ flash: true }); return; }
   if (t.dataset.chip) { EXP.linked = true; if (t.dataset.chip === 'design') EXP.by = 'design'; else { EXP.by = 'h'; EXP.v = +t.dataset.chip; } expChanged(); return; }
   if (t.id === 'xLink') {
@@ -3454,6 +3472,8 @@ async function renderBatch() {
   if (!lines.length) { $('#bgrid').replaceChildren(); $('#bSummary').textContent = ''; return; }
   const plan = await planBatch(lines); if (my !== bseq) return;
   $('#xScaleB').innerHTML = scaleBtns(plan[0].m.ow, plan[0].m.oh, false);
+  { const sz = Math.round(EXP.bmode === 'grow' ? EXP.BH : EXP.BW), mode = { grow: 'grow with the text', same: EXP.fit === 'wrap' ? 'same width, wrap' : 'same width, shrink', widest: 'as wide as the longest' }[EXP.bmode];
+    $('#xSumTxtB').textContent = `${mode} · ${sz} px ${EXP.bmode === 'grow' ? 'tall' : 'wide'} · ${EXP.k}×`; }
   const est = plan.map(estimate), dpr = window.devicePixelRatio || 1;
   const fonts = est.map(e => e.font), sameFont = Math.max(...fonts) - Math.min(...fonts) < 0.6;
   $('#bSummary').innerHTML = `${lines.length} files · widths ${range(est.map(e => e.fw))}px · heights ${range(est.map(e => e.fh))}px · ` +
@@ -5715,6 +5735,7 @@ resizer($('#folderGrip'), '--ftw', 210, () => 150, () => Math.max(200, document.
 buildPanel();
 syncUI();
 syncBatchExp();
+syncFold();
 updFoldLabel();
 autoGrow();
 pushHist();
