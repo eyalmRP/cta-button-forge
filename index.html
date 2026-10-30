@@ -225,7 +225,8 @@ input[type="color"] { width: 100%; height: 26px; padding: 0 2px; border: 1px sol
 .pb-tabs button { height: 30px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel); color: var(--fg); font-size: 12.5px; cursor: pointer; }
 .pb-tabs button[aria-selected="true"] { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); font-weight: 600; }
 .pb-tabs button small { color: var(--muted); margin-left: 4px; }
-.pb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; max-height: 330px; overflow-y: auto; padding: 2px; }
+.pb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); grid-auto-rows: max-content; align-content: start; gap: 8px; max-height: 330px; overflow-y: auto; padding: 2px; }
+@media (max-width: 860px) { .pb-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); max-height: 300px; } }
 .pb-card { display: grid; gap: 4px; padding: 0 0 6px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); cursor: pointer; overflow: hidden; text-align: left; color: var(--fg); }
 .pb-card:hover { border-color: var(--muted); }
 .pb-card[aria-pressed="true"] { border: 2px solid var(--accent); padding-bottom: 5px; }
@@ -327,7 +328,7 @@ a.btn.drv.fresh { border-color: var(--accent); background: var(--accent-soft); c
 .xlayout { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 16px; align-items: start; }
 .xleft { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
 .xright { display: flex; flex-direction: column; gap: 12px; position: sticky; top: calc(var(--modes-h, 90px) + 8px); max-height: calc(100vh - var(--modes-h, 90px) - 16px); overflow-y: auto; overscroll-behavior: contain; }
-@media (max-width: 1240px) { .xlayout { grid-template-columns: minmax(0, 1fr); } .xright { position: static; } }
+@media (max-width: 1240px) { .xlayout { grid-template-columns: minmax(0, 1fr); } .xright { position: static; max-height: none; overflow: visible; } }
 .xstep { display: grid; gap: 10px; padding: 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); }
 .xstep h4 { margin: 0; display: flex; align-items: flex-start; gap: 8px; font-size: 15px; font-weight: 600; line-height: 1.35; }
 .xstep h4 small { display: block; }
@@ -568,11 +569,15 @@ input.tg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
   #view-single > .bar { order: 4; }
   #view-batch { order: 3; }
   .panel { order: 5; border-right: 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); overflow: visible; }
-  .refbar { order: 6; }
-  .hints, .cssbox { order: 6; }
+  .refbar { order: 2; }
+  .hints, .cssbox { order: 2; }
   #view-single > .exportbox { order: 7; }
+  #view-single .xlayout, #view-single .xleft, #view-single .xright { display: contents; }
+  #view-single .xleft > .bar { order: 4; }
+  .presetbar { order: 2; }
+  #view-single .fileview, #view-single .xinfo, #view-single .xstep { order: 7; }
   .lib { order: 8; }
-  .textrow, .refbar, .hints, .cssbox, .stagegrid, #view-single > .bar, #view-single > .exportbox { margin-inline: max(12px, env(safe-area-inset-left, 0px)) max(12px, env(safe-area-inset-right, 0px)); margin-block: 6px; }
+  .textrow, .refbar, .presetbar, .hints, .cssbox, .stagegrid, #view-single > .bar, #view-single .xleft > .bar, #view-single > .exportbox, #view-single .fileview, #view-single .xinfo, #view-single .xstep { margin-inline: max(12px, env(safe-area-inset-left, 0px)) max(12px, env(safe-area-inset-right, 0px)); margin-block: 6px; }
   .stage { min-height: 140px; height: 32vh; padding: 10px; }
   .stage canvas { max-width: 100%; max-height: 100%; object-fit: contain; }
   .stage canvas.real { max-width: none; max-height: none; }
