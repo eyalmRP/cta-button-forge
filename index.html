@@ -324,6 +324,8 @@ a.btn.drv.fresh { border-color: var(--accent); background: var(--accent-soft); c
 .xgo-drv { display: flex; flex-wrap: wrap; gap: 8px; }
 .xgo-drv > * { flex: 1 1 auto; justify-content: center; text-align: center; }
 #sizeOut { white-space: nowrap; }
+.xleft .stage { min-height: 170px; padding: 18px; }
+.stagegrid.withref .stage { min-height: 260px; }
 .xleft .xinfo { background: var(--panel); border-radius: 12px; padding: 14px 16px; }
 
 .xgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
@@ -3135,7 +3137,7 @@ function fileBases(lines) {
 // Single: the button's size on screen (linked to its shape, or width and height apart), a scale for more pixels,
 // and optional empty space around it. Batch: how buttons with longer texts behave, one size, and a scale.
 const EXP = { k: 2, by: 'design', v: 0, linked: true, uW: 240, uH: 66, space: false, SW: 600, SH: 200,
-  bmode: 'grow', fit: 'shrink', BH: 56, BW: 200, guides: true, fileOpen: true, fileH: 260 };
+  bmode: 'grow', fit: 'shrink', BH: 56, BW: 200, guides: true, fileOpen: true, fileH: 190 };
 try {
   const o = JSON.parse(localStorage.getItem('ctaforge.export2') || 'null');
   if (o) Object.assign(EXP, o);
