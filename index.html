@@ -274,6 +274,10 @@ a.btn.drv.fresh { border-color: var(--accent); background: var(--accent-soft); c
 /* batch */
 .batch { display: grid; grid-template-columns: minmax(220px, 300px) minmax(0, 1fr); gap: 14px; align-items: start; }
 .batch textarea { width: 100%; min-height: 360px; resize: vertical; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); font-size: 14px; line-height: 1.7; }
+.batch.stacked { grid-template-columns: minmax(0, 1fr); }
+.batch.stacked textarea { min-height: 150px; }
+.xgo-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.xgo-row select { flex: 1; }
 .batch .note { color: var(--muted); font-size: 12px; margin-top: 6px; line-height: 1.5; }
 .bgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); gap: 10px; }
 .bcard { border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--panel); min-width: 0; }
@@ -303,12 +307,13 @@ a.btn.drv.fresh { border-color: var(--accent); background: var(--accent-soft); c
 /* single export: preview and results on the left, the steps on the right (as in the mockup) */
 .xlayout { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 16px; align-items: start; }
 .xleft { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
-.xright { display: flex; flex-direction: column; gap: 12px; position: sticky; top: calc(var(--modes-h, 90px) + 8px); }
+.xright { display: flex; flex-direction: column; gap: 12px; position: sticky; top: calc(var(--modes-h, 90px) + 8px); max-height: calc(100vh - var(--modes-h, 90px) - 16px); overflow-y: auto; overscroll-behavior: contain; }
 @media (max-width: 1240px) { .xlayout { grid-template-columns: minmax(0, 1fr); } .xright { position: static; } }
 .xstep { display: grid; gap: 10px; padding: 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); }
-.xstep h4 { margin: 0; display: flex; align-items: baseline; gap: 8px; font-size: 15px; font-weight: 600; flex-wrap: wrap; }
+.xstep h4 { margin: 0; display: flex; align-items: flex-start; gap: 8px; font-size: 15px; font-weight: 600; line-height: 1.35; }
+.xstep h4 small { display: block; }
 .xstep h4 small { font-weight: 400; color: var(--muted); font-size: 12.5px; }
-.xn { flex: none; width: 20px; height: 20px; border-radius: 999px; background: var(--fg); color: var(--panel); font-size: 12px; font-weight: 700; display: inline-grid; place-items: center; align-self: center; }
+.xn { flex: none; width: 20px; height: 20px; border-radius: 999px; background: var(--fg); color: var(--panel); font-size: 12px; font-weight: 700; display: inline-grid; place-items: center; margin-top: 0; }
 .xstep .xin { height: 40px; }
 .xstep .xin input { width: 70px; font-size: 16px; }
 .xstep .xlink { width: 40px; height: 40px; }
@@ -708,57 +713,59 @@ input.tg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
     </div>
 
     <div class="view" id="view-batch" hidden>
-      <div class="batch">
-        <div>
-          <textarea id="batchText" spellcheck="false" aria-label="Batch button texts">Play Now
+      <div class="xlayout">
+        <div class="xleft">
+          <div class="batch stacked">
+            <div>
+              <textarea id="batchText" spellcheck="false" aria-label="Batch button texts">Play Now
 Claim Your Bonus
 Join Free
 Spin &amp; Win
 Get 100 Free Spins
 Start</textarea>
-          <div class="note">One button per line, all with the current design. Use <b>|</b> inside a line for a line break, e.g. <code>Your next|move?</code></div>
-        </div>
-        <div style="display:grid;gap:10px;min-width:0">
-          <div class="bhead" id="bFiles">
-            <label class="chk"><input type="checkbox" class="guidesChk" checked>Guides</label><span class="glegend"><span class="lgp"><i></i>Button</span><span class="lgo"><i></i>With effects</span></span>
-            <span class="seg" role="group" aria-label="Preview size"><button data-pv="fit" aria-pressed="true">Fit to card</button><button data-pv="real" aria-pressed="false">Real size</button></span>
-            <span class="meta" id="bSummary"></span>
+              <div class="note">One button per line, all with the current design. Use <b>|</b> inside a line for a line break, e.g. <code>Your next|move?</code></div>
+            </div>
+            <div style="display:grid;gap:10px;min-width:0">
+              <div class="bhead" id="bFiles">
+                <label class="chk"><input type="checkbox" class="guidesChk" checked>Guides</label><span class="glegend"><span class="lgp"><i></i>Button</span><span class="lgo"><i></i>With effects</span></span>
+                <span class="seg" role="group" aria-label="Preview size"><button data-pv="fit" aria-pressed="true">Fit to card</button><button data-pv="real" aria-pressed="false">Real size</button></span>
+                <span class="meta" id="bSummary"></span>
+              </div>
+              <div class="bgrid" id="bgrid"></div>
+            </div>
           </div>
-          <div class="bgrid" id="bgrid"></div>
         </div>
-      </div>
-      <div class="exportbox xbox" id="sizeBatch">
-        <div class="xgrid">
-          <section class="xsec xsec-wide">
-            <h4>Texts are different lengths. Should the buttons…</h4>
+        <aside class="xright" aria-label="Export size">
+          <section class="xstep">
+            <h4><span class="xn">1</span>Texts are different lengths. Should the buttons…</h4>
             <div class="xmodes" id="xModes"></div>
           </section>
-          <section class="xsec">
-            <h4 id="xBQ"></h4>
+          <section class="xstep">
+            <h4><span class="xn">2</span><span id="xBQ"></span></h4>
             <div class="xwh"><span class="xin"><input type="number" id="xB" min="1" step="1"><i>px</i></span><span class="note-sm" id="xBHint"></span></div>
-            <h4 style="margin-top:8px">Scale <small>more pixels, same size on screen</small></h4>
+          </section>
+          <section class="xstep">
+            <h4><span class="xn">3</span>Scale <small>more pixels, same size on screen</small></h4>
             <div class="xscale" id="xScaleB" role="group" aria-label="Scale"></div>
           </section>
-        </div>
-      </div>
-      <div class="exportbox">
-        <span class="meta" id="batchCount"></span>
-        <label class="chk"><input type="checkbox" id="bPng" checked>PNG</label>
-        <label class="chk"><input type="checkbox" id="bSvg">SVG</label>
-        <label class="meta" for="prefix">File prefix</label>
-        <input id="prefix" type="text" value="cta-" class="sm" style="width:80px">
-        <label class="meta" for="destSel">Save as</label>
-        <select class="sm" id="destSel">
-          <option value="zip">One ZIP file</option>
-          <option value="folder">Into a folder…</option>
-          <option value="files">Separate files</option>
-          <option value="drive" id="destDrive" disabled>Team Drive folder</option>
-        </select>
-        <span class="drvrow">
-        <a class="btn drv teamfolder" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Team folder</a>
-        <a class="btn drv lastexp" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1"/><path d="M3 7v10a2 2 0 0 0 2 2h12.5a2 2 0 0 0 1.9-1.4L22 11H7.5a2 2 0 0 0-1.9 1.4L3 19"/></svg>Open last export</a>
-        <button class="btn primary" id="exportAll">Export all</button>
-        </span>
+          <section class="xstep xgo">
+            <div class="xgo-row"><span class="meta" id="batchCount"></span><label class="chk"><input type="checkbox" id="bPng" checked>PNG</label><label class="chk"><input type="checkbox" id="bSvg">SVG</label></div>
+            <div class="xgo-row"><label class="meta" for="prefix">File prefix</label><input id="prefix" type="text" value="cta-" class="sm" style="width:90px"></div>
+            <div class="xgo-row"><label class="meta" for="destSel">Save as</label>
+            <select class="sm" id="destSel">
+              <option value="zip">One ZIP file</option>
+              <option value="folder">Into a folder…</option>
+              <option value="files">Separate files</option>
+              <option value="drive" id="destDrive" disabled>Team Drive folder</option>
+            </select>
+            </div>
+            <button class="btn primary xbig" id="exportAll">Export all</button>
+            <div class="xgo-drv">
+            <a class="btn drv teamfolder" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Team folder</a>
+            <a class="btn drv lastexp" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1"/><path d="M3 7v10a2 2 0 0 0 2 2h12.5a2 2 0 0 0 1.9-1.4L22 11H7.5a2 2 0 0 0-1.9 1.4L3 19"/></svg>Open last export</a>
+            </div>
+          </section>
+        </aside>
       </div>
     </div>
 
@@ -3409,7 +3416,8 @@ document.querySelectorAll('[data-pv]').forEach(b => b.onclick = () => { pvMode =
 async function renderBatch() {
   const my = ++bseq;
   const lines = batchLines(), names = fileBases(lines);
-  $('#batchCount').textContent = lines.length ? `${lines.length} button${lines.length > 1 ? 's' : ''}` : 'Add texts on the left';
+  $('#batchCount').textContent = lines.length ? `${lines.length} button${lines.length > 1 ? 's' : ''}` : 'Add texts first';
+  if (!$('#exportAll').disabled) $('#exportAll').textContent = lines.length ? `Export all ${lines.length}` : 'Export all';
   if (!lines.length) { $('#bgrid').replaceChildren(); $('#bSummary').textContent = ''; return; }
   const plan = await planBatch(lines); if (my !== bseq) return;
   $('#xScaleB').innerHTML = scaleBtns(plan[0].m.ow, plan[0].m.oh, false);
