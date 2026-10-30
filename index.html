@@ -300,6 +300,32 @@ a.btn.drv.fresh { border-color: var(--accent); background: var(--accent-soft); c
 .exportbox { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; padding: 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); }
 /* export size: size on screen, scale, empty space; batch choices */
 .exportbox.xbox { display: grid; gap: 14px; align-items: stretch; }
+/* single export: preview and results on the left, the steps on the right (as in the mockup) */
+.xlayout { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 16px; align-items: start; }
+.xleft { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.xright { display: flex; flex-direction: column; gap: 12px; position: sticky; top: calc(var(--modes-h, 90px) + 8px); }
+@media (max-width: 1240px) { .xlayout { grid-template-columns: minmax(0, 1fr); } .xright { position: static; } }
+.xstep { display: grid; gap: 10px; padding: 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); }
+.xstep h4 { margin: 0; display: flex; align-items: baseline; gap: 8px; font-size: 15px; font-weight: 600; flex-wrap: wrap; }
+.xstep h4 small { font-weight: 400; color: var(--muted); font-size: 12.5px; }
+.xn { flex: none; width: 20px; height: 20px; border-radius: 999px; background: var(--fg); color: var(--panel); font-size: 12px; font-weight: 700; display: inline-grid; place-items: center; align-self: center; }
+.xstep .xin { height: 40px; }
+.xstep .xin input { width: 70px; font-size: 16px; }
+.xstep .xlink { width: 40px; height: 40px; }
+.xstep .xscale button { padding: 9px 2px; }
+.xstep .xscale button[aria-pressed="true"] { padding: 8px 1px; }
+.xstep .xscale button b { font-size: 16px; }
+.xstep .xspace b { font-size: 14px; }
+.xgo { gap: 10px; }
+.xgo-top { display: flex; }
+.xgo-top .seg { flex: 1; display: flex; }
+.xgo-top .seg button { flex: 1; }
+.btn.xbig { height: 46px; font-size: 15px; width: 100%; }
+.xgo-drv { display: flex; flex-wrap: wrap; gap: 8px; }
+.xgo-drv > * { flex: 1 1 auto; justify-content: center; text-align: center; }
+#sizeOut { white-space: nowrap; }
+.xleft .xinfo { background: var(--panel); border-radius: 12px; padding: 14px 16px; }
+
 .xgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
 .xsec { display: grid; gap: 8px; align-content: start; padding: 12px; border: 1px solid var(--line); border-radius: 10px; min-width: 0; }
 .xsec-wide { grid-column: span 2; }
@@ -393,7 +419,7 @@ a.btn.drv.fresh { border-color: var(--accent); background: var(--accent-soft); c
 .fv-file { position: relative; line-height: 0; outline: 2px solid var(--accent); }
 .fv-file canvas { display: block; max-width: none; }
 .fv-ghost { position: absolute; border: 1px dashed #8a92a3; box-sizing: border-box; pointer-events: none; }
-.fv-ghost span { position: absolute; left: 3px; top: 3px; font: 600 10px/1 var(--mono); color: #5b6375; background: rgba(255,255,255,.8); padding: 1px 3px; border-radius: 3px; }
+.fv-ghost span { position: absolute; left: -1px; top: -15px; font: 600 10px/1 var(--mono); color: #5b6375; background: rgba(255,255,255,.8); padding: 1px 3px; border-radius: 3px; }
 .fv-grip { height: 12px; display: grid; place-items: center; cursor: ns-resize; touch-action: none; border-top: 1px solid var(--line); }
 .fv-grip span { width: 44px; height: 4px; border-radius: 2px; background: var(--line); }
 .fv-grip:hover span, .fv-grip.drag span { background: var(--accent); }
@@ -608,69 +634,74 @@ input.tg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
         <label>Shape <select class="sm" id="hShape"><option value="">Auto</option></select></label>
         <button class="btn sm" id="hClear" hidden>Clear hints</button>
       </div>
-      <div class="stagegrid" id="stagegrid">
-        <figure class="refbox" id="refbox" hidden>
-          <canvas id="refCanvas" aria-label="Reference image, click to pick a color"></canvas>
-          <figcaption><span>Reference</span><span id="pickOut"></span></figcaption>
-        </figure>
-        <div class="stage" id="stage" data-bg="checker"></div>
-      </div>
-      <div class="bar">
-        <div class="bgs" aria-label="Preview background">
-          <button data-bg="checker" aria-pressed="true" title="Transparent" style="background:conic-gradient(var(--check-b) 25%, var(--check-a) 0 50%, var(--check-b) 0 75%, var(--check-a) 0) 0 0/10px 10px"></button>
-          <button data-bg="#ffffff" aria-pressed="false" title="White" style="background:#ffffff"></button>
-          <button data-bg="#0d0e12" aria-pressed="false" title="Black" style="background:#0d0e12"></button>
-          <input type="color" id="bg-custom" value="#2b6cb0" title="Custom background" aria-label="Custom background">
-        </div>
-        <label class="chk"><input type="checkbox" class="guidesChk" checked>Guides</label><span class="glegend"><span class="lgp"><i></i>Button</span><span class="lgo"><i></i>With effects</span></span>
-        <label class="zoom" for="zoom">Zoom <input type="range" id="zoom" min="0.5" max="3" step="0.25" value="1"><span class="meta" id="zoomOut">100%</span></label>
-        <span class="meta grow" id="sizeOut"></span>
-        <button class="btn sm pinbtn" id="pinBtn" aria-pressed="true">Unpin preview</button>
-      </div>
-      <section class="fileview" id="fileView" aria-label="The exported file at real size">
-        <button type="button" class="fv-head" id="fvHead" aria-expanded="true" aria-controls="fvBody"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5"/></svg><b>The file</b><span class="fv-px" id="fvPx"></span><span class="fv-note" id="fvNote"></span></button>
-        <div class="fv-body" id="fvBody"><div class="fv-in" id="fvWrap"></div></div>
-        <div class="fv-grip" id="fvGrip" role="separator" aria-orientation="horizontal" aria-label="Drag to make the file view taller or shorter (arrow keys work too)" tabindex="0"><span></span></div>
-      </section>
-      <div class="exportbox xbox">
-        <div class="xgrid">
-          <section class="xsec">
-            <h4>Size on screen</h4>
-            <div class="note-sm" id="xHelpWrap">The size you'd give it in Figma or on the page. <span id="xHelp"></span></div>
-            <div class="xwh">
-              <label>Width<span class="xin"><input type="number" id="xW" min="1" step="1"><i>px</i></span></label>
-              <button type="button" class="xlink" id="xLink" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true" class="lk-on"><path d="M9 15 15 9"/><path d="M11 6.5 12.5 5a3.5 3.5 0 0 1 5 5L16 11.5"/><path d="M13 17.5 11.5 19a3.5 3.5 0 0 1-5-5L8 12.5"/></svg><svg viewBox="0 0 24 24" aria-hidden="true" class="lk-off"><path d="M11 6.5 12.5 5a3.5 3.5 0 0 1 5 5L16 11.5"/><path d="M13 17.5 11.5 19a3.5 3.5 0 0 1-5-5L8 12.5"/><path d="M4 4l3 3M20 20l-3-3"/></svg></button>
-              <label>Height<span class="xin"><input type="number" id="xH" min="1" step="1"><i>px</i></span></label>
+      <div class="xlayout">
+        <div class="xleft">
+          <div class="stagegrid" id="stagegrid">
+            <figure class="refbox" id="refbox" hidden>
+              <canvas id="refCanvas" aria-label="Reference image, click to pick a color"></canvas>
+              <figcaption><span>Reference</span><span id="pickOut"></span></figcaption>
+            </figure>
+            <div class="stage" id="stage" data-bg="checker"></div>
+          </div>
+          <div class="bar">
+            <div class="bgs" aria-label="Preview background">
+              <button data-bg="checker" aria-pressed="true" title="Transparent" style="background:conic-gradient(var(--check-b) 25%, var(--check-a) 0 50%, var(--check-b) 0 75%, var(--check-a) 0) 0 0/10px 10px"></button>
+              <button data-bg="#ffffff" aria-pressed="false" title="White" style="background:#ffffff"></button>
+              <button data-bg="#0d0e12" aria-pressed="false" title="Black" style="background:#0d0e12"></button>
+              <input type="color" id="bg-custom" value="#2b6cb0" title="Custom background" aria-label="Custom background">
             </div>
-            <div class="xwarn" id="xWarn" hidden></div>
-            <div class="xchips" id="xChips"></div>
+            <label class="chk"><input type="checkbox" class="guidesChk" checked>Guides</label><span class="glegend"><span class="lgp"><i></i>Button</span><span class="lgo"><i></i>With effects</span></span>
+            <label class="zoom" for="zoom">Zoom <input type="range" id="zoom" min="0.5" max="3" step="0.25" value="1"><span class="meta" id="zoomOut">100%</span></label>
+            <span class="meta grow" id="sizeOut"></span>
+            <button class="btn sm pinbtn" id="pinBtn" aria-pressed="true">Unpin preview</button>
+          </div>
+          <section class="fileview" id="fileView" aria-label="The exported file at real size">
+            <button type="button" class="fv-head" id="fvHead" aria-expanded="true" aria-controls="fvBody"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5"/></svg><b>The file</b><span class="fv-px" id="fvPx"></span><span class="fv-note" id="fvNote"></span></button>
+            <div class="fv-body" id="fvBody"><div class="fv-in" id="fvWrap"></div></div>
+            <div class="fv-grip" id="fvGrip" role="separator" aria-orientation="horizontal" aria-label="Drag to make the file view taller or shorter (arrow keys work too)" tabindex="0"><span></span></div>
           </section>
-          <section class="xsec">
-            <h4>Scale <small>more pixels, same size on screen</small></h4>
-            <div class="xscale" id="xScale" role="group" aria-label="Scale"></div>
-            <div class="note-sm" id="xScaleNote"></div>
+            <div class="xinfo" id="xInfo" aria-live="polite">
+              <div class="xi-txt"><span class="xi-h">Export</span><b class="xi-name" id="xName"></b><span class="xi-px" id="xPx"></span><span class="note-sm" id="xStory"></span><span class="note-sm" id="fmtNote"></span></div>
+              <div class="xi-edge"><div><figure><canvas id="xL0"></canvas><figcaption id="xL0c"></figcaption></figure><figure><canvas id="xL1"></canvas><figcaption id="xL1c"></figcaption></figure></div><span class="note-sm">Edge, zoomed in</span></div>
+            </div>
+        </div>
+        <aside class="xright" aria-label="Export size">
+          <section class="xstep">
+            <h4><span class="xn">1</span>How big is the button on screen?</h4>
+                <div class="note-sm" id="xHelpWrap">The size you'd give it in Figma or on the page. <span id="xHelp"></span></div>
+                <div class="xwh">
+                  <label>Width<span class="xin"><input type="number" id="xW" min="1" step="1"><i>px</i></span></label>
+                  <button type="button" class="xlink" id="xLink" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true" class="lk-on"><path d="M9 15 15 9"/><path d="M11 6.5 12.5 5a3.5 3.5 0 0 1 5 5L16 11.5"/><path d="M13 17.5 11.5 19a3.5 3.5 0 0 1-5-5L8 12.5"/></svg><svg viewBox="0 0 24 24" aria-hidden="true" class="lk-off"><path d="M11 6.5 12.5 5a3.5 3.5 0 0 1 5 5L16 11.5"/><path d="M13 17.5 11.5 19a3.5 3.5 0 0 1-5-5L8 12.5"/><path d="M4 4l3 3M20 20l-3-3"/></svg></button>
+                  <label>Height<span class="xin"><input type="number" id="xH" min="1" step="1"><i>px</i></span></label>
+                </div>
+                <div class="xwarn" id="xWarn" hidden></div>
+                <div class="xchips" id="xChips"></div>
           </section>
-          <section class="xsec">
-            <label class="chk xspace"><input type="checkbox" id="xSpace"><span><b>Add empty space around it</b><small>The image gets a size you choose, with the button in the middle.</small></span></label>
-            <div class="xwh" id="xSpaceRow" hidden><span class="note-sm">Image size</span><span class="xin"><input type="number" id="xSW" min="1" step="1" aria-label="Image width"></span>×<span class="xin"><input type="number" id="xSH" min="1" step="1" aria-label="Image height"><i>px</i></span></div>
-            <div class="xwarn" id="xSpaceWarn" hidden></div>
+          <section class="xstep">
+            <h4><span class="xn">2</span>Scale <small>more pixels, same size on screen</small></h4>
+                <div class="xscale" id="xScale" role="group" aria-label="Scale"></div>
+                <div class="note-sm" id="xScaleNote"></div>
           </section>
-        </div>
-        <div class="xinfo" id="xInfo">
-          <div class="xi-txt"><span class="xi-h">Export</span><b class="xi-name" id="xName"></b><span class="xi-px" id="xPx"></span><span class="note-sm" id="xStory"></span><span class="note-sm" id="fmtNote"></span></div>
-          <div class="xi-edge"><div><figure><canvas id="xL0"></canvas><figcaption id="xL0c"></figcaption></figure><figure><canvas id="xL1"></canvas><figcaption id="xL1c"></figcaption></figure></div><span class="note-sm">Edge, zoomed in</span></div>
-        </div>
-        <div class="xrow">
-        <span class="seg" role="group" aria-label="Format">
-          <button data-fmt="png" aria-pressed="true">PNG</button>
-          <button data-fmt="svg" aria-pressed="false">SVG (vector)</button>
-        </span>
-        <span class="grow"></span>
-        <a class="btn drv teamfolder" id="driveLink" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Team folder</a>
-        <a class="btn drv lastexp" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1"/><path d="M3 7v10a2 2 0 0 0 2 2h12.5a2 2 0 0 0 1.9-1.4L22 11H7.5a2 2 0 0 0-1.9 1.4L3 19"/></svg>Open last export</a>
-        <button class="btn" id="driveOne" title="Save this export into the team's shared Google Drive folder">Save to team Drive</button>
-        <button class="btn primary" id="exportOne">Export PNG</button>
-        </div>
+          <section class="xstep">
+                <label class="chk xspace"><input type="checkbox" id="xSpace"><span><b>Add empty space around it</b><small>The image gets a size you choose, with the button in the middle.</small></span></label>
+                <div class="xwh" id="xSpaceRow" hidden><span class="note-sm">Image size</span><span class="xin"><input type="number" id="xSW" min="1" step="1" aria-label="Image width"></span>×<span class="xin"><input type="number" id="xSH" min="1" step="1" aria-label="Image height"><i>px</i></span></div>
+                <div class="xwarn" id="xSpaceWarn" hidden></div>
+          </section>
+          <section class="xstep xgo">
+            <div class="xgo-top">
+            <span class="seg" role="group" aria-label="Format">
+              <button data-fmt="png" aria-pressed="true">PNG</button>
+              <button data-fmt="svg" aria-pressed="false">SVG (vector)</button>
+            </span>
+            </div>
+            <button class="btn primary xbig" id="exportOne">Export PNG</button>
+            <div class="xgo-drv">
+            <a class="btn drv teamfolder" id="driveLink" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Team folder</a>
+            <a class="btn drv lastexp" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1"/><path d="M3 7v10a2 2 0 0 0 2 2h12.5a2 2 0 0 0 1.9-1.4L22 11H7.5a2 2 0 0 0-1.9 1.4L3 19"/></svg>Open last export</a>
+            <button class="btn" id="driveOne" title="Save this export into the team's shared Google Drive folder">Save to team Drive</button>
+            </div>
+          </section>
+        </aside>
       </div>
     </div>
 
@@ -3284,6 +3315,7 @@ function updateSizeInfo() {
     $('#xScaleNote').textContent = SCALE_NOTE[K];
     $('#xName').textContent = `${fileBases([text.replace(/\n/g, ' ')])[0]}.${fmtOne}`;
     $('#xPx').textContent = fmtOne === 'svg' ? `${e.fw} × ${e.fh} (vector)` : `${e.fw} × ${e.fh} px`;
+    $('#exportOne').textContent = `Export ${fmtOne.toUpperCase()} · ${e.fw} × ${e.fh}`;
     $('#xStory').textContent = (EXP.space ? `A ${EXP.SW} × ${EXP.SH} image with the ${sw} × ${sh} button in the middle` : `Shows as a ${sw} × ${sh} button`) +
       (K === 1 ? '. One file pixel per screen pixel.' : `. ${K}× scale: ${K} × ${K} file pixels for every screen pixel, so the edges stay crisp.`);
     $('#fmtNote').innerHTML = fmtOne === 'svg' ? (tfOn(D) && (D.tf.tiltX || D.tf.tiltY) ? 'Tilt has no vector form, so this SVG holds a sharp image of the tilted button.' : 'Vector shapes and editable text. Install the font where you open it.') : '';
