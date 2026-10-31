@@ -5786,19 +5786,38 @@ function tourPlace() {
   const x = Math.min(innerWidth - cw - 16, Math.max(16, r.width > 480 ? r.left + 16 : r.left + r.width / 2 - cw / 2));
   card.style.left = x + 'px'; card.style.top = y + 'px';
 }
-// bring a part into view just below whatever is pinned at the top (the mode bar; on phones, the preview)
-function tourScroll(el, mode) {
+// bring a part into view just below whatever is pinned at the top (the mode bar; on phones, the preview).
+// Phones differ in how pages scroll, so check it moved and fall back to simpler ways if it did not.
+let tourScrollT = 0;
+function tourPad(el) {
   const mob = matchMedia('(max-width: 860px)').matches, sg = $('#stagegrid');
-  let pad;
-  if (mob) pad = sg && view === 'single' && getComputedStyle(sg).position === 'sticky' && !sg.contains(el) && el !== sg ? sg.getBoundingClientRect().height + 12 : 12;
-  else pad = (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--modes-h')) || 90) + 16;
-  let sc = el.parentElement;
-  while (sc && sc !== document.body) { const o = getComputedStyle(sc).overflowY; if ((o === 'auto' || o === 'scroll') && sc.scrollHeight > sc.clientHeight + 1) break; sc = sc.parentElement; }
-  if (!sc || sc === document.body) sc = document.scrollingElement;
-  const r = el.getBoundingClientRect(), view0 = sc === document.scrollingElement ? 0 : sc.getBoundingClientRect().top;
+  if (mob) return sg && view === 'single' && getComputedStyle(sg).position === 'sticky' && !sg.contains(el) && el !== sg ? sg.getBoundingClientRect().height + 12 : 12;
+  return (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--modes-h')) || 90) + 16;
+}
+function tourWant(el, mode) {
+  const mob = matchMedia('(max-width: 860px)').matches, pad = tourPad(el), h = el.getBoundingClientRect().height;
   const avail = (mob ? innerHeight - 230 : innerHeight) - pad;
-  const want = mob || mode === 'start' || r.height > avail ? pad : pad + Math.max(0, (avail - r.height) / 2 - 60);
-  sc.scrollBy({ top: r.top - view0 - want, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  return mob || mode === 'start' || h > avail ? pad : pad + Math.max(0, (avail - h) / 2 - 60);
+}
+function scrollerOf(el) {
+  for (let sc = el.parentElement; sc && sc !== document.body && sc !== document.documentElement; sc = sc.parentElement) {
+    const cs = getComputedStyle(sc);
+    if (cs.display !== 'contents' && /(auto|scroll)/.test(cs.overflowY) && sc.scrollHeight > sc.clientHeight + 1) return sc;
+  }
+  return null;
+}
+function tourScroll(el, mode, tries = 0) {
+  const d = el.getBoundingClientRect().top - tourWant(el, mode);
+  if (Math.abs(d) < 24) return;
+  const sc = scrollerOf(el), pos = () => sc ? sc.scrollTop : window.pageYOffset, before = pos();
+  const max = sc ? sc.scrollHeight - sc.clientHeight : document.scrollingElement.scrollHeight - innerHeight;
+  if ((d < 0 && before <= 0) || (d > 0 && before >= max - 1)) return; // already as far as it can go
+  if (tries === 0) (sc || window).scrollBy({ top: d, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  else if (tries === 1) { if (sc) sc.scrollTop += d; else window.scrollTo(0, window.pageYOffset + d); }
+  else { el.scrollIntoView(true); window.scrollBy(0, -tourWant(el, mode)); tourPlace(); return; }
+  clearTimeout(tourScrollT);
+  // only when nothing moved at all (some phone browsers ignore one way of scrolling) try the next way
+  tourScrollT = setTimeout(() => { if (pos() === before && Math.abs(el.getBoundingClientRect().top - tourWant(el, mode)) > 24) tourScroll(el, mode, tries + 1); tourPlace(); }, tries === 0 ? 800 : 150);
 }
 function tourShow(i) {
   tourI = i; const st = TOUR[i];
