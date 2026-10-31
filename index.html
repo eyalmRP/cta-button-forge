@@ -214,6 +214,21 @@ input[type="color"] { width: 100%; height: 26px; padding: 0 2px; border: 1px sol
 .view { display: flex; flex-direction: column; gap: 12px; padding-block: 16px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
 .textrow textarea { width: 100%; font-size: 18px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); resize: vertical; min-height: 50px; line-height: 1.4; display: block; }
 .refbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+/* first-run tour: a spotlight on one part of the app at a time, with a short note */
+.tourbtn { display: inline-flex; align-items: center; gap: 6px; }
+.tourbtn svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
+.tour { position: fixed; inset: 0; z-index: 90; }
+.tour-spot { position: fixed; border-radius: 12px; box-shadow: 0 0 0 9999px rgba(10, 12, 20, .58); outline: 3px solid var(--accent); outline-offset: 2px; transition: all .3s ease; pointer-events: none; }
+.tour-spot.none { left: 50% !important; top: 40% !important; width: 0 !important; height: 0 !important; outline: 0; }
+.tour-card { position: fixed; width: min(360px, calc(100vw - 32px)); background: var(--panel); color: var(--fg); border-radius: 14px; padding: 16px 18px 14px; box-shadow: 0 18px 50px rgba(0,0,0,.35); transition: left .3s ease, top .3s ease; display: grid; gap: 6px; }
+.tour-card h3 { margin: 0; font-size: 17px; }
+.tour-card p { margin: 0 0 6px; color: var(--muted); font-size: 13.5px; line-height: 1.5; }
+.tour-step { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.tour-btns { display: flex; align-items: center; gap: 8px; }
+.tour-btns .grow { flex: 1; }
+@media (max-width: 860px) { .tour-card { left: 16px !important; right: 16px; width: auto; top: auto !important; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); } }
+@media (prefers-reduced-motion: reduce) { .tour-spot, .tour-card { transition: none; } }
+
 /* export: one line that always shows the result; "Size & scale" opens the settings under it */
 .xbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 12px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); }
 .xsum { display: flex; align-items: center; gap: 10px; flex: 1 1 300px; min-width: 0; padding: 8px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); color: var(--fg); cursor: pointer; text-align: left; }
@@ -622,6 +637,7 @@ input.tg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
   <header class="top">
     <div class="brand"><i aria-hidden="true"></i>CTA Button Forge</div>
     <div class="hint">Buttons grow with their text. Effects stack. Export PNG or SVG, one at a time or in batches.</div>
+    <button type="button" class="btn sm tourbtn" id="tourBtn" title="A one-minute walk through the app. Run it any time."><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14"/><path d="M12 17.5h.01"/></svg>Tour</button>
     <span class="seg" role="group" aria-label="Interface theme">
       <button data-theme-set="system" aria-pressed="true">Auto</button>
       <button data-theme-set="light" aria-pressed="false">Light</button>
@@ -855,6 +871,15 @@ Start</textarea>
 <div class="toast" id="toast" role="status"></div>
 <div class="progress" id="progress" hidden role="progressbar" aria-live="polite"><span class="pl" id="progLabel"></span><span class="track"><span class="fill" id="progFill"></span></span></div>
 <div class="menu" id="menu" role="menu" hidden></div>
+<div class="tour" id="tour" hidden>
+  <div class="tour-spot" id="tourSpot"></div>
+  <div class="tour-card" id="tourCard" role="dialog" aria-modal="true" aria-labelledby="tourTitle" aria-describedby="tourText">
+    <div class="tour-step" id="tourStep"></div>
+    <h3 id="tourTitle"></h3>
+    <p id="tourText"></p>
+    <div class="tour-btns"><button type="button" class="btn sm" id="tourSkip"></button><span class="grow"></span><button type="button" class="btn sm" id="tourBack">Back</button><button type="button" class="btn sm primary" id="tourNext">Next</button></div>
+  </div>
+</div>
 <dialog class="askdlg" id="askDlg" aria-labelledby="askTitle">
   <form method="dialog">
     <h2 id="askTitle"></h2>
@@ -5731,6 +5756,88 @@ function resizer(grip, cssVar, def, min, max, store, target = document.documentE
 resizer($('#railGrip'), '--rail', 360, () => 260, () => Math.max(300, innerWidth * 0.6), 'ctaforge.railW', document.querySelector('.app'), () => document.querySelector('.app').getBoundingClientRect().left);
 resizer($('#folderGrip'), '--ftw', 210, () => 150, () => Math.max(200, document.querySelector('.libgrid').clientWidth * 0.5), 'ctaforge.folderW', document.querySelector('.libgrid'), () => document.querySelector('.libgrid').getBoundingClientRect().left);
 
+/* ================= first-run tour ================= */
+// shown once on a first visit; the Tour button in the top bar runs it again any time
+const STORE_TOUR = 'ctaforge.tourSeen';
+const TOUR = [
+  { title: 'Welcome to CTA Button Forge', text: 'Design call-to-action buttons and export them as PNG or SVG, one at a time or many at once. This tour takes about a minute.' },
+  { el: '#ctaText', title: 'Your button text', text: 'Type the words for your button. Press Enter for a second line. The button grows to fit.', single: true },
+  { el: '.lib', title: 'Start from a preset', text: 'Every design here applies at once to your button (and to all buttons in Batch). Your text stays. Use the folders to browse.', scroll: 'start' },
+  { el: '#controls .layers', title: 'Change any part', text: 'Pick what to edit: the text, the button, an icon, a cursor or the whole design. Its settings show below.' },
+  { el: '#stagegrid', title: 'Live preview', text: 'This is the button at its real size on screen. Purple guides show the button; orange ones show the extra room taken by shadows and glows.', single: true },
+  { el: '.refbar', title: 'Copy a button you like', text: 'Have a screenshot or a Figma design? Match a reference image, or paste the CSS from Figma. Presets… opens the presets right here too.', single: true },
+  { el: '#xBarS', title: 'Export', text: 'This line shows exactly what you will get. Open Size & scale to set the size on screen and the scale (2× is crisp on phones), then press Export.', single: true },
+  { el: '#tab-batch', title: 'Many buttons at once', text: 'Batch makes one button per line of text, all in the same design, and exports them together as a ZIP, a folder or to the team Drive.' },
+  { el: '.libtools', title: 'Save and share', text: 'Name your design and Save it, or share it with the team so everyone can use it.', scroll: 'center' },
+  { el: '#tourBtn', title: "That's it", text: 'You can take this tour again any time from the Tour button up here.', last: true },
+];
+let tourI = 0, tourBack = null;
+function tourPlace() {
+  const st = TOUR[tourI], spot = $('#tourSpot'), card = $('#tourCard'), el = st.el && document.querySelector(st.el);
+  const vis = el && el.getClientRects().length;
+  if (!vis) { spot.classList.add('none'); card.style.left = Math.max(16, (innerWidth - card.offsetWidth) / 2) + 'px'; card.style.top = Math.max(16, (innerHeight - card.offsetHeight) / 2 - 40) + 'px'; return; }
+  const r = el.getBoundingClientRect(), pad = 6;
+  spot.classList.remove('none');
+  const top = Math.max(4, r.top - pad), bottom = Math.min(innerHeight - 4, r.bottom + pad);
+  Object.assign(spot.style, { left: r.left - pad + 'px', top: top + 'px', width: r.width + 2 * pad + 'px', height: Math.max(0, bottom - top) + 'px' });
+  const cw = card.offsetWidth, ch = card.offsetHeight;
+  let y = bottom + 12; if (y + ch > innerHeight - 12) y = top - ch - 12; if (y < 12) y = Math.min(innerHeight - ch - 12, Math.max(12, r.top + 12));
+  // wide parts: card at their left edge; small parts: card centred under them
+  const x = Math.min(innerWidth - cw - 16, Math.max(16, r.width > 480 ? r.left + 16 : r.left + r.width / 2 - cw / 2));
+  card.style.left = x + 'px'; card.style.top = y + 'px';
+}
+// bring a part into view just below whatever is pinned at the top (the mode bar; on phones, the preview)
+function tourScroll(el, mode) {
+  const mob = matchMedia('(max-width: 860px)').matches, sg = $('#stagegrid');
+  let pad;
+  if (mob) pad = sg && view === 'single' && getComputedStyle(sg).position === 'sticky' && !sg.contains(el) && el !== sg ? sg.getBoundingClientRect().height + 12 : 12;
+  else pad = (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--modes-h')) || 90) + 16;
+  let sc = el.parentElement;
+  while (sc && sc !== document.body) { const o = getComputedStyle(sc).overflowY; if ((o === 'auto' || o === 'scroll') && sc.scrollHeight > sc.clientHeight + 1) break; sc = sc.parentElement; }
+  if (!sc || sc === document.body) sc = document.scrollingElement;
+  const r = el.getBoundingClientRect(), view0 = sc === document.scrollingElement ? 0 : sc.getBoundingClientRect().top;
+  const avail = (mob ? innerHeight - 230 : innerHeight) - pad;
+  const want = mob || mode === 'start' || r.height > avail ? pad : pad + Math.max(0, (avail - r.height) / 2 - 60);
+  sc.scrollBy({ top: r.top - view0 - want, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+}
+function tourShow(i) {
+  tourI = i; const st = TOUR[i];
+  if (st.single && view !== 'single') setView('single');
+  $('#tourStep').textContent = i === 0 ? 'Quick tour' : `Step ${i} of ${TOUR.length - 1}`;
+  $('#tourTitle').textContent = st.title; $('#tourText').textContent = st.text;
+  $('#tourBack').hidden = i === 0;
+  $('#tourNext').textContent = i === 0 ? 'Start the tour' : st.last ? 'Done' : 'Next';
+  $('#tourSkip').textContent = i === 0 ? 'Not now' : st.last ? '' : 'Skip tour';
+  $('#tourSkip').hidden = !!st.last;
+  const el = st.el && document.querySelector(st.el);
+  if (el) tourScroll(el, st.scroll);
+  tourPlace(); setTimeout(tourPlace, 450); setTimeout(tourPlace, 900);
+  $('#tourNext').focus();
+}
+function tourStart(fromStep = 0) {
+  closeMenu(); tourBack = document.activeElement;
+  $('#tour').hidden = false; tourShow(fromStep);
+  addEventListener('resize', tourPlace); addEventListener('scroll', tourPlace, true);
+}
+function tourEnd(skipped) {
+  $('#tour').hidden = true;
+  removeEventListener('resize', tourPlace); removeEventListener('scroll', tourPlace, true);
+  try { localStorage.setItem(STORE_TOUR, '1'); } catch (e) {}
+  if (skipped) toast('You can take the tour any time from the Tour button at the top.', 4500);
+  (tourBack && tourBack.focus ? tourBack : $('#tourBtn')).focus?.();
+}
+$('#tourBtn').onclick = () => tourStart(1);
+$('#tourNext').onclick = () => TOUR[tourI].last ? tourEnd(false) : tourShow(tourI + 1);
+$('#tourBack').onclick = () => tourShow(Math.max(0, tourI - 1));
+$('#tourSkip').onclick = () => tourEnd(true);
+$('#tour').addEventListener('keydown', e => {
+  if (e.key === 'Escape') { e.preventDefault(); tourEnd(tourI < TOUR.length - 1); }
+  else if (e.key === 'ArrowRight') { e.preventDefault(); $('#tourNext').click(); }
+  else if (e.key === 'ArrowLeft' && tourI > 0) { e.preventDefault(); tourShow(tourI - 1); }
+  else if (e.key === 'Tab') { const f = [...$('#tourCard').querySelectorAll('button:not([hidden])')]; const i = f.indexOf(document.activeElement); e.preventDefault(); f[(i + (e.shiftKey ? f.length - 1 : 1)) % f.length].focus(); }
+});
+// clicks outside the card do nothing while the tour is open
+$('#tour').addEventListener('pointerdown', e => { if (!e.target.closest('#tourCard')) e.preventDefault(); });
 /* ================= boot ================= */
 buildPanel();
 syncUI();
@@ -5745,6 +5852,8 @@ pushHist();
   renderSingle();
   updBatchHint();
   renderGallery();
+  let seen = false; try { seen = !!localStorage.getItem(STORE_TOUR) || /[?&]notour\b/.test(location.search); } catch (e) {}
+  if (!seen) setTimeout(() => tourStart(0), 600);
 })();
 document.fonts.addEventListener?.('loadingdone', () => requestRender());
 </script>
