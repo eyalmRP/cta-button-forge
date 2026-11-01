@@ -355,6 +355,11 @@ a.btn.drv.fresh { border-color: var(--accent); background: var(--accent-soft); c
 .cn-ctl { display: grid; gap: 8px; min-width: 0; }
 .cn-ctl .fld { grid-template-columns: 44px minmax(0, 1fr) 54px; }
 .bhead { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.bcard { position: relative; }
+.bsel { position: absolute; top: 8px; left: 8px; z-index: 2; width: 28px; height: 28px; display: grid; place-items: center; border-radius: 7px; background: var(--panel); border: 1px solid var(--line); cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+.bsel input { width: 17px; height: 17px; margin: 0; accent-color: var(--accent); cursor: pointer; }
+.bcard.off .img, .bcard.off .cap, .bcard.off .sub { opacity: .38; }
+#bSelAll { margin-left: auto; }
 .bcard .sub { padding: 0 10px 8px; font-family: var(--mono); font-size: 11px; color: var(--muted); }
 .warn { color: var(--danger); }
 .stage canvas.real { outline: 1px dashed color-mix(in srgb, var(--accent) 65%, transparent); }
@@ -795,6 +800,7 @@ Start</textarea>
                 <label class="chk"><input type="checkbox" class="guidesChk" checked>Guides</label><span class="glegend"><span class="lgp"><i></i>Button</span><span class="lgo"><i></i>With effects</span></span>
                 <span class="seg" role="group" aria-label="Preview size"><button data-pv="fit" aria-pressed="true">Fit to card</button><button data-pv="real" aria-pressed="false">Real size</button></span>
                 <span class="meta" id="bSummary"></span>
+            <button type="button" class="btn sm" id="bSelAll">Select none</button>
               </div>
               <div class="bgrid" id="bgrid"></div>
             </div>
@@ -1621,7 +1627,8 @@ async function getLayout(d, text) {
   const f = d.font, I = d.icon, b = d.box;
   let t = String(text ?? '').replace(/\|/g, '\n');
   if (f.upper) t = t.toLocaleUpperCase();
-  let lines = t.split('\n').map(s => s.trim()).filter(Boolean);
+  // a line of only spaces keeps them, so a blank button takes its width from them
+  let lines = t.split('\n').map(s => s.trim() || s).filter(s => s.length);
   if (!lines.length) lines = I.type !== 'none' ? [''] : [' '];
   await loadFont(f, lines.join('') || 'A');
   const fontStr = fontString(f);
@@ -3203,7 +3210,8 @@ function requestRender() {
   if (view === 'batch') { clearTimeout(batchTimer); batchTimer = setTimeout(renderBatch, 150); }
   updBatchHint();
 }
-function batchLines() { return $('#batchText').value.split('\n').map(s => s.trim()).filter(Boolean); }
+// one button per line; empty lines are skipped, a line of only spaces makes a blank button
+function batchLines() { return $('#batchText').value.split('\n').map(s => s.trim() || s).filter(s => s.length); }
 function updBatchHint() { const n = batchLines().length; $('#batchHint').textContent = n ? `${n} text${n > 1 ? 's' : ''} → ${n} button${n > 1 ? 's' : ''}, same design` : 'Many texts, same design, one export'; }
 function fileBases(lines) {
   const pre = $('#prefix').value.trim(), seen = {};
@@ -3492,11 +3500,20 @@ document.addEventListener('change', e => {
 const range = a => { const lo = Math.min(...a), hi = Math.max(...a); return lo === hi ? `${lo}` : `${lo}–${hi}`; };
 let bseq = 0, pvMode = 'fit';
 document.querySelectorAll('[data-pv]').forEach(b => b.onclick = () => { pvMode = b.dataset.pv; document.querySelectorAll('[data-pv]').forEach(x => x.setAttribute('aria-pressed', x === b)); renderBatch(); });
+// texts left out of the batch export (kept by text, so edits elsewhere in the list keep the choice)
+const BSKIP = new Set();
+function batchPicked(lines = batchLines()) { return lines.map((t, i) => i).filter(i => !BSKIP.has(lines[i])); }
+function updBatchSel(lines = batchLines()) {
+  const n = lines.length, k = batchPicked(lines).length;
+  $('#batchCount').textContent = !n ? 'Add texts first' : k === n ? `${n} button${n > 1 ? 's' : ''}` : `${k} of ${n} picked`;
+  if (!$('#exportAll').disabled) $('#exportAll').textContent = !n ? 'Export all' : k === n ? `Export all ${n}` : `Export ${k} of ${n}`;
+  if (n && !k && !$('#exportAll').disabled) $('#exportAll').textContent = 'Pick buttons to export';
+  const all = $('#bSelAll'); if (all) { all.hidden = !n; all.textContent = k === n ? 'Select none' : 'Select all'; }
+}
 async function renderBatch() {
   const my = ++bseq;
   const lines = batchLines(), names = fileBases(lines);
-  $('#batchCount').textContent = lines.length ? `${lines.length} button${lines.length > 1 ? 's' : ''}` : 'Add texts first';
-  if (!$('#exportAll').disabled) $('#exportAll').textContent = lines.length ? `Export all ${lines.length}` : 'Export all';
+  updBatchSel(lines);
   if (!lines.length) { $('#bgrid').replaceChildren(); $('#bSummary').textContent = ''; return; }
   const plan = await planBatch(lines); if (my !== bseq) return;
   $('#xScaleB').innerHTML = scaleBtns(plan[0].m.ow, plan[0].m.oh, false);
@@ -3531,7 +3548,11 @@ async function renderBatch() {
     const sub = document.createElement('div'); sub.className = 'sub';
     sub.textContent = `on screen ${Math.round(it.m.w * it.f)}×${Math.round(it.m.h * it.f)} · text ${Math.round(it.d.font.size * it.f * 10) / 10}px` + (it.note ? ` · ${it.note}` : '');
     if (!sameFont) sub.classList.add('warn');
-    card.append(img, cap, sub); cards.push(card);
+    const sel = document.createElement('label'); sel.className = 'bsel'; sel.title = 'Include in the export';
+    const cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = !BSKIP.has(lines[i]); cb.setAttribute('aria-label', `Export ${names[i]}`);
+    cb.onchange = () => { if (cb.checked) BSKIP.delete(lines[i]); else BSKIP.add(lines[i]); card.classList.toggle('off', !cb.checked); updBatchSel(); };
+    sel.append(cb); card.classList.toggle('off', !cb.checked);
+    card.append(sel, img, cap, sub); cards.push(card);
   }
   $('#bgrid').replaceChildren(...cards);
 }
@@ -3587,8 +3608,15 @@ $('#copyOne').addEventListener('click', async e => {
     toast(err?.name === 'NotAllowedError' ? 'Copying is blocked here. Open the app in its own tab, or use Export.' : 'Could not copy. Use Export instead.', 4500);
   } finally { btn.disabled = false; }
 });
+$('#bSelAll').onclick = () => {
+  const lines = batchLines(), none = batchPicked(lines).length === lines.length;
+  lines.forEach(t => none ? BSKIP.add(t) : BSKIP.delete(t));
+  document.querySelectorAll('#bgrid .bsel input').forEach(cb => { cb.checked = !none; cb.closest('.bcard').classList.toggle('off', none); });
+  updBatchSel(lines);
+};
 $('#exportAll').addEventListener('click', async e => {
-  const lines = batchLines(); if (!lines.length) { toast('Add at least one line of text first.'); return; }
+  const all = batchLines(); if (!all.length) { toast('Add at least one line of text first.'); return; }
+  const pick = batchPicked(all); if (!pick.length) { toast('Tick at least one button to export.'); return; }
   const fmts = [$('#bPng').checked && 'png', $('#bSvg').checked && 'svg'].filter(Boolean);
   if (!fmts.length) { toast('Pick PNG, SVG or both.'); return; }
   const dest = $('#destSel').value, btn = e.currentTarget, label = btn.textContent;
@@ -3602,14 +3630,16 @@ $('#exportAll').addEventListener('click', async e => {
   if (dest === 'drive' && TEAM.kind !== 'sheet') { toast('Connect the team library first.'); return; }
   btn.disabled = true;
   try {
-    const bases = fileBases(lines), files = [];
+    // sizes come from the whole list (as shown), then only the picked buttons are saved
+    const allBases = fileBases(all), files = [];
     btn.textContent = 'Measuring…';
-    const pg = progress('Rendering', lines.length * fmts.length);
+    const pg = progress('Rendering', pick.length * fmts.length);
     try {
-      const plan = await planBatch(lines);
-      for (let i = 0; i < lines.length; i++) for (const f of fmts) {
-        btn.textContent = `Rendering ${i + 1}/${lines.length}…`;
-        files.push({ name: `${bases[i]}.${f}`, blob: await makeBlob(plan[i], f) }); pg.step();
+      const allPlan = await planBatch(all);
+      for (let j = 0; j < pick.length; j++) for (const f of fmts) {
+        const i = pick[j];
+        btn.textContent = `Rendering ${j + 1}/${pick.length}…`;
+        files.push({ name: `${allBases[i]}.${f}`, blob: await makeBlob(allPlan[i], f) }); pg.step();
       }
     } finally { pg.end(); }
     if (dest === 'zip') {
@@ -3617,7 +3647,7 @@ $('#exportAll').addEventListener('click', async e => {
       zip.file('design.json', JSON.stringify(D, null, 2));
       btn.textContent = 'Zipping…'; const zp = progress('Zipping…');
       let zblob; try { zblob = await zip.generateAsync({ type: 'blob' }); } finally { zp.end(); }
-      await saveFile(`${($('#prefix').value.trim() || 'cta-').replace(/-$/, '')}-buttons-${lines.length}.zip`, zblob);
+      await saveFile(`${($('#prefix').value.trim() || 'cta-').replace(/-$/, '')}-buttons-${pick.length}.zip`, zblob);
     } else if (dest === 'drive') {
       const stamp = new Date().toISOString().slice(0, 16).replace('T', ' ').replace(':', '.');
       const up = progress('Uploading to the team Drive folder', files.length);
