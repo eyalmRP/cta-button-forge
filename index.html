@@ -240,6 +240,8 @@ input[type="color"] { width: 100%; height: 26px; padding: 0 2px; border: 1px sol
 .xsum[aria-expanded="true"] .xchev { transform: none; }
 .xb-drv { display: flex; gap: 8px; flex-wrap: wrap; order: 9; flex-basis: 100%; justify-content: flex-end; }
 .xb-drv .btn { padding: 5px 10px; font-size: 12.5px; }
+.copybtn { display: inline-flex; align-items: center; gap: 6px; }
+.copybtn svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linejoin: round; }
 #xBarS .xsum { flex: 1 1 380px; }
 #xBarB .xsum { flex-basis: 100%; }
 .xbar .xgo-row select { flex: none; width: auto; }
@@ -738,6 +740,7 @@ input.tg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
         <span class="xb-drv"><a class="btn drv teamfolder" id="driveLink" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Team folder</a>
             <a class="btn drv lastexp" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1"/><path d="M3 7v10a2 2 0 0 0 2 2h12.5a2 2 0 0 0 1.9-1.4L22 11H7.5a2 2 0 0 0-1.9 1.4L3 19"/></svg>Open last export</a>
             <button class="btn" id="driveOne" title="Save this export into the team's shared Google Drive folder">Save to team Drive</button></span>
+        <button class="btn copybtn" id="copyOne" title="Copy the image at the chosen scale, then paste it into Figma, Slack, a doc or an email"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>Copy</button>
         <button class="btn primary" id="exportOne">Export PNG</button>
       </section>
       <section class="xmore" id="xMoreS" hidden>
@@ -3567,6 +3570,22 @@ $('#exportOne').addEventListener('click', async e => {
     await saveFile(`${fileBases([text.replace(/\n/g, ' ')])[0]}.${fmtOne}`, blob);
   } catch (err) { toast('Export failed: ' + (err?.message || err)); }
   finally { btn.disabled = false; }
+});
+// copy the single export to the clipboard at the chosen scale: the picture for PNG, the code for SVG.
+// The clipboard gets a promise right away, so browsers that need the click still count it as one.
+$('#copyOne').addEventListener('click', async e => {
+  const btn = e.currentTarget, text = $('#ctaText').value || 'button', svg = fmtOne === 'svg';
+  if (!navigator.clipboard || !window.ClipboardItem) { toast('This browser cannot copy images. Use Export instead.', 4000); return; }
+  btn.disabled = true;
+  const planP = planExport([text]);
+  const blobP = planP.then(async ([it]) => svg ? new Blob([await buildSVG(it.d, it.t, { k: it.k, frame: it.frame })], { type: 'text/plain' }) : toBlob(await renderItem(it)));
+  try {
+    await navigator.clipboard.write([new ClipboardItem({ [svg ? 'text/plain' : 'image/png']: blobP })]);
+    const ex = estimate((await planP)[0]);
+    toast(svg ? 'Copied the SVG code. Paste it into Figma or your code.' : `Copied the ${ex.fw} × ${ex.fh} px image (${EXP.k}×). Paste it anywhere.`, 3500);
+  } catch (err) {
+    toast(err?.name === 'NotAllowedError' ? 'Copying is blocked here. Open the app in its own tab, or use Export.' : 'Could not copy. Use Export instead.', 4500);
+  } finally { btn.disabled = false; }
 });
 $('#exportAll').addEventListener('click', async e => {
   const lines = batchLines(); if (!lines.length) { toast('Add at least one line of text first.'); return; }
