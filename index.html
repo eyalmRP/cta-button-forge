@@ -37,7 +37,7 @@
   --check-a: #1e2129; --check-b: #262a33; color-scheme: dark;
 }
 :root[data-theme="light"] { color-scheme: light; }
-html, body { height: 100%; }
+html, body { height: 100%; margin: 0; }
 body { background: var(--bg); color: var(--fg); font-family: var(--ui); font-size: 13px; }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
@@ -91,8 +91,8 @@ body.resizing { cursor: col-resize; user-select: none; }
 .sec > summary::after, .fx > summary::after { content: ""; margin-left: auto; width: 6px; height: 6px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(-45deg); transition: transform .15s; color: var(--muted); }
 .sec[open] > summary::after, .fx[open] > summary::after { transform: rotate(45deg); }
 .sec-body { padding: 0 16px 14px; display: grid; gap: 10px; }
-.fld { display: grid; grid-template-columns: 92px minmax(0, 1fr) 62px; align-items: center; gap: 8px; }
-.fld > label { color: var(--muted); }
+.fld { display: grid; grid-template-columns: 114px minmax(0, 1fr) 58px; align-items: center; gap: 8px; }
+.fld > label { color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .fld > label small { font-size: 10px; opacity: .8; }
 .fld code { font-family: var(--mono); font-size: 11px; color: var(--muted); text-align: right; }
 .fld select { grid-column: 2 / 4; padding: 5px 6px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); min-width: 0; }
@@ -157,7 +157,7 @@ input[type="color"] { width: 100%; height: 26px; padding: 0 2px; border: 1px sol
 .ge-top { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
 .ge-top .ge-l { color: var(--muted); flex: 1; min-width: 70px; }
 .ge-top select, .ge-top .num { width: auto; padding: 3px 5px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); }
-.ge-top .num { width: 52px; }
+.ge-top .num { width: 62px; }
 .ge-bar { height: 22px; border-radius: 6px; border: 1px solid var(--line); background-image: var(--ge, none), conic-gradient(var(--check-b) 25%, var(--check-a) 0 50%, var(--check-b) 0 75%, var(--check-a) 0); background-size: 100% 100%, 10px 10px; cursor: copy; }
 .ge-track { position: relative; height: 18px; margin: 0 7px; cursor: copy; }
 .ge-stop { position: absolute; top: 2px; width: 14px; height: 14px; margin-left: -7px; border-radius: 3px; border: 2px solid var(--panel); box-shadow: 0 0 0 1px var(--muted); cursor: ew-resize; touch-action: none; padding: 0; }
@@ -330,6 +330,16 @@ input[type="color"] { width: 100%; height: 26px; padding: 0 2px; border: 1px sol
 .bcard:hover .bedit, .bcard:focus-within .bedit { opacity: 1; }
 @media (hover: none) { .bcard .bedit { opacity: 1; } }
 .bcard.back { outline: 3px solid var(--fromb); outline-offset: 2px; box-shadow: 0 0 0 8px color-mix(in srgb, var(--fromb) 20%, transparent); transition: outline-color 1.2s, box-shadow 1.2s; }
+@media (max-width: 860px) {
+  .seg button, .chip, .btn.sm, .ip-tabs button, .xbox .xscale button { min-height: 38px; }
+  input[type="checkbox"] { width: 20px; height: 20px; }
+  .frow > .fopen { min-height: 40px; }
+  .frow .fmore { min-width: 36px; min-height: 36px; opacity: 1; }
+  .bgs button, .bgs input { width: 34px !important; height: 34px !important; }
+  #foldBtn, .fxadd, .ftree .fh button { min-height: 34px; padding-inline: 12px; }
+  .gcard .more { width: 34px !important; height: 34px !important; }
+  .xb-drv .btn, .modesw .mode, #tab-single, #tab-batch { min-height: 38px; }
+}
 @media (max-width: 860px) { .tour-card { left: 16px !important; right: 16px; width: auto; top: auto !important; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); } }
 @media (prefers-reduced-motion: reduce) { .tour-spot, .tour-card { transition: none; } }
 
@@ -589,7 +599,7 @@ a.btn.drv.fresh { border-color: var(--accent); background: var(--accent-soft); c
 .fv-file { position: relative; line-height: 0; outline: 2px solid var(--accent); }
 .fv-file canvas { display: block; max-width: none; }
 .fv-ghost { position: absolute; border: 1px dashed #8a92a3; box-sizing: border-box; pointer-events: none; }
-.fv-ghost span { position: absolute; left: -1px; top: -15px; font: 600 10px/1 var(--mono); color: #5b6375; background: rgba(255,255,255,.8); padding: 1px 3px; border-radius: 3px; }
+.fv-ghost span { position: absolute; right: -1px; bottom: -15px; font: 600 10px/1 var(--mono); color: #5b6375; background: rgba(255,255,255,.8); padding: 1px 3px; border-radius: 3px; }
 .fv-grip { height: 12px; display: grid; place-items: center; cursor: ns-resize; touch-action: none; border-top: 1px solid var(--line); }
 .fv-grip span { width: 44px; height: 4px; border-radius: 2px; background: var(--line); }
 .fv-grip:hover span, .fv-grip.drag span { background: var(--accent); }
@@ -842,6 +852,35 @@ input.tg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
   .gallery { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+/* ===== audit fixes ===== */
+.meta.prose, .cssbox > label.meta { font-family: var(--ui); }
+/* library filter: one connected switch (no gaps), one line each */
+.gfilter { gap: 0; }
+.presets .libbar .gfilter button { flex: 1; height: 30px; padding: 0 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 12px; }
+.presets .libbar .crumb { display: none; }
+/* folders: names readable; one column when the panel is narrow */
+.presets .frow > .fopen { padding: 6px 4px 6px 6px; gap: 5px; font-size: 12.5px; }
+.presets .frow > .fopen svg { width: 14px; height: 14px; }
+.presets .frow > .fopen small { margin-left: auto; font-size: 10.5px; }
+.presets .frow .fmore { padding: 4px 3px; }
+.presets .frow:not(:hover):not(.sel) .fmore { width: 0; padding: 0; overflow: hidden; }
+@media (max-width: 1279px) { .fld > label small { display: none; } }
+@media (max-width: 1279px) { .presets .ftin { grid-template-columns: 1fr; } }
+/* preset cards: name and STARTER never overlap; previews fit inside the card */
+.gcard .name span:first-child { flex: 1 1 auto; min-width: 0; }
+.gcard .name > :not(:first-child) { flex: none; }
+.gcard .thumb { grid-template-columns: minmax(0, 1fr); padding: 10px 12px; overflow: hidden; }
+.gcard .thumb canvas { max-width: 100%; max-height: 76px; justify-self: center; object-fit: contain; }
+.gcard .more { width: 26px; height: 26px; top: 5px; right: 5px; opacity: .0; transition: opacity .15s; }
+.gcard:hover .more, .gcard:focus-within .more, .gcard .more[aria-expanded="true"] { opacity: 1; }
+@media (hover: none) { .gcard .more { opacity: 1; } }
+/* cursor tiles: drawn on a light chip in both themes (black cursors vanished in dark mode) */
+#curGrid .ip { background: #eef0f5; color: #151922; }
+#curGrid .ip[aria-pressed="true"] { background: #dfe4ff; }
+/* size & scale side: readable labels on the tint */
+.xside.xsz .xk, .xside.xsz .xx, .xside.xsz .note-sm { color: color-mix(in srgb, var(--fg) 72%, var(--panel)); }
+.xh { font-size: 11.5px; color: color-mix(in srgb, var(--accent) 80%, var(--fg)); }
+/* phones: comfortable tap targets */
 </style>
 
 <div class="app">
@@ -894,7 +933,7 @@ input.tg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
           <button class="btn sm" id="refCrop">Crop…</button>
           <button class="btn sm" id="refClose">Remove reference</button>
         </span>
-        <span class="meta" id="refHint">or paste an image (Ctrl/Cmd+V). Auto-match runs in your browser.</span>
+        <span class="meta prose" id="refHint">or paste an image (Ctrl/Cmd+V). Auto-match runs in your browser.</span>
       </div>
       <section class="presetbar" id="presetBar" hidden aria-label="Presets">
         <div class="pb-head">
@@ -3455,13 +3494,14 @@ function fileBases(lines) {
 // Single: the button's size on screen (linked to its shape, or width and height apart), a scale for more pixels,
 // and optional empty space around it. Batch: how buttons with longer texts behave, one size, and a scale.
 const EXP = { k: 2, by: 'design', v: 0, linked: true, uW: 240, uH: 66, space: false, SW: 600, SH: 200,
-  bmode: 'grow', fit: 'shrink', BH: 56, BW: 200, guides: true, fileOpen: true, fileH: 190, open: false };
+  bmode: 'grow', fit: 'shrink', BH: 56, BW: 200, guides: true, fileOpen: true, fileH: 120, open: false };
 try {
   const o = JSON.parse(localStorage.getItem('ctaforge.export2') || 'null');
   if (o) Object.assign(EXP, o);
   else { const old = JSON.parse(localStorage.getItem('ctaforge.export') || '{}'); if (old.mode === 'scale' && old.scale) EXP.k = Math.min(4, Math.max(1, Math.round(old.scale))); }
 } catch (e) {}
 EXP.fileOpen = EXP.k > 1;
+if (EXP.fileH === 190) EXP.fileH = 120;
 function saveExp() { try { localStorage.setItem('ctaforge.export2', JSON.stringify(EXP)); } catch (e) {} }
 const tfOn = d => !!(d.tf && (d.tf.rot || d.tf.skewX || d.tf.tiltX || d.tf.tiltY));
 // size at 1×: the button (w, h), the whole image with effects (ow, oh) and where the button sits in it (bx, by)
