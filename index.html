@@ -52,6 +52,19 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .grip:hover::after, .grip:focus-visible::after, .grip.drag::after { background: var(--accent); }
 .grip:focus-visible { outline: none; }
 .app > .railgrip { grid-column: 1; grid-row: 2; justify-self: end; margin-right: -5px; }
+/* fold the design panel: a button on the divider, a slim bar to bring it back, and a hint when a drag goes past the edge */
+.railfold { grid-column: 1; grid-row: 2; justify-self: end; align-self: center; margin-right: -13px; z-index: 25; width: 26px; height: 44px; border-radius: 13px; border: 1px solid var(--line); background: var(--panel); color: var(--muted); display: grid; place-items: center; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,.12); opacity: .85; transition: opacity .15s, color .15s, border-color .15s; padding: 0; }
+.railfold:hover, .railfold:focus-visible { opacity: 1; color: var(--accent); border-color: var(--accent); outline: none; }
+.railfold svg, .railbar svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.railbar { grid-column: 1; grid-row: 2; width: 100%; border: 0; border-right: 1px solid var(--line); background: var(--panel); color: var(--muted); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 14px 0; transition: background .15s, color .15s; }
+.railbar span { writing-mode: vertical-rl; transform: rotate(180deg); font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+.railbar:hover, .railbar:focus-visible { background: var(--accent-soft); color: var(--accent); outline: none; }
+.app.railfolded { grid-template-columns: 34px minmax(0, 1fr); }
+.app.railfolded > .panel, .app.railfolded > .railgrip, .app.railfolded > .railfold { display: none; }
+.foldhint { position: absolute; top: 50%; left: 14px; transform: translateY(-50%); white-space: nowrap; background: var(--danger); color: #ffffff; font-size: 12px; font-weight: 600; padding: 5px 10px; border-radius: 6px; pointer-events: none; opacity: 0; transition: opacity .12s; }
+.grip.folding::after { background: var(--danger); width: 3px; }
+.grip.folding .foldhint { opacity: 1; }
+.app.willfold > .panel { opacity: .45; transition: opacity .12s; }
 body.resizing { cursor: col-resize; user-select: none; }
 .top { grid-column: 1 / -1; display: flex; align-items: center; gap: 16px; padding-block: 10px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); border-bottom: 1px solid var(--line); background: var(--panel); }
 .brand { font-weight: 700; font-size: 15px; letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
@@ -596,7 +609,8 @@ input.tg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
 @media (max-width: 860px) {
   html, body { height: auto; }
   .app { display: flex; flex-direction: column; height: auto; }
-  .app > .railgrip { display: none; }
+  .app > .railgrip, .app > .railfold, .app > .railbar { display: none !important; }
+  .app.railfolded > .panel { display: block; }
   .work, #view-single { display: contents; }
   .top { order: 0; flex-wrap: wrap; gap: 8px 12px; }
   .top .hint { display: none; }
@@ -652,7 +666,9 @@ input.tg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
     </span>
   </header>
 
-  <div class="grip railgrip" id="railGrip" role="separator" aria-orientation="vertical" aria-label="Resize the controls panel (arrow keys; double-click to reset)" tabindex="0"></div>
+  <div class="grip railgrip" id="railGrip" role="separator" aria-orientation="vertical" aria-label="Resize the controls panel (arrow keys; double-click to reset)" tabindex="0"><span class="foldhint" aria-hidden="true">Release to fold</span></div>
+  <button type="button" class="railfold" id="railFold" title="Fold the design panel away" aria-label="Fold the design panel" aria-expanded="true" aria-controls="panel"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M7.5 3 4.5 6l3 3"/></svg></button>
+  <button type="button" class="railbar" id="railBar" hidden title="Show the design panel" aria-label="Show the design panel" aria-controls="panel"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M4.5 3l3 3-3 3"/></svg><span>Design panel</span></button>
   <aside class="panel" id="panel" aria-label="Design controls">
     <div class="tools">
       <button id="undoBtn" title="Undo (Ctrl/Cmd+Z)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>Undo</button>
@@ -5786,15 +5802,16 @@ $('#libMore').onclick = () => {
 };
 
 /* resizable panels: drag the handle, use the arrow keys, or double-click to reset; widths are remembered */
-function resizer(grip, cssVar, def, min, max, store, target = document.documentElement, edgeOf = () => 0) {
+function resizer(grip, cssVar, def, min, max, store, target = document.documentElement, edgeOf = () => 0, hooks = {}) {
   const get = () => parseFloat(getComputedStyle(target).getPropertyValue(cssVar)) || def;
   const set = w => { w = Math.round(Math.max(min(), Math.min(max(), w))); target.style.setProperty(cssVar, w + 'px'); grip.setAttribute('aria-valuenow', w); return w; };
   const save = w => { try { localStorage.setItem(store, String(w)); } catch (e) {} };
   try { const v = parseFloat(localStorage.getItem(store)); if (v) set(v); } catch (e) {}
   grip.addEventListener('pointerdown', e => {
     e.preventDefault(); grip.setPointerCapture(e.pointerId); grip.classList.add('drag'); document.body.classList.add('resizing');
-    const move = ev => set(ev.clientX - edgeOf());
-    const up = () => { grip.removeEventListener('pointermove', move); grip.classList.remove('drag'); document.body.classList.remove('resizing'); save(get()); };
+    let raw = get();
+    const move = ev => { raw = ev.clientX - edgeOf(); hooks.drag?.(raw); set(raw); };
+    const up = () => { grip.removeEventListener('pointermove', move); grip.classList.remove('drag'); document.body.classList.remove('resizing'); if (!hooks.release?.(raw)) save(get()); };
     grip.addEventListener('pointermove', move); grip.addEventListener('pointerup', up, { once: true }); grip.addEventListener('pointercancel', up, { once: true });
   });
   grip.addEventListener('keydown', e => { if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { e.preventDefault(); save(set(get() + (e.key === 'ArrowLeft' ? -16 : 16))); } });
@@ -5802,7 +5819,28 @@ function resizer(grip, cssVar, def, min, max, store, target = document.documentE
 }
 // the folder list stays in view below the sticky Single/Batch bar
 { const mo = document.querySelector('.modes'); if (mo && window.ResizeObserver) new ResizeObserver(() => document.documentElement.style.setProperty('--modes-h', mo.offsetHeight + 'px')).observe(mo); }
-resizer($('#railGrip'), '--rail', 360, () => 260, () => Math.max(300, innerWidth * 0.6), 'ctaforge.railW', document.querySelector('.app'), () => document.querySelector('.app').getBoundingClientRect().left);
+// dragging the divider well past the panel's smallest width offers to fold it
+const RAIL_MIN = 260, FOLD_AT = RAIL_MIN - 90;
+resizer($('#railGrip'), '--rail', 360, () => RAIL_MIN, () => Math.max(300, innerWidth * 0.6), 'ctaforge.railW', document.querySelector('.app'), () => document.querySelector('.app').getBoundingClientRect().left, {
+  drag: w => { const f = w < FOLD_AT; $('#railGrip').classList.toggle('folding', f); document.querySelector('.app').classList.toggle('willfold', f); },
+  release: w => { $('#railGrip').classList.remove('folding'); document.querySelector('.app').classList.remove('willfold'); if (w < FOLD_AT) {
+    // keep the width it had before the drag, for when it opens again
+    let keep = 360; try { keep = parseFloat(localStorage.getItem('ctaforge.railW')) || 360; } catch (e) {}
+    document.querySelector('.app').style.setProperty('--rail', keep + 'px'); foldRail(true); return true;
+  } return false; },
+});
+const STORE_RAILFOLD = 'ctaforge.railFolded';
+function foldRail(on, focus = true) {
+  const app = document.querySelector('.app');
+  app.classList.toggle('railfolded', on); $('#railBar').hidden = !on;
+  $('#railFold').setAttribute('aria-expanded', !on);
+  try { localStorage.setItem(STORE_RAILFOLD, on ? '1' : ''); } catch (e) {}
+  if (focus) (on ? $('#railBar') : $('#railFold')).focus();
+  requestRender();
+}
+$('#railFold').onclick = () => foldRail(true);
+$('#railBar').onclick = () => foldRail(false);
+try { if (localStorage.getItem(STORE_RAILFOLD)) foldRail(true, false); } catch (e) {}
 resizer($('#folderGrip'), '--ftw', 210, () => 150, () => Math.max(200, document.querySelector('.libgrid').clientWidth * 0.5), 'ctaforge.folderW', document.querySelector('.libgrid'), () => document.querySelector('.libgrid').getBoundingClientRect().left);
 
 /* ================= first-run tour ================= */
