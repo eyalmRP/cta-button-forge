@@ -264,6 +264,72 @@ input[type="color"] { width: 100%; height: 26px; padding: 0 2px; border: 1px sol
 .tour-step { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
 .tour-btns { display: flex; align-items: center; gap: 8px; }
 .tour-btns .grow { flex: 1; }
+/* size & scale (left) and export (right), always open */
+.xbox { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); border: 1px solid var(--line); border-radius: 12px; background: var(--panel); overflow: hidden; }
+.xside { display: grid; gap: 10px; padding: 12px 14px; align-content: start; min-width: 0; }
+.xside.xsz { background: color-mix(in srgb, var(--accent-soft) 45%, var(--panel)); }
+.xside + .xside { box-shadow: -1px 0 0 var(--line), 0 -1px 0 var(--line); }
+.xh { margin: 0; display: flex; align-items: baseline; gap: 8px; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.xh .xpx { margin-left: auto; font: 600 13px var(--mono); letter-spacing: 0; text-transform: none; color: var(--fg); white-space: nowrap; }
+.xrow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; min-width: 0; }
+.xk { width: 64px; flex: none; font-size: 12px; color: var(--muted); }
+.xx { color: var(--muted); }
+.xbox .xin { height: 32px; flex: none; }
+.xbox .xin input { width: 46px !important; min-width: 0; font-size: 14px; }
+.xbox .xlink { width: 32px; height: 32px; }
+.xbox .chip { height: 26px; padding: 0 10px; font-size: 11.5px; }
+.xbox .xscale { flex: 1; min-width: 160px; display: flex; gap: 0; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.xbox .xscale button, .xbox .xscale button[aria-pressed="true"] { flex: 1; padding: 0; height: 32px; border: 0; border-left: 1px solid var(--line); border-radius: 0; display: grid; place-items: center; }
+.xbox .xscale button:first-child { border-left: 0; }
+.xbox .xscale button b { font-size: 13.5px; }
+.xbox .xscale button[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); }
+.xbox .xscale svg, .xbox .xscale small { display: none; }
+.xfn { font: 500 12px var(--mono); color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.xbox .xfmt { flex: 1; display: flex; } .xbox .xfmt button { flex: 1; }
+.xgo { width: 100%; height: 42px; font-size: 14.5px; }
+.xbox .xb-drv { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; order: 0; flex-basis: auto; }
+.xbox .xb-drv > :last-child:nth-child(odd) { grid-column: 1 / -1; }
+.xbox .xb-drv .btn { justify-content: center; }
+.xbox #destSel, .xbox #prefix { flex: 1; min-width: 0; width: auto; }
+.xbox .note-sm:empty, .xbox #fmtNote:empty { display: none; }
+/* batch: the width choices fold to tiles; the bar on top folds or expands them (click or drag) */
+.xbatch { border-color: var(--accent); }
+.xgrip { grid-column: 1 / -1; height: 22px; border: 0; border-radius: 0; background: var(--accent); color: var(--accent-fg); font: 600 11.5px var(--ui); display: flex; align-items: center; justify-content: center; gap: 10px; cursor: ns-resize; touch-action: none; }
+.xgrip::before, .xgrip::after { content: ""; width: 28px; height: 3px; border-radius: 2px; background: color-mix(in srgb, var(--accent-fg) 55%, transparent); }
+.xgrip:hover { filter: brightness(1.1); }
+.xbatch .xmode > button { padding: 6px 9px; gap: 10px; }
+.xbatch .xmode svg { width: 46px; height: 39px; }
+.xbatch .xmode > button b { font-size: 13px; } .xbatch .xmode > button small { font-size: 11.5px; }
+.xbatch .xmode .xfit { margin: 0 9px 8px 65px; }
+.xmodes.tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.xmodes.tiles .xmode > button { flex-direction: column; gap: 2px; padding: 6px 4px; text-align: center; }
+.xmodes.tiles .xmode svg { width: 34px; height: 29px; }
+.xmodes.tiles .xmode b { font-size: 11.5px; }
+.xmodes.tiles .xmode.on b { color: var(--accent); }
+.xmodes.tiles .xfit { grid-column: 1 / -1; justify-self: start; }
+/* editing one button from Batch: orange everywhere it shows */
+:root { --fromb: #f08a1c; --fromb-soft: #fff3e4; --fromb-ink: #a35200; }
+:root[data-theme="dark"] { --fromb-soft: #3a2712; --fromb-ink: #ffb066; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --fromb-soft: #3a2712; --fromb-ink: #ffb066; } }
+.frombar, .xslim, .stagetag { display: none; }
+.fromb .frombar { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; padding: 10px 12px 10px 14px; border-radius: 12px; background: var(--fromb-soft); border: 2px solid var(--fromb); font-size: 13.5px; }
+.fb-tag { font: 700 10.5px var(--ui); letter-spacing: .08em; text-transform: uppercase; color: #fff; background: var(--fromb); padding: 3px 8px; border-radius: 6px; white-space: nowrap; }
+.fb-t { display: block; min-width: 0; } .fb-t small { display: block; color: var(--muted); font-size: 12px; }
+.fb-done { margin-left: auto; background: var(--fromb); border: 0; color: #fff; font: 600 14px var(--ui); padding: 9px 16px; border-radius: 9px; white-space: nowrap; cursor: pointer; }
+.fb-done:hover { filter: brightness(1.08); }
+.fromb #xBarS, .fromb #fileView { display: none !important; }
+.fromb .xslim { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 10px; padding: 10px 12px 10px 14px; border-radius: 12px; background: var(--fromb-soft); border: 1.5px dashed var(--fromb); font-size: 13.5px; }
+.xslim .fromDone { margin-left: auto; border-color: var(--fromb); color: var(--fromb-ink); font-weight: 600; }
+.fromb #stage { outline: 3px solid var(--fromb); outline-offset: -3px; }
+.stagegrid { position: relative; }
+.fromb .stagetag { display: block; position: absolute; top: 10px; left: 10px; z-index: 4; background: var(--fromb); color: #fff; font: 600 12px var(--ui); padding: 4px 10px; border-radius: 7px; pointer-events: none; max-width: calc(100% - 20px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fromb #tab-single[aria-selected="true"] { background: var(--fromb) !important; border-color: var(--fromb) !important; color: #fff !important; }
+.fromb #tab-single b::after { content: " · editing from Batch"; font-weight: 500; }
+.bcard { position: relative; }
+.bcard .bedit { position: absolute; top: 8px; right: 8px; z-index: 3; opacity: 0; transition: opacity .15s; font-size: 12px; padding: 4px 9px; }
+.bcard:hover .bedit, .bcard:focus-within .bedit { opacity: 1; }
+@media (hover: none) { .bcard .bedit { opacity: 1; } }
+.bcard.back { outline: 3px solid var(--fromb); outline-offset: 2px; box-shadow: 0 0 0 8px color-mix(in srgb, var(--fromb) 20%, transparent); transition: outline-color 1.2s, box-shadow 1.2s; }
 @media (max-width: 860px) { .tour-card { left: 16px !important; right: 16px; width: auto; top: auto !important; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); } }
 @media (prefers-reduced-motion: reduce) { .tour-spot, .tour-card { transition: none; } }
 
@@ -280,12 +346,7 @@ input[type="color"] { width: 100%; height: 26px; padding: 0 2px; border: 1px sol
 .xb-drv .btn { padding: 5px 10px; font-size: 12.5px; }
 .copybtn { display: inline-flex; align-items: center; gap: 6px; }
 .copybtn svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linejoin: round; }
-#xBarS .xsum { flex: 1 1 100%; }
-#xBarS #exportOne { margin-left: auto; order: 5; padding-inline: 22px; }
-#xBarS .xb-drv { order: 9; }
-#xBarB .xsum { flex-basis: 100%; }
 .xbar .xgo-row select { flex: none; width: auto; }
-#xBarB #exportAll { margin-left: auto; }
 .xbar .xgo-row { display: inline-flex; }
 .xmore { display: grid; gap: 12px; }
 .xmore-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; align-items: start; }
@@ -703,7 +764,7 @@ input.tg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
   #view-single > .stagegrid { flex: 1 1 auto; padding-bottom: 0; }
   #view-single > .stagegrid .stage { min-height: 260px; height: 100%; }
   #view-single > .bar { border-bottom: 1px solid var(--line); border-radius: 0 0 12px 12px; padding: 8px 12px 10px; }
-  #view-single > #xBarS { margin-top: 10px; }
+  #view-single > #xBarS, #view-single > #fileView { margin-top: 10px; }
   #view-batch > #xBarB { position: sticky; bottom: 0; z-index: 5; margin-top: 10px; box-shadow: 0 -8px 18px -6px rgba(20,25,40,.18); }
 }
 /* folder rows: their ⋯ shows on hover so names have room */
@@ -750,7 +811,9 @@ input.tg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
   .app > .presgrip, .app > .presfold, .app > .presbar { display: none !important; }
   .app.presfolded > .presets { display: block; }
   .app > .xover { order: 7; position: static; margin: 6px 12px; max-height: none; }
-  #view-single > #xBarS { order: 7; margin: 6px 12px; }
+  #view-single > #xBarS, #view-single > .xslim { order: 7; margin: 6px 12px; }
+  #view-single > #fileView { order: 6; margin: 6px 12px; }
+  #view-single > .frombar { order: 1; margin: 6px 12px; flex-wrap: wrap; }
   .app > .work { display: contents; }
   .app > .presets { order: 8; border-left: 0; border-top: 1px solid var(--line); overflow: visible; }
   .app > .panel { overflow: visible; }
@@ -814,6 +877,7 @@ input.tg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
   <section class="work">
 
     <div class="view" id="view-single">
+      <div class="frombar" id="fromBar" role="status"><span class="fb-tag">From Batch</span><span class="fb-t">Editing <b id="fbWhich"></b><small>Text changes go back to its line. Design changes apply to all <span class="fbN"></span>.</small></span><button type="button" class="fb-done fromDone">Done → Back to Batch</button></div>
       <div class="textrow">
         <textarea id="ctaText" rows="1" aria-label="Button text" spellcheck="false">Play Now</textarea>
       </div>
@@ -860,6 +924,7 @@ input.tg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
               <figcaption><span>Reference</span><span id="pickOut"></span></figcaption>
             </figure>
             <div class="stage" id="stage" data-bg="checker"></div>
+            <span class="stagetag" id="fbTag"></span>
               <div class="te-bar" id="teBar" role="toolbar" aria-label="Text on the button" hidden><span>Size <b id="teSize"></b></span><i></i><span>Spacing <b id="teSp"></b></span><i></i><span>Line height <b id="teLh"></b></span><i></i><button type="button" id="teUp" aria-pressed="false" title="Uppercase">AA</button><button type="button" id="teIt" aria-pressed="false" title="Italic"><em>I</em></button></div>
               <div class="te-keys" id="teKeys" hidden><span><kbd>Alt</kbd> <kbd>←</kbd> <kbd>→</kbd> letter spacing</span><span><kbd>Alt</kbd> <kbd>↑</kbd> <kbd>↓</kbd> line height</span><span><kbd>Ctrl</kbd> <kbd>Shift</kbd> <kbd>&lt;</kbd> <kbd>&gt;</kbd> size</span><span><kbd>Shift</kbd> + arrows select</span><span><kbd>Esc</kbd> done</span></div>
               <span class="te-chip" id="teChip" hidden>Typing on the button</span>
@@ -876,18 +941,33 @@ input.tg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
             <span class="meta grow" id="sizeOut"></span>
             <button class="btn sm pinbtn" id="pinBtn" aria-pressed="true">Unpin preview</button>
           </div>
-      <section class="xbar" id="xBarS">
-        <button type="button" class="xsum" id="xSumS" aria-expanded="false" aria-controls="xMoreS"><span class="xs-l">Export</span><b class="xs-v" id="xSumTxt"></b><span class="xs-c">Size &amp; scale</span></button>
-        <span class="seg" role="group" aria-label="Format">
-              <button data-fmt="png" aria-pressed="true">PNG</button>
-              <button data-fmt="svg" aria-pressed="false">SVG (vector)</button>
-            </span>
-        <span class="xb-drv"><a class="btn drv teamfolder" id="driveLink" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Team folder</a>
+      <section class="fileview" id="fileView" aria-label="The exported file at real size">
+            <button type="button" class="fv-head" id="fvHead" aria-expanded="true" aria-controls="fvBody"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5"/></svg><b>The file</b><span class="fv-px" id="fvPx"></span><span class="fv-note" id="fvNote"></span></button>
+            <div class="fv-body" id="fvBody"><div class="fv-in" id="fvWrap"></div></div>
+            <div class="fv-grip" id="fvGrip" role="separator" aria-orientation="horizontal" aria-label="Drag to make the file view taller or shorter (arrow keys work too)" tabindex="0"><span></span></div>
+          </section>
+      <section class="xbox" id="xBarS" aria-label="Size, scale and export">
+        <section class="xside xsz"><h4 class="xh">Size &amp; scale</h4>
+          <div class="xrow"><span class="xk">On screen</span><span class="xin"><input type="number" id="xW" min="1" step="1" aria-label="Width on screen"><i>w</i></span><span class="xx">×</span><span class="xin"><input type="number" id="xH" min="1" step="1" aria-label="Height on screen"><i>h</i></span><button type="button" class="xlink" id="xLink" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true" class="lk-on"><path d="M9 15 15 9"/><path d="M11 6.5 12.5 5a3.5 3.5 0 0 1 5 5L16 11.5"/><path d="M13 17.5 11.5 19a3.5 3.5 0 0 1-5-5L8 12.5"/></svg><svg viewBox="0 0 24 24" aria-hidden="true" class="lk-off"><path d="M11 6.5 12.5 5a3.5 3.5 0 0 1 5 5L16 11.5"/><path d="M13 17.5 11.5 19a3.5 3.5 0 0 1-5-5L8 12.5"/><path d="M4 4l3 3M20 20l-3-3"/></svg></button></div>
+          <div class="xwarn" id="xWarn" hidden></div>
+          <div class="xrow"><span class="xk"></span><div class="xchips" id="xChips"></div></div>
+          <div class="xrow"><span class="xk">Scale</span><div class="xscale" id="xScale" role="group" aria-label="Scale"></div></div>
+          <div class="xrow"><span class="xk"></span><label class="chk"><input type="checkbox" id="xSpace">Empty space around</label></div>
+          <div class="xrow" id="xSpaceRow" hidden><span class="xk">Image</span><span class="xin"><input type="number" id="xSW" min="1" step="1" aria-label="Image width"><i>w</i></span><span class="xx">×</span><span class="xin"><input type="number" id="xSH" min="1" step="1" aria-label="Image height"><i>h</i></span></div>
+          <div class="xwarn" id="xSpaceWarn" hidden></div>
+        </section>
+        <section class="xside xex"><h4 class="xh">Export<b class="xpx" id="xPx"></b></h4>
+          <div class="xfn" id="xName"></div>
+          <div class="xrow"><span class="seg xfmt" role="group" aria-label="Format"><button data-fmt="png" aria-pressed="true">PNG</button><button data-fmt="svg" aria-pressed="false">SVG (vector)</button></span>
+            <button class="btn copybtn" id="copyOne" title="Copy the image at the chosen scale, then paste it into Figma, Slack, a doc or an email"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>Copy</button></div>
+          <div class="note-sm" id="fmtNote"></div>
+          <button class="btn primary xgo" id="exportOne">Export PNG</button>
+          <span class="xb-drv"><a class="btn drv teamfolder" id="driveLink" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Team folder</a>
             <a class="btn drv lastexp" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1"/><path d="M3 7v10a2 2 0 0 0 2 2h12.5a2 2 0 0 0 1.9-1.4L22 11H7.5a2 2 0 0 0-1.9 1.4L3 19"/></svg>Open last export</a>
             <button class="btn" id="driveOne" title="Save this export into the team's shared Google Drive folder">Save to team Drive</button></span>
-        <button class="btn copybtn" id="copyOne" title="Copy the image at the chosen scale, then paste it into Figma, Slack, a doc or an email"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>Copy</button>
-        <button class="btn primary" id="exportOne">Export PNG</button>
+        </section>
       </section>
+      <div class="xslim" id="fromSlim"><span>Size, scale and export are set in <b>Batch</b> for all <span class="fbN"></span> buttons.</span><button type="button" class="btn fromDone">Done → Back to Batch</button></div>
     </div>
 
     <div class="view" id="view-batch" hidden>
@@ -911,78 +991,30 @@ Start</textarea>
               <div class="bgrid" id="bgrid"></div>
             </div>
           </div>
-      <section class="xbar" id="xBarB">
-        <button type="button" class="xsum" id="xSumB" aria-expanded="false" aria-controls="xMoreB"><span class="xs-l">Export</span><b class="xs-v" id="xSumTxtB"></b><span class="xs-c">Long texts, size &amp; scale</span></button>
-        <div class="xgo-row"><span class="meta" id="batchCount"></span><label class="chk"><input type="checkbox" id="bPng" checked>PNG</label><label class="chk"><input type="checkbox" id="bSvg">SVG</label></div>
-        <div class="xgo-row"><label class="meta" for="prefix">File prefix</label><input id="prefix" type="text" value="cta-" class="sm" style="width:90px"></div>
-        <div class="xgo-row"><label class="meta" for="destSel">Save as</label>
-            <select class="sm" id="destSel">
+      <section class="xbox xbatch" id="xBarB" aria-label="Size, scale and export for all buttons">
+        <button type="button" class="xgrip" id="xbGrip" aria-expanded="true" title="Click, or drag up or down, to show or fold the size choices"><span id="xbGripT">Fold ▾</span></button>
+        <section class="xside xsz"><h4 class="xh">Size &amp; scale</h4>
+          <div class="xmodes" id="xModes"></div>
+          <div class="xrow"><span class="xk" id="xBQ">Tall</span><span class="xin"><input type="number" id="xB" min="1" step="1"><i>px</i></span><span class="note-sm" id="xBHint"></span></div>
+          <div class="xrow"><span class="xk">Scale</span><div class="xscale" id="xScaleB" role="group" aria-label="Scale"></div></div>
+        </section>
+        <section class="xside xex"><h4 class="xh">Export<b class="xpx" id="bPx"></b></h4>
+          <div class="xrow"><span class="meta" id="batchCount"></span><label class="chk"><input type="checkbox" id="bPng" checked>PNG</label><label class="chk"><input type="checkbox" id="bSvg">SVG</label></div>
+          <div class="xrow"><label class="xk" for="destSel">Save as</label><select class="sm" id="destSel">
               <option value="zip">One ZIP file</option>
               <option value="folder">Into a folder…</option>
               <option value="files">Separate files</option>
               <option value="drive" id="destDrive" disabled>Team Drive folder</option>
-            </select>
-            </div>
-        <span class="xb-drv"><a class="btn drv teamfolder" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Team folder</a>
+            </select></div>
+          <div class="xrow"><label class="xk" for="prefix">Name</label><input id="prefix" type="text" value="cta-" class="sm" aria-label="File name prefix"></div>
+          <button class="btn primary xgo" id="exportAll">Export all</button>
+          <span class="xb-drv"><a class="btn drv teamfolder" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Team folder</a>
             <a class="btn drv lastexp" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1"/><path d="M3 7v10a2 2 0 0 0 2 2h12.5a2 2 0 0 0 1.9-1.4L22 11H7.5a2 2 0 0 0-1.9 1.4L3 19"/></svg>Open last export</a></span>
-        <button class="btn primary" id="exportAll">Export all</button>
+        </section>
       </section>
     </div>
 
   </section>
-
-  <section class="xmore xover" id="xMoreS" hidden aria-label="Size &amp; scale">
-        <div class="xo-head"><b>Size &amp; scale</b><span class="xo-sum" data-sum="xMoreS"></span><span class="grow"></span><button type="button" class="btn sm primary xdone">Done</button></div>
-        <div class="xmore-grid">
-          <section class="xstep">
-            <h4><span class="xn">1</span>How big is the button on screen?</h4>
-                <div class="note-sm" id="xHelpWrap">The size you'd give it in Figma or on the page. <span id="xHelp"></span></div>
-                <div class="xwh">
-                  <label>Width<span class="xin"><input type="number" id="xW" min="1" step="1"><i>px</i></span></label>
-                  <button type="button" class="xlink" id="xLink" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true" class="lk-on"><path d="M9 15 15 9"/><path d="M11 6.5 12.5 5a3.5 3.5 0 0 1 5 5L16 11.5"/><path d="M13 17.5 11.5 19a3.5 3.5 0 0 1-5-5L8 12.5"/></svg><svg viewBox="0 0 24 24" aria-hidden="true" class="lk-off"><path d="M11 6.5 12.5 5a3.5 3.5 0 0 1 5 5L16 11.5"/><path d="M13 17.5 11.5 19a3.5 3.5 0 0 1-5-5L8 12.5"/><path d="M4 4l3 3M20 20l-3-3"/></svg></button>
-                  <label>Height<span class="xin"><input type="number" id="xH" min="1" step="1"><i>px</i></span></label>
-                </div>
-                <div class="xwarn" id="xWarn" hidden></div>
-                <div class="xchips" id="xChips"></div>
-          </section>
-          <section class="xstep">
-            <h4><span class="xn">2</span>Scale <small>more pixels, same size on screen</small></h4>
-                <div class="xscale" id="xScale" role="group" aria-label="Scale"></div>
-                <div class="note-sm" id="xScaleNote"></div>
-          </section>
-          <section class="xstep">
-                <label class="chk xspace"><input type="checkbox" id="xSpace"><span><b>Add empty space around it</b><small>The image gets a size you choose, with the button in the middle.</small></span></label>
-                <div class="xwh" id="xSpaceRow" hidden><span class="note-sm">Image size</span><span class="xin"><input type="number" id="xSW" min="1" step="1" aria-label="Image width"></span>×<span class="xin"><input type="number" id="xSH" min="1" step="1" aria-label="Image height"><i>px</i></span></div>
-                <div class="xwarn" id="xSpaceWarn" hidden></div>
-          </section>
-        </div>
-        <section class="fileview" id="fileView" aria-label="The exported file at real size">
-            <button type="button" class="fv-head" id="fvHead" aria-expanded="true" aria-controls="fvBody"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5"/></svg><b>The file</b><span class="fv-px" id="fvPx"></span><span class="fv-note" id="fvNote"></span></button>
-            <div class="fv-body" id="fvBody"><div class="fv-in" id="fvWrap"></div></div>
-            <div class="fv-grip" id="fvGrip" role="separator" aria-orientation="horizontal" aria-label="Drag to make the file view taller or shorter (arrow keys work too)" tabindex="0"><span></span></div>
-          </section>
-        <div class="xinfo" id="xInfo" aria-live="polite">
-              <div class="xi-txt"><span class="xi-h">Export</span><b class="xi-name" id="xName"></b><span class="xi-px" id="xPx"></span><span class="note-sm" id="xStory"></span><span class="note-sm" id="fmtNote"></span></div>
-              <div class="xi-edge"><div><figure><canvas id="xL0"></canvas><figcaption id="xL0c"></figcaption></figure><figure><canvas id="xL1"></canvas><figcaption id="xL1c"></figcaption></figure></div><span class="note-sm">Edge, zoomed in</span></div>
-            </div>
-      </section>
-  <section class="xmore xover" id="xMoreB" hidden aria-label="Long texts, size &amp; scale">
-        <div class="xo-head"><b>Long texts, size &amp; scale</b><span class="xo-sum" data-sum="xMoreB"></span><span class="grow"></span><button type="button" class="btn sm primary xdone">Done</button></div>
-        <div class="xmore-grid">
-          <section class="xstep">
-            <h4><span class="xn">1</span>Texts are different lengths. Should the buttons…</h4>
-            <div class="xmodes" id="xModes"></div>
-          </section>
-          <section class="xstep">
-            <h4><span class="xn">2</span><span id="xBQ"></span></h4>
-            <div class="xwh"><span class="xin"><input type="number" id="xB" min="1" step="1"><i>px</i></span><span class="note-sm" id="xBHint"></span></div>
-          </section>
-          <section class="xstep">
-            <h4><span class="xn">3</span>Scale <small>more pixels, same size on screen</small></h4>
-            <div class="xscale" id="xScaleB" role="group" aria-label="Scale"></div>
-          </section>
-        </div>
-      </section>
 
   <div class="grip presgrip" id="presGrip" role="separator" aria-orientation="vertical" aria-label="Resize the presets panel (arrow keys; double-click to reset)" tabindex="0"><span class="foldhint" aria-hidden="true">Release to fold</span></div>
   <button type="button" class="presfold" id="presFold" title="Click to fold the presets panel, or drag to resize it" aria-label="Fold the presets panel" aria-expanded="true" aria-controls="presets"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M4.5 3l3 3-3 3"/></svg></button>
@@ -3515,12 +3547,27 @@ const MODES = [
   ['widest', 'All as wide as the longest', () => 'Same text size; short texts get extra room.'],
 ];
 function syncBatchExp() {
-  $('#xModes').innerHTML = MODES.map(([v, name, note]) => `<div class="xmode${EXP.bmode === v ? ' on' : ''}"><button type="button" data-bm="${v}" aria-pressed="${EXP.bmode === v}">${modeIcon(v, EXP.fit)}<span><b>${name}</b><small>${note()}</small></span></button>` +
-    (v === 'same' ? `<span class="seg xfit" role="group" aria-label="Long text"><button type="button" data-fit="shrink" aria-pressed="${EXP.fit === 'shrink'}">Shrink text</button><button type="button" data-fit="wrap" aria-pressed="${EXP.fit === 'wrap'}">Wrap text</button></span>` : '') + `</div>`).join('');
+  const tiles = !!EXP.bfold, fitSeg = `<span class="seg xfit" role="group" aria-label="Long text"><button type="button" data-fit="shrink" aria-pressed="${EXP.fit === 'shrink'}">Shrink text</button><button type="button" data-fit="wrap" aria-pressed="${EXP.fit === 'wrap'}">Wrap text</button></span>`;
+  const SHORT = { grow: 'Grow', same: 'Same width', widest: 'Widest' };
+  $('#xModes').classList.toggle('tiles', tiles);
+  $('#xModes').innerHTML = MODES.map(([v, name, note]) => `<div class="xmode${EXP.bmode === v ? ' on' : ''}"><button type="button" data-bm="${v}" aria-pressed="${EXP.bmode === v}" title="${name}: ${note()}">${modeIcon(v, EXP.fit)}<span><b>${tiles ? SHORT[v] : name}</b>${tiles ? '' : `<small>${note()}</small>`}</span></button>` +
+    (v === 'same' && !tiles ? fitSeg : '') + `</div>`).join('') + (tiles && EXP.bmode === 'same' ? fitSeg : '');
+  $('#xbGripT').textContent = tiles ? 'Expand ▴' : 'Fold ▾'; $('#xbGrip').setAttribute('aria-expanded', !tiles);
   const grow = EXP.bmode === 'grow';
-  $('#xBQ').textContent = grow ? 'How tall are the buttons on screen?' : EXP.bmode === 'widest' ? 'How wide is the longest button?' : 'How wide are the buttons?';
-  $('#xBHint').textContent = grow ? 'Widths follow each text.' : 'Heights follow the shape.';
-  const xb = $('#xB'); xb.setAttribute('aria-label', $('#xBQ').textContent); if (document.activeElement !== xb) xb.value = grow ? EXP.BH : EXP.BW;
+  $('#xBQ').textContent = grow ? 'Tall' : 'Wide';
+  $('#xBHint').textContent = grow ? 'on screen' : EXP.bmode === 'widest' ? 'the longest one' : 'on screen';
+  const xb = $('#xB'); xb.setAttribute('aria-label', grow ? 'Button height on screen' : 'Button width on screen'); if (document.activeElement !== xb) xb.value = grow ? EXP.BH : EXP.BW;
+}
+{
+  let g0 = null; const grip = () => $('#xbGrip');
+  const setFold = v => { EXP.bfold = v; saveExp(); syncBatchExp(); };
+  document.addEventListener('pointerdown', e => { if (e.target.closest('#xbGrip')) { g0 = { y: e.clientY, id: e.pointerId }; grip().setPointerCapture?.(e.pointerId); } });
+  document.addEventListener('pointerup', e => {
+    if (!g0) return; const dy = e.clientY - g0.y; g0 = null;
+    setFold(dy > 12 ? true : dy < -12 ? false : !EXP.bfold);
+  });
+  document.addEventListener('pointercancel', () => { g0 = null; });
+  document.addEventListener('keydown', e => { if (e.target.id === 'xbGrip' && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); setFold(e.key === 'ArrowDown'); } });
 }
 function flash(el) { if (!el) return; el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); }
 // a rounded edge, zoomed in, drawn with k pixels per screen pixel (smoothed like a real PNG)
@@ -3571,9 +3618,8 @@ function updateSizeInfo() {
     if (document.activeElement !== xH) xH.value = EXP.linked ? sh : EXP.uH;
     const lk = $('#xLink'); lk.setAttribute('aria-pressed', EXP.linked); lk.classList.toggle('off', !EXP.linked);
     lk.title = lk.ariaLabel = EXP.linked ? 'Linked: keeps the shape. Click to set width and height separately.' : 'Not linked. Click to link them and keep the shape.';
-    $('#xHelp').textContent = EXP.linked ? 'Change either number; the other follows the shape.' : 'Width and height are separate now.';
     const n0w = Math.round(it.m0.w), n0h = Math.round(it.m0.h);
-    $('#xChips').innerHTML = [['design', `As designed · ${n0w} × ${n0h}`], [40, '40 px tall'], [48, '48 px tall'], [56, '56 px tall']].map(([v, l]) => {
+    $('#xChips').innerHTML = [['design', 'As designed'], [40, '40 tall'], [48, '48 tall'], [56, '56 tall']].map(([v, l]) => {
       const on = EXP.linked && (v === 'design' ? EXP.by === 'design' : EXP.by === 'h' && EXP.v === v);
       return `<button type="button" class="chip" data-chip="${v}" aria-pressed="${on}">${l}</button>`;
     }).join('');
@@ -3591,17 +3637,11 @@ function updateSizeInfo() {
     sp.hidden = !tooBig; sp.textContent = "The button doesn't fit. Make the image bigger or the button smaller.";
     ['SW', 'SH'].forEach(k => { const el = $('#x' + k); if (document.activeElement !== el) el.value = EXP[k]; });
     $('#xScale').innerHTML = scaleBtns(ow, oh, true);
-    $('#xScaleNote').textContent = SCALE_NOTE[K];
+    $('#xScale').title = SCALE_NOTE[K];
     $('#xName').textContent = `${fileBases([text.replace(/\n/g, ' ')])[0]}.${fmtOne}`;
     $('#xPx').textContent = fmtOne === 'svg' ? `${e.fw} × ${e.fh} (vector)` : `${e.fw} × ${e.fh} px`;
     $('#exportOne').textContent = `Export ${fmtOne.toUpperCase()}`;
-    $('#xSumTxt').textContent = `${sw} × ${sh} on screen · ${K}× → ${e.fw} × ${e.fh} px` + (EXP.space ? ` (image ${EXP.SW} × ${EXP.SH})` : '');
-    document.querySelector('[data-sum="xMoreS"]').textContent = $('#xSumTxt').textContent;
-    $('#xStory').textContent = (EXP.space ? `A ${EXP.SW} × ${EXP.SH} image with the ${sw} × ${sh} button in the middle` : `Shows as a ${sw} × ${sh} button`) +
-      (K === 1 ? '. One file pixel per screen pixel.' : `. ${K}× scale: ${K} × ${K} file pixels for every screen pixel, so the edges stay crisp.`);
     $('#fmtNote').innerHTML = fmtOne === 'svg' ? (tfOn(D) && (D.tf.tiltX || D.tf.tiltY) ? 'Tilt has no vector form, so this SVG holds a sharp image of the tilted button.' : 'Vector shapes and editable text. Install the font where you open it.') : '';
-    const cmp = K === 1 ? 2 : 1, pair = cmp < K ? [cmp, K] : [K, cmp];
-    pair.forEach((v, i) => { drawLoupe($('#xL' + i), v); $('#xL' + i + 'c').textContent = v === K ? `${v}× yours` : `${v}×`; $('#xL' + i + 'c').classList.toggle('mine', v === K); });
   }, 120);
 }
 async function renderSingle() {
@@ -3624,8 +3664,8 @@ async function renderSingle() {
 }
 // the export at real size: one file pixel per screen pixel; smaller scales outlined inside it
 async function renderFileView(it, my) {
-  if (!EXP.open) return;
-  const p = $('#fileView'), K = EXP.k, open = EXP.fileOpen;
+  const p = $('#fileView'); p.hidden = EXP.k === 1 || !!FROMB; if (p.hidden) return;
+  const K = EXP.k, open = EXP.fileOpen;
   p.classList.toggle('open', open); $('#fvHead').setAttribute('aria-expanded', open); $('#fvGrip').hidden = !open;
   $('#fvBody').style.height = open ? EXP.fileH + 'px' : '0px';
   const e = estimate(it);
@@ -3643,21 +3683,16 @@ async function renderFileView(it, my) {
   const body = $('#fvBody');
   $('#fvNote').textContent = cv.width > body.clientWidth - 24 || cv.height > body.clientHeight - 24 ? 'Real size, 1 file pixel = 1 screen pixel. Scroll to see all of it.' : 'Real size, 1 file pixel = 1 screen pixel';
 }
-function syncFold() {
-  [['#xSumS', '#xMoreS', 'single'], ['#xSumB', '#xMoreB', 'batch']].forEach(([b, m, v]) => { $(m).hidden = !(EXP.open && view === v); $(b).setAttribute('aria-expanded', EXP.open); });
-}
-document.addEventListener('click', e => { if (e.target.closest('.xdone')) { EXP.open = false; saveExp(); syncFold(); } });
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && EXP.open && !e.target.closest('input, textarea, select') && $('#tour').hidden) { EXP.open = false; saveExp(); syncFold(); } });
+function syncFold() {}
 function expChanged(opts = {}) {
   saveExp();
-  if (opts.flash) flash(EXP.open ? (view === 'batch' ? $('#bFiles') : $('#xInfo')) : (view === 'batch' ? $('#xBarB') : $('#xBarS')));
+  if (opts.flash) flash(view === 'batch' ? $('#bFiles') : EXP.k > 1 ? $('#fileView') : $('#xBarS'));
   if (view === 'batch') { syncBatchExp(); clearTimeout(batchTimer); batchTimer = setTimeout(renderBatch, 120); }
   else requestRender();
   updateSizeInfo();
 }
 document.addEventListener('click', e => {
-  const t = e.target.closest('[data-xk],[data-chip],#xLink,[data-bm],[data-fit],#fvHead,.xsum'); if (!t) return;
-  if (t.classList.contains('xsum')) { EXP.open = !EXP.open; saveExp(); syncFold(); if (view === 'batch') { syncBatchExp(); renderBatch(); } else requestRender(); return; }
+  const t = e.target.closest('[data-xk],[data-chip],#xLink,[data-bm],[data-fit],#fvHead'); if (!t) return;
   if (t.dataset.xk) { EXP.k = +t.dataset.xk; EXP.fileOpen = EXP.k > 1; document.querySelectorAll('[data-xk]').forEach(b => b.setAttribute('aria-pressed', +b.dataset.xk === EXP.k)); expChanged({ flash: true }); return; }
   if (t.dataset.chip) { EXP.linked = true; if (t.dataset.chip === 'design') EXP.by = 'design'; else { EXP.by = 'h'; EXP.v = +t.dataset.chip; } expChanged(); return; }
   if (t.id === 'xLink') {
@@ -3710,10 +3745,8 @@ async function renderBatch() {
   if (!lines.length) { $('#bgrid').replaceChildren(); $('#bSummary').textContent = ''; return; }
   const plan = await planBatch(lines); if (my !== bseq) return;
   $('#xScaleB').innerHTML = scaleBtns(plan[0].m.ow, plan[0].m.oh, false);
-  { const sz = Math.round(EXP.bmode === 'grow' ? EXP.BH : EXP.BW), mode = { grow: 'grow with the text', same: EXP.fit === 'wrap' ? 'same width, wrap' : 'same width, shrink', widest: 'as wide as the longest' }[EXP.bmode];
-    $('#xSumTxtB').textContent = `${mode} · ${sz} px ${EXP.bmode === 'grow' ? 'tall' : 'wide'} · ${EXP.k}×`;
-    document.querySelector('[data-sum="xMoreB"]').textContent = $('#xSumTxtB').textContent; }
   const est = plan.map(estimate), dpr = window.devicePixelRatio || 1;
+  $('#bPx').textContent = `${lines.length} × ${range(est.map(e => e.fw))} × ${range(est.map(e => e.fh))} px`;
   const fonts = est.map(e => e.font), sameFont = Math.max(...fonts) - Math.min(...fonts) < 0.6;
   $('#bSummary').innerHTML = `${lines.length} files · widths ${range(est.map(e => e.fw))}px · heights ${range(est.map(e => e.fh))}px · ` +
     (sameFont ? `text ${fonts[0]}px on all` : `<span class="warn">text size varies ${range(fonts.map(Math.round))}px</span>`);
@@ -3746,7 +3779,12 @@ async function renderBatch() {
     const cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = !BSKIP.has(lines[i]); cb.setAttribute('aria-label', `Export ${names[i]}`);
     cb.onchange = () => { if (cb.checked) BSKIP.delete(lines[i]); else BSKIP.add(lines[i]); card.classList.toggle('off', !cb.checked); updBatchSel(); };
     sel.append(cb); card.classList.toggle('off', !cb.checked);
-    card.append(sel, img, cap, sub); cards.push(card);
+    const ed = document.createElement('button'); ed.type = 'button'; ed.className = 'btn sm bedit'; ed.textContent = '✎ Edit alone'; ed.title = 'Edit this button on its own in Single (or double-click it)';
+    ed.onclick = () => fromBatch(i);
+    card.title = 'Double-click to edit on its own in Single';
+    card.ondblclick = e => { if (!e.target.closest('.bsel, .bedit')) fromBatch(i); };
+    if (i === BACK.i && Date.now() < BACK.until) card.classList.add('back');
+    card.append(sel, img, cap, sub, ed); cards.push(card);
   }
   $('#bgrid').replaceChildren(...cards);
 }
@@ -3860,12 +3898,13 @@ $('#exportAll').addEventListener('click', async e => {
 
 /* ================= view controls ================= */
 function setView(v) {
+  if (v === 'batch' && FROMB) return backToBatch();
   view = v; document.querySelector('.app').dataset.view = v; if (typeof syncFold === 'function') syncFold();
   $('#tab-single').setAttribute('aria-selected', v === 'single');
   $('#tab-batch').setAttribute('aria-selected', v === 'batch');
   $('#view-single').hidden = v !== 'single';
   $('#view-batch').hidden = v !== 'batch';
-  v === 'single' ? renderSingle() : renderBatch();
+  return v === 'single' ? renderSingle() : renderBatch();
 }
 $('#tab-single').onclick = () => setView('single');
 $('#tab-batch').onclick = () => setView('batch');
@@ -3878,6 +3917,55 @@ ta.addEventListener('input', () => {
   autoGrow(); requestRender();
 });
 try { const t0 = localStorage.getItem('ctaforge.text'); if (t0 != null) ta.value = t0; } catch (e) {}
+/* ---------- editing one Batch button on its own ----------
+   Double-click a card (or its Edit button) to open that text in Single. Text edits go back to its line in the
+   list; the design is shared, so design changes apply to all. Done, Esc or the Batch tab brings you back. */
+var FROMB = null, BACK = { i: -1, until: 0 };
+function rawIndex(i) { const L = $('#batchText').value.split('\n'); let n = -1; for (let r = 0; r < L.length; r++) if ((L[r].trim() || L[r]).length && ++n === i) return r; return -1; }
+function syncFromB() {
+  document.body.classList.toggle('fromb', !!FROMB);
+  if (!FROMB) return;
+  const txt = ta.value.replace(/\n/g, ' ').trim() || '(blank)';
+  $('#fbWhich').textContent = `button ${FROMB.i + 1} of ${FROMB.n} · “${txt}”`;
+  $('#fbTag').textContent = `Button ${FROMB.i + 1} of ${FROMB.n} · ${txt}`;
+  document.querySelectorAll('.fbN').forEach(e => e.textContent = FROMB.n);
+}
+function fromBatch(i) {
+  const lines = batchLines(), r = rawIndex(i); if (r < 0) return;
+  FROMB = { i, n: lines.length, r, prev: ta.value, line: lines[i] };
+  ta.value = lines[i].replace(/\|/g, '\n'); autoGrow();
+  updLayerSums(); syncFontSample(); syncFromB();
+  setView('single');
+  window.scrollTo({ top: 0 }); document.querySelector('.app > .work')?.scrollTo?.({ top: 0 });
+}
+ta.addEventListener('input', () => {
+  if (!FROMB) return;
+  const L = $('#batchText').value.split('\n'), nv = ta.value.replace(/\n/g, '|');
+  if (BSKIP.has(L[FROMB.r])) { BSKIP.delete(L[FROMB.r]); BSKIP.add(nv); }
+  L[FROMB.r] = nv; $('#batchText').value = L.join('\n');
+  try { localStorage.setItem('ctaforge.text', FROMB.prev); } catch (e) {}
+  try { $('#batchText').dispatchEvent(new Event('input')); } catch (e) {}
+  syncFromB();
+});
+async function backToBatch() {
+  if (!FROMB) return;
+  const f = FROMB; FROMB = null; TE.on = false;
+  ta.value = f.prev; autoGrow(); try { localStorage.setItem('ctaforge.text', f.prev); } catch (e) {}
+  updLayerSums(); syncFontSample(); syncFromB();
+  await setView('batch');
+  BACK = { i: f.i, until: Date.now() + 2200 };
+  const card = $('#bgrid').children[f.i];
+  if (card) { card.classList.add('back'); card.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
+  setTimeout(() => document.querySelectorAll('.bcard.back').forEach(c => c.classList.remove('back')), 2200);
+  toast(`Back in Batch · “${(batchLines()[f.i] || '').replace(/\|/g, ' ')}” updated`, 2500);
+}
+document.addEventListener('click', e => { if (e.target.closest('.fromDone')) backToBatch(); });
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape' || !FROMB || e.defaultPrevented || !$('#tour').hidden) return;
+  if (e.target === ta) { ta.blur(); return; }
+  if (e.target.closest('input, textarea, select, [role="menu"], [role="dialog"]')) return;
+  backToBatch();
+});
 /* ---------- typing on the button in the preview ----------
    The text box stays the real editor: clicking the button's text focuses it and puts the cursor there; the
    cursor and selection are drawn over the preview. Photoshop keys: Alt+←/→ spacing (between two letters, or
@@ -6172,8 +6260,8 @@ const TOUR = [
   { el: '#controls .layers', title: 'Change any part', text: 'Pick what to edit: the text, the button, an icon, a cursor or the whole design. Its settings show below.' },
   { el: '#stagegrid', title: 'Live preview, and type on it', text: 'This is the button at its real size on screen. Click its text to type right on it: Alt+←/→ changes the space between letters, Alt+↑/↓ the line height. Purple guides show the button; orange ones show the room taken by shadows and glows.', single: true },
   { el: '.refbar', title: 'Copy a button you like', text: 'Have a screenshot or a Figma design? Match a reference image, or paste the CSS from Figma. Presets… opens the presets right here too.', single: true },
-  { el: '#xBarS', title: 'Export', text: 'This line shows exactly what you will get. Open Size & scale to set the size on screen and the scale (2× is crisp on phones), then press Export.', single: true },
-  { el: '#tab-batch', title: 'Many buttons at once', text: 'Batch makes one button per line of text, all in the same design, and exports them together as a ZIP, a folder or to the team Drive.' },
+  { el: '#xBarS', title: 'Size & scale, then Export', text: 'On the left, set the size on screen and the scale (2× is crisp on phones; above 1× the file opens at real size). On the right, Export shows exactly the file you get.', single: true },
+  { el: '#tab-batch', title: 'Many buttons at once', text: 'Batch makes one button per line of text, all in the same design, and exports them together as a ZIP, a folder or to the team Drive. Double-click any button there to edit it on its own.' },
   { el: '.libtools', title: 'Save and share', text: 'Name your design and Save it, or share it with the team so everyone can use it. More ⋯ imports and downloads designs.' },
   { el: '#tourBtn', title: "That's it", text: 'You can take this tour again any time from the Tour button up here.', last: true },
 ];
