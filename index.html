@@ -7,7 +7,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
 /* Layout: tool app — control rail on the left; workspace on the right with a big mode switch, stage, export bar, and a gallery grid below */
-:root {
+:root { --modes-h: 0px;
   --bg: #eceef3;
   --panel: #ffffff;
   --sunk: #e2e5ec;
@@ -65,7 +65,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .railbar span { writing-mode: vertical-rl; transform: rotate(180deg); font-size: 14px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
 .railbar svg { width: 16px !important; height: 16px !important; stroke-width: 2.2 !important; }
 .railbar:hover, .railbar:focus-visible { background: var(--accent); color: #ffffff; outline: none; }
-.app.railfolded { grid-template-columns: 40px minmax(0, 1fr); }
+
 .app.railfolded > .panel, .app.railfolded > .railgrip, .app.railfolded > .railfold { display: none; }
 .foldhint { position: absolute; top: 50%; left: 14px; transform: translateY(-50%); white-space: nowrap; background: var(--danger); color: #ffffff; font-size: 12px; font-weight: 600; padding: 5px 10px; border-radius: 6px; pointer-events: none; opacity: 0; transition: opacity .12s; }
 .grip.folding::after { background: var(--danger); width: 3px; }
@@ -233,6 +233,24 @@ input[type="color"] { width: 100%; height: 26px; padding: 0 2px; border: 1px sol
 .view { display: flex; flex-direction: column; gap: 12px; padding-block: 16px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
 .textrow textarea { width: 100%; font-size: 18px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); resize: vertical; min-height: 50px; line-height: 1.4; display: block; }
 .refbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+/* typing on the button: cursor, selection, toolbar and keys over the preview */
+.stagegrid { position: relative; }
+.te-box { cursor: text; }
+.te-box.te-on { outline: 2px dashed var(--accent); outline-offset: 6px; border-radius: 6px; }
+.te-layer { position: absolute; inset: 0; pointer-events: none; }
+.te-sel { position: absolute; background: rgba(53, 80, 240, .45); border-radius: 2px; mix-blend-mode: multiply; }
+.te-caret { position: absolute; width: 2px; background: #ffffff; box-shadow: 0 0 0 1px var(--accent); border-radius: 1px; }
+.te-caret.blink { opacity: 0; }
+.te-bar { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); z-index: 6; display: flex; align-items: center; gap: 10px; padding: 6px 8px; border-radius: 10px; background: #151922; color: #ffffff; box-shadow: 0 10px 26px rgba(0,0,0,.28); font-size: 12px; white-space: nowrap; }
+.te-bar b { font-family: var(--mono); }
+.te-bar > i { width: 1px; height: 18px; background: #3a4150; }
+.te-bar button { border: 0; border-radius: 6px; padding: 3px 8px; background: transparent; color: #ffffff; font: 600 12px var(--ui); cursor: pointer; }
+.te-bar button[aria-pressed="true"] { background: var(--accent); }
+.te-keys { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); z-index: 6; display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 14px; max-width: calc(100% - 24px); padding: 6px 12px; border-radius: 10px; background: color-mix(in srgb, var(--panel) 94%, transparent); border: 1px solid var(--line); color: var(--muted); font-size: 12px; }
+.te-keys kbd { border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 5px; padding: 0 5px; font: 600 11px var(--mono); color: var(--fg); background: var(--panel); }
+.te-chip { position: absolute; top: 12px; left: 12px; z-index: 6; padding: 4px 10px; border-radius: 999px; background: var(--accent); color: #ffffff; font-size: 12px; font-weight: 600; }
+@media (max-width: 1100px) { .te-bar { top: auto; bottom: 56px; } }
+
 /* first-run tour: a spotlight on one part of the app at a time, with a short note */
 .tourbtn { display: inline-flex; align-items: center; gap: 6px; }
 .tourbtn svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
@@ -612,6 +630,109 @@ input.tg::after { content: ""; position: absolute; top: 2px; left: 2px; width: 1
 input.tg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .fx-empty { color: var(--muted); font-size: 12px; padding: 4px 2px; }
 .pinbtn { display: none; }
+/* ===== main layout: design panel | preview | presets ===== */
+.app { grid-template-columns: var(--railc, var(--rail, 360px)) minmax(0, 1fr) var(--presc, var(--pres, 340px)); }
+.app.railfolded { grid-template-columns: var(--railc, var(--rail, 360px)) minmax(0, 1fr) var(--presc, var(--pres, 340px)); --railc: 40px; }
+.app.presfolded { --presc: 40px; }
+.app > .panel { grid-column: 1; grid-row: 2; display: flex; flex-direction: column; overflow: hidden; padding-bottom: 0; min-height: 0; }
+.app > .panel > #controls { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding-bottom: 20px; }
+.app > .work { grid-column: 2; grid-row: 2; display: flex; flex-direction: column; }
+/* top bar: Single/Batch switch and the edit tools */
+.modesw { display: flex; border: 1px solid var(--line); border-radius: 9px; overflow: hidden; flex: none; }
+.top .mode { display: flex; align-items: center; gap: 7px; padding: 6px 14px; border: 0; border-radius: 0; background: var(--panel); color: var(--fg); box-shadow: none; font-size: 13px; }
+.top .mode + .mode { border-left: 1px solid var(--line); }
+.top .mode svg { width: 18px; height: 18px; color: var(--muted); }
+.top .mode b { font-size: 13.5px; }
+.top .mode small { margin: 0; font-size: 12px; color: var(--muted); }
+.top .mode[aria-selected="true"] { background: var(--accent); color: var(--accent-fg); box-shadow: none; }
+.top .mode[aria-selected="true"] svg, .top .mode[aria-selected="true"] small { color: var(--accent-fg); }
+.top .tools { position: static; display: flex; gap: 6px; padding: 0; border: 0; background: none; grid-template-columns: none; }
+.top .tools button { padding: 6px 10px; }
+.top .grow { flex: 1; }
+/* Export, docked at the bottom of the design panel */
+.xdock { flex: none; border-top: 1px solid var(--line); background: color-mix(in srgb, var(--sunk) 45%, var(--panel)); padding: 12px; box-shadow: 0 -6px 14px rgba(0,0,0,.05); }
+.xdock .xbar { border: 0; padding: 0; background: none; border-radius: 0; }
+#xBarS { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+#xBarS .xsum { grid-column: 1 / -1; }
+#xBarS .seg { grid-column: 1; display: flex; }
+#xBarS .seg button { flex: 1; }
+#xBarS #copyOne { grid-column: 2; }
+#xBarS #exportOne { grid-column: 1 / -1; height: 40px; font-size: 14px; }
+#xBarS .xb-drv, #xBarB .xb-drv { grid-column: 1 / -1; order: 9; justify-content: stretch; }
+.xdock .xb-drv > * { flex: 1 1 0; justify-content: center; font-size: 12px !important; padding: 5px 6px !important; }
+#xBarB { display: flex; flex-direction: column; align-items: stretch; gap: 8px; }
+#xBarB .xgo-row { display: flex; gap: 8px; align-items: center; }
+#xBarB .xgo-row select { flex: 1; width: auto; }
+#xBarB #exportAll { order: 8; margin: 0; }
+.xdock .xsum { flex: none; flex-wrap: wrap; row-gap: 2px; }
+.xdock .xsum .xs-v { white-space: normal; }
+.xdock .xsum .xs-c::after { content: " ›"; }
+.xdock .xsum .xs-c { padding: 4px 11px; border-radius: 999px; background: var(--accent-soft); border: 1px solid var(--accent); }
+.xdock .xsum:hover .xs-c { background: var(--accent); color: #ffffff; }
+.app[data-view="batch"] #xBarS, .app:not([data-view="batch"]) #xBarB { display: none; }
+/* Size & scale: opens over the middle */
+.app > .xover { grid-column: 2; grid-row: 2; z-index: 30; align-self: start; margin: 12px; max-height: calc(100% - 24px); overflow: auto; background: var(--panel); border: 2px solid var(--accent); border-radius: 14px; box-shadow: 0 18px 50px rgba(20,30,90,.22); padding: 12px 14px 14px; }
+.xo-head { display: flex; align-items: center; gap: 12px; position: sticky; top: -12px; margin: -12px -14px 0; padding: 10px 14px; background: color-mix(in srgb, var(--sunk) 45%, var(--panel)); border-bottom: 1px solid var(--line); z-index: 2; }
+.xo-head b { font-size: 15px; }
+.xo-sum { font: 600 13px var(--mono); color: var(--accent); }
+.xo-head .grow { flex: 1; }
+/* presets and library on the right */
+.app > .presets { grid-column: 3; grid-row: 2; min-height: 0; overflow-y: auto; background: var(--panel); border-left: 4px solid color-mix(in srgb, var(--accent) 35%, transparent); }
+.presets .lib { border-top: 0; padding: 12px 12px 0; display: flex; flex-direction: column; gap: 10px; min-height: 100%; box-sizing: border-box; }
+.presets .libhead { display: contents; }
+.presets .lib h2 { order: 0; font-size: 15px; font-weight: 700; text-transform: none; letter-spacing: 0; color: var(--fg); display: flex; align-items: baseline; gap: 8px; }
+.presets .libhint { font-size: 12px; font-weight: 400; color: var(--muted); }
+.presets .libgrid { order: 1; display: flex; flex-direction: column; gap: 10px; margin-top: 0; }
+.presets .libbar { display: flex; flex-direction: column; align-items: stretch; gap: 6px; }
+.presets .libbar .gfilter { display: flex; }
+.presets .libbar .gfilter button { flex: 1; }
+.presets .ftree { position: static; padding: 4px; }
+.presets .ftin { position: static; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px 4px; }
+.presets .ftin .fh { grid-column: 1 / -1; }
+.presets .fgrip { display: none; }
+.presets .gallery { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; }
+.presets .gcard .thumb { height: 74px; }
+.presets .gcard .thumb canvas { max-height: 60px; }
+.presets .teamurl { order: 9; }
+.presets .libtools { order: 10; position: sticky; bottom: 0; z-index: 3; margin: auto -12px 0; padding: 10px 12px 12px; background: var(--panel); border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 6px; }
+.presets .libtools #saveName { flex: 1 1 120px; min-width: 0; }
+#presetBtn, #presetBar { display: none !important; }
+/* narrower windows: slimmer side panels and icon-only edit tools (a width you dragged still wins) */
+@media (max-width: 1280px) and (min-width: 861px) {
+  .app { --rail: 300px; --pres: 280px; }
+  .top .tools button { font-size: 0; gap: 0; padding: 7px 9px; }
+  .top .tools svg { width: 16px; height: 16px; }
+  .top .mode small { display: none; }
+}
+/* Single: the text, its tools, the preview and the preview tools read as one card */
+@media (min-width: 861px) {
+  .app > .work > #view-single { flex: 1 0 auto; gap: 0; }
+  #view-single > .textrow, #view-single > .refbar, #view-single > .hints, #view-single > .cssbox, #view-single > .presetbar, #view-single > .stagegrid, #view-single > .bar { background: var(--panel); border: 1px solid var(--line); border-top: 0; border-bottom: 0; padding: 8px 10px 0; }
+  #view-single > .textrow { border-top: 1px solid var(--line); border-radius: 12px 12px 0 0; padding-top: 10px; }
+  #view-single > .textrow textarea { border: 1.5px solid var(--accent); }
+  #view-single > .stagegrid { flex: 1 1 auto; padding-bottom: 0; }
+  #view-single > .stagegrid .stage { min-height: 260px; height: 100%; }
+  #view-single > .bar { border-bottom: 1px solid var(--line); border-radius: 0 0 12px 12px; padding: 8px 12px 10px; }
+}
+/* folder rows: their ⋯ shows on hover so names have room */
+.presets .frow .fmore { opacity: 0; }
+.presets .frow:hover .fmore, .presets .frow:focus-within .fmore, .presets .frow.sel .fmore { opacity: 1; }
+.presets .frow .fopen small { margin-left: auto; }
+
+/* the presets divider: same fold button and bar as the design panel */
+.app > .presgrip { grid-column: 3; grid-row: 2; justify-self: start; margin-left: -5px; }
+.app > .presgrip::after { width: 4px; left: 3px; background: transparent; }
+.app > .presgrip:hover::after, .app > .presgrip.drag::after, .app > .presgrip:focus-visible::after { background: var(--accent); }
+.app > .presgrip .foldhint { left: auto; right: 14px; }
+.presfold { grid-column: 3; grid-row: 2; justify-self: start; align-self: center; margin-left: -13px; z-index: 25; width: 26px; height: 96px; border-radius: 13px; border: 1.5px solid var(--accent); background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; cursor: col-resize; box-shadow: 0 2px 10px rgba(0,0,0,.14); padding: 0; touch-action: none; transition: background .15s, color .15s; }
+.presfold:hover, .presfold:focus-visible, .presfold.drag { background: var(--accent); color: #ffffff; outline: none; }
+.presfold svg, .presbar svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.presbar { grid-column: 3; grid-row: 2; width: 100%; border: 0; border-left: 4px solid var(--accent); background: var(--accent-soft); color: var(--accent); cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 14px 0; }
+.presbar span { writing-mode: vertical-rl; font-size: 14px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.presbar:hover, .presbar:focus-visible { background: var(--accent); color: #ffffff; outline: none; }
+.app.presfolded > .presets, .app.presfolded > .presgrip, .app.presfolded > .presfold { display: none; }
+.app.willfoldp > .presets { opacity: .45; transition: opacity .12s; }
+
 @media (max-width: 860px) {
   html, body { height: auto; }
   .app { display: flex; flex-direction: column; height: auto; }
@@ -634,12 +755,18 @@ input.tg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
   .refbar { order: 2; }
   .hints, .cssbox { order: 2; }
   #view-single > .exportbox { order: 7; }
-  #view-single .xlayout, #view-single .xleft, #view-single .xright { display: contents; }
+  .app > .presgrip, .app > .presfold, .app > .presbar { display: none !important; }
+  .app.presfolded > .presets { display: block; }
+  .app > .xover { order: 7; position: static; margin: 6px 12px; max-height: none; }
+  .app > .presets { order: 8; border-left: 0; border-top: 1px solid var(--line); overflow: visible; }
+  .app > .panel { overflow: visible; }
+  .app > .panel > #controls { overflow: visible; }
+  .top .grow { display: none; }
+  .top .tools { flex-wrap: wrap; }
   #view-single .xleft > .bar { order: 4; }
   .presetbar { order: 2; }
-  #view-single .xbar, #view-single .xmore { order: 7; }
   .lib { order: 8; }
-  .textrow, .refbar, .presetbar, .hints, .cssbox, .stagegrid, #view-single > .bar, #view-single .xleft > .bar, #view-single > .exportbox, #view-single .xbar, #view-single .xmore { margin-inline: max(12px, env(safe-area-inset-left, 0px)) max(12px, env(safe-area-inset-right, 0px)); margin-block: 6px; }
+  .textrow, .refbar, .presetbar, .hints, .cssbox, .stagegrid, #view-single > .bar, #view-single .xleft > .bar, #view-single > .exportbox { margin-inline: max(12px, env(safe-area-inset-left, 0px)) max(12px, env(safe-area-inset-right, 0px)); margin-block: 6px; }
   .stage { min-height: 140px; height: 32vh; padding: 10px; }
   .stage canvas { max-width: 100%; max-height: 100%; object-fit: contain; }
   .stage canvas.real { max-width: none; max-height: none; }
@@ -663,7 +790,18 @@ input.tg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
 <div class="app">
   <header class="top">
     <div class="brand"><i aria-hidden="true"></i>CTA Button Forge</div>
-    <div class="hint">Buttons grow with their text. Effects stack. Export PNG or SVG, one at a time or in batches.</div>
+    <div class="modesw" role="tablist" aria-label="Mode">
+      <button class="mode" role="tab" id="tab-single" aria-selected="true"><svg viewBox="0 0 34 34" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><rect x="3" y="11" width="28" height="12" rx="6"/></svg><b>Single</b></button>
+      <button class="mode" role="tab" id="tab-batch" aria-selected="false"><svg viewBox="0 0 34 34" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><rect x="3" y="3" width="22" height="8" rx="4"/><rect x="3" y="13" width="28" height="8" rx="4"/><rect x="3" y="23" width="16" height="8" rx="4"/></svg><b>Batch</b><small id="batchHint"></small></button>
+    </div>
+    <div class="tools" role="group" aria-label="Edit">
+      <button id="undoBtn" title="Undo (Ctrl/Cmd+Z)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>Undo</button>
+      <button id="redoBtn" title="Redo (Ctrl/Cmd+Shift+Z)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></svg>Redo</button>
+      <button id="resetBtn" title="Back to the default design"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>Reset</button>
+      <button id="randomBtn" title="Random design"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.2" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.2" fill="currentColor"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/></svg>Random</button>
+      <button id="foldBtn" title="Fold or unfold every section"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 15 5-5 5 5"/><path d="m7 9 5-5 5 5"/></svg><span>Fold all</span></button>
+    </div>
+    <span class="grow"></span>
     <button type="button" class="btn sm tourbtn" id="tourBtn" title="A one-minute walk through the app. Run it any time."><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14"/><path d="M12 17.5h.01"/></svg>Tour</button>
     <span class="seg" role="group" aria-label="Interface theme">
       <button data-theme-set="system" aria-pressed="true">Auto</button>
@@ -676,27 +814,40 @@ input.tg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
   <button type="button" class="railfold" id="railFold" title="Click to fold the design panel, or drag to resize it" aria-label="Fold the design panel" aria-expanded="true" aria-controls="panel"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M7.5 3 4.5 6l3 3"/></svg></button>
   <button type="button" class="railbar" id="railBar" hidden title="Show the design panel" aria-label="Show the design panel" aria-controls="panel"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M4.5 3l3 3-3 3"/></svg><span>Design panel</span><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M4.5 3l3 3-3 3"/></svg></button>
   <aside class="panel" id="panel" aria-label="Design controls">
-    <div class="tools">
-      <button id="undoBtn" title="Undo (Ctrl/Cmd+Z)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>Undo</button>
-      <button id="redoBtn" title="Redo (Ctrl/Cmd+Shift+Z)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></svg>Redo</button>
-      <button id="resetBtn" title="Back to the default design"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>Reset</button>
-      <button id="randomBtn" title="Random design"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.2" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.2" fill="currentColor"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/></svg>Random</button>
-      <button id="foldBtn" title="Fold or unfold every section"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 15 5-5 5 5"/><path d="m7 9 5-5 5 5"/></svg><span>Fold all</span></button>
-    </div>
     <div id="controls"></div>
+    <div class="xdock" id="xDock" aria-label="Export">
+      <section class="xbar" id="xBarS">
+        <button type="button" class="xsum" id="xSumS" aria-expanded="false" aria-controls="xMoreS"><span class="xs-l">Export</span><b class="xs-v" id="xSumTxt"></b><span class="xs-c">Size &amp; scale</span></button>
+        <span class="seg" role="group" aria-label="Format">
+              <button data-fmt="png" aria-pressed="true">PNG</button>
+              <button data-fmt="svg" aria-pressed="false">SVG (vector)</button>
+            </span>
+        <span class="xb-drv"><a class="btn drv teamfolder" id="driveLink" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Team folder</a>
+            <a class="btn drv lastexp" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1"/><path d="M3 7v10a2 2 0 0 0 2 2h12.5a2 2 0 0 0 1.9-1.4L22 11H7.5a2 2 0 0 0-1.9 1.4L3 19"/></svg>Open last export</a>
+            <button class="btn" id="driveOne" title="Save this export into the team's shared Google Drive folder">Save to team Drive</button></span>
+        <button class="btn copybtn" id="copyOne" title="Copy the image at the chosen scale, then paste it into Figma, Slack, a doc or an email"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>Copy</button>
+        <button class="btn primary" id="exportOne">Export PNG</button>
+      </section>
+      <section class="xbar" id="xBarB">
+        <button type="button" class="xsum" id="xSumB" aria-expanded="false" aria-controls="xMoreB"><span class="xs-l">Export</span><b class="xs-v" id="xSumTxtB"></b><span class="xs-c">Long texts, size &amp; scale</span></button>
+        <div class="xgo-row"><span class="meta" id="batchCount"></span><label class="chk"><input type="checkbox" id="bPng" checked>PNG</label><label class="chk"><input type="checkbox" id="bSvg">SVG</label></div>
+        <div class="xgo-row"><label class="meta" for="prefix">File prefix</label><input id="prefix" type="text" value="cta-" class="sm" style="width:90px"></div>
+        <div class="xgo-row"><label class="meta" for="destSel">Save as</label>
+            <select class="sm" id="destSel">
+              <option value="zip">One ZIP file</option>
+              <option value="folder">Into a folder…</option>
+              <option value="files">Separate files</option>
+              <option value="drive" id="destDrive" disabled>Team Drive folder</option>
+            </select>
+            </div>
+        <span class="xb-drv"><a class="btn drv teamfolder" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Team folder</a>
+            <a class="btn drv lastexp" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1"/><path d="M3 7v10a2 2 0 0 0 2 2h12.5a2 2 0 0 0 1.9-1.4L22 11H7.5a2 2 0 0 0-1.9 1.4L3 19"/></svg>Open last export</a></span>
+        <button class="btn primary" id="exportAll">Export all</button>
+      </section>
+    </div>
   </aside>
 
   <section class="work">
-    <div class="modes" role="tablist" aria-label="Mode">
-      <button class="mode" role="tab" id="tab-single" aria-selected="true">
-        <svg viewBox="0 0 34 34" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="28" height="12" rx="6"/></svg>
-        <span><b>Single button</b><small>Design it and export one PNG or SVG</small></span>
-      </button>
-      <button class="mode" role="tab" id="tab-batch" aria-selected="false">
-        <svg viewBox="0 0 34 34" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="22" height="8" rx="4"/><rect x="3" y="13" width="28" height="8" rx="4"/><rect x="3" y="23" width="17" height="8" rx="4"/></svg>
-        <span><b>Batch</b><small id="batchHint">Many texts, same design, one export</small></span>
-      </button>
-    </div>
 
     <div class="view" id="view-single">
       <div class="textrow">
@@ -745,6 +896,9 @@ input.tg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
               <figcaption><span>Reference</span><span id="pickOut"></span></figcaption>
             </figure>
             <div class="stage" id="stage" data-bg="checker"></div>
+              <div class="te-bar" id="teBar" role="toolbar" aria-label="Text on the button" hidden><span>Size <b id="teSize"></b></span><i></i><span>Spacing <b id="teSp"></b></span><i></i><span>Line height <b id="teLh"></b></span><i></i><button type="button" id="teUp" aria-pressed="false" title="Uppercase">AA</button><button type="button" id="teIt" aria-pressed="false" title="Italic"><em>I</em></button></div>
+              <div class="te-keys" id="teKeys" hidden><span><kbd>Alt</kbd> <kbd>←</kbd> <kbd>→</kbd> letter spacing</span><span><kbd>Alt</kbd> <kbd>↑</kbd> <kbd>↓</kbd> line height</span><span><kbd>Ctrl</kbd> <kbd>Shift</kbd> <kbd>&lt;</kbd> <kbd>&gt;</kbd> size</span><span><kbd>Shift</kbd> + arrows select</span><span><kbd>Esc</kbd> done</span></div>
+              <span class="te-chip" id="teChip" hidden>Typing on the button</span>
           </div>
       <div class="bar">
             <div class="bgs" aria-label="Preview background">
@@ -758,19 +912,35 @@ input.tg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
             <span class="meta grow" id="sizeOut"></span>
             <button class="btn sm pinbtn" id="pinBtn" aria-pressed="true">Unpin preview</button>
           </div>
-      <section class="xbar" id="xBarS">
-        <button type="button" class="xsum" id="xSumS" aria-expanded="false" aria-controls="xMoreS"><svg class="xchev" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5"/></svg><span class="xs-l">Export</span><b class="xs-v" id="xSumTxt"></b><span class="xs-c">Size &amp; scale</span></button>
-        <span class="seg" role="group" aria-label="Format">
-              <button data-fmt="png" aria-pressed="true">PNG</button>
-              <button data-fmt="svg" aria-pressed="false">SVG (vector)</button>
-            </span>
-        <span class="xb-drv"><a class="btn drv teamfolder" id="driveLink" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Team folder</a>
-            <a class="btn drv lastexp" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1"/><path d="M3 7v10a2 2 0 0 0 2 2h12.5a2 2 0 0 0 1.9-1.4L22 11H7.5a2 2 0 0 0-1.9 1.4L3 19"/></svg>Open last export</a>
-            <button class="btn" id="driveOne" title="Save this export into the team's shared Google Drive folder">Save to team Drive</button></span>
-        <button class="btn copybtn" id="copyOne" title="Copy the image at the chosen scale, then paste it into Figma, Slack, a doc or an email"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>Copy</button>
-        <button class="btn primary" id="exportOne">Export PNG</button>
-      </section>
-      <section class="xmore" id="xMoreS" hidden>
+    </div>
+
+    <div class="view" id="view-batch" hidden>
+      <div class="batch">
+            <div>
+              <textarea id="batchText" spellcheck="false" aria-label="Batch button texts">Play Now
+Claim Your Bonus
+Join Free
+Spin &amp; Win
+Get 100 Free Spins
+Start</textarea>
+              <div class="note">One button per line, all with the current design. Use <b>|</b> inside a line for a line break, e.g. <code>Your next|move?</code></div>
+            </div>
+            <div style="display:grid;gap:10px;min-width:0">
+              <div class="bhead" id="bFiles">
+                <label class="chk"><input type="checkbox" class="guidesChk" checked>Guides</label><span class="glegend"><span class="lgp"><i></i>Button</span><span class="lgo"><i></i>With effects</span></span>
+                <span class="seg" role="group" aria-label="Preview size"><button data-pv="fit" aria-pressed="true">Fit to card</button><button data-pv="real" aria-pressed="false">Real size</button></span>
+                <span class="meta" id="bSummary"></span>
+            <button type="button" class="btn sm" id="bSelAll">Select none</button>
+              </div>
+              <div class="bgrid" id="bgrid"></div>
+            </div>
+          </div>
+    </div>
+
+  </section>
+
+  <section class="xmore xover" id="xMoreS" hidden aria-label="Size &amp; scale">
+        <div class="xo-head"><b>Size &amp; scale</b><span class="xo-sum" data-sum="xMoreS"></span><span class="grow"></span><button type="button" class="btn sm primary xdone">Done</button></div>
         <div class="xmore-grid">
           <section class="xstep">
             <h4><span class="xn">1</span>How big is the button on screen?</h4>
@@ -804,46 +974,8 @@ input.tg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
               <div class="xi-edge"><div><figure><canvas id="xL0"></canvas><figcaption id="xL0c"></figcaption></figure><figure><canvas id="xL1"></canvas><figcaption id="xL1c"></figcaption></figure></div><span class="note-sm">Edge, zoomed in</span></div>
             </div>
       </section>
-    </div>
-
-    <div class="view" id="view-batch" hidden>
-      <div class="batch">
-            <div>
-              <textarea id="batchText" spellcheck="false" aria-label="Batch button texts">Play Now
-Claim Your Bonus
-Join Free
-Spin &amp; Win
-Get 100 Free Spins
-Start</textarea>
-              <div class="note">One button per line, all with the current design. Use <b>|</b> inside a line for a line break, e.g. <code>Your next|move?</code></div>
-            </div>
-            <div style="display:grid;gap:10px;min-width:0">
-              <div class="bhead" id="bFiles">
-                <label class="chk"><input type="checkbox" class="guidesChk" checked>Guides</label><span class="glegend"><span class="lgp"><i></i>Button</span><span class="lgo"><i></i>With effects</span></span>
-                <span class="seg" role="group" aria-label="Preview size"><button data-pv="fit" aria-pressed="true">Fit to card</button><button data-pv="real" aria-pressed="false">Real size</button></span>
-                <span class="meta" id="bSummary"></span>
-            <button type="button" class="btn sm" id="bSelAll">Select none</button>
-              </div>
-              <div class="bgrid" id="bgrid"></div>
-            </div>
-          </div>
-      <section class="xbar" id="xBarB">
-        <button type="button" class="xsum" id="xSumB" aria-expanded="false" aria-controls="xMoreB"><svg class="xchev" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5"/></svg><span class="xs-l">Export</span><b class="xs-v" id="xSumTxtB"></b><span class="xs-c">Long texts, size &amp; scale</span></button>
-        <div class="xgo-row"><span class="meta" id="batchCount"></span><label class="chk"><input type="checkbox" id="bPng" checked>PNG</label><label class="chk"><input type="checkbox" id="bSvg">SVG</label></div>
-        <div class="xgo-row"><label class="meta" for="prefix">File prefix</label><input id="prefix" type="text" value="cta-" class="sm" style="width:90px"></div>
-        <div class="xgo-row"><label class="meta" for="destSel">Save as</label>
-            <select class="sm" id="destSel">
-              <option value="zip">One ZIP file</option>
-              <option value="folder">Into a folder…</option>
-              <option value="files">Separate files</option>
-              <option value="drive" id="destDrive" disabled>Team Drive folder</option>
-            </select>
-            </div>
-        <span class="xb-drv"><a class="btn drv teamfolder" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Team folder</a>
-            <a class="btn drv lastexp" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1"/><path d="M3 7v10a2 2 0 0 0 2 2h12.5a2 2 0 0 0 1.9-1.4L22 11H7.5a2 2 0 0 0-1.9 1.4L3 19"/></svg>Open last export</a></span>
-        <button class="btn primary" id="exportAll">Export all</button>
-      </section>
-      <section class="xmore" id="xMoreB" hidden>
+  <section class="xmore xover" id="xMoreB" hidden aria-label="Long texts, size &amp; scale">
+        <div class="xo-head"><b>Long texts, size &amp; scale</b><span class="xo-sum" data-sum="xMoreB"></span><span class="grow"></span><button type="button" class="btn sm primary xdone">Done</button></div>
         <div class="xmore-grid">
           <section class="xstep">
             <h4><span class="xn">1</span>Texts are different lengths. Should the buttons…</h4>
@@ -859,11 +991,14 @@ Start</textarea>
           </section>
         </div>
       </section>
-    </div>
 
+  <div class="grip presgrip" id="presGrip" role="separator" aria-orientation="vertical" aria-label="Resize the presets panel (arrow keys; double-click to reset)" tabindex="0"><span class="foldhint" aria-hidden="true">Release to fold</span></div>
+  <button type="button" class="presfold" id="presFold" title="Click to fold the presets panel, or drag to resize it" aria-label="Fold the presets panel" aria-expanded="true" aria-controls="presets"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M4.5 3l3 3-3 3"/></svg></button>
+  <button type="button" class="presbar" id="presBar" hidden title="Show the presets" aria-label="Show the presets panel" aria-controls="presets"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M7.5 3 4.5 6l3 3"/></svg><span>Presets</span><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M7.5 3 4.5 6l3 3"/></svg></button>
+  <aside class="presets" id="presets" aria-label="Presets and design library">
     <div class="lib">
       <div class="libhead">
-        <h2>Design library</h2>
+        <h2>Presets <span class="libhint">click one to try it</span></h2>
         <div class="libtools">
           <input type="text" id="saveName" placeholder="Name this design" aria-label="Design name">
           <button class="btn sm primary" id="saveBtn" title="Save the current design to My designs (into the open folder)">Save</button>
@@ -893,7 +1028,7 @@ Start</textarea>
         <div class="gallery" id="gallery"></div>
       </div>
     </div>
-  </section>
+  </aside>
 </div>
 <input type="file" id="fontFile" accept=".ttf,.otf,.woff,.woff2" multiple hidden>
 <input type="file" id="ipFile" accept="image/png,image/svg+xml,image/webp,image/jpeg,image/gif" hidden>
@@ -1645,24 +1780,50 @@ function sparkleSpots(d, x, y, w, h) {
 }
 
 /* ================= text layout ================= */
+/* ---------- per-letter spacing (kerning and tracking) ----------
+   D.font.kern = { t: the text it belongs to, k: { index: extra px after that letter } }.
+   It applies only to that exact text, so Batch texts and other designs ignore it. */
+function kernMap(d, text) { const K = d.font.kern; return K && K.k && K.t === String(text ?? '') && Object.keys(K.k).length ? K.k : null; }
+// distance from a line's left edge to just before letter p (letters, spacing and extra space so far)
+function linePrefix(l, p) {
+  if (p <= 0) return 0;
+  if (p >= l.s.length) return l.w / 1;
+  let k = 0; if (l.k) for (let j = 0; j < p; j++) k += l.k[j] || 0;
+  return MC.measureText(l.s.slice(0, p)).width + k;
+}
+// keep the extra spaces on the same letters when the text is edited elsewhere: unchanged start and end keep theirs
+function realignKern(K, text) {
+  if (!K || K.t === text) return K;
+  const a = K.t || '', b = text; let p = 0; while (p < a.length && p < b.length && a[p] === b[p]) p++;
+  let q = 0; while (q < a.length - p && q < b.length - p && a[a.length - 1 - q] === b[b.length - 1 - q]) q++;
+  const k = {};
+  for (const [i, v] of Object.entries(K.k || {})) { const n = +i; if (n < p) k[n] = v; else if (n >= a.length - q) k[n + b.length - a.length] = v; }
+  return Object.keys(k).length ? { t: b, k } : null;
+}
 async function getLayout(d, text) {
   const f = d.font, I = d.icon, b = d.box;
   let t = String(text ?? '').replace(/\|/g, '\n');
   if (f.upper) t = t.toLocaleUpperCase();
-  // a line of only spaces keeps them, so a blank button takes its width from them
-  let lines = t.split('\n').map(s => s.trim() || s).filter(s => s.length);
-  if (!lines.length) lines = I.type !== 'none' ? [''] : [' '];
+  // a line of only spaces keeps them, so a blank button takes its width from them.
+  // i0 = where the line starts in the text (for per-letter spacing and the text cursor)
+  const KM = kernMap(d, text);
+  let lines = [], starts = [], off = 0;
+  for (const s of t.split('\n')) { const tr = s.trim(), keep = tr || s; if (keep.length) { lines.push(keep); starts.push(off + (tr ? s.indexOf(tr) : 0)); } off += s.length + 1; }
+  if (!lines.length) { lines = I.type !== 'none' ? [''] : [' ']; starts = [0]; }
   await loadFont(f, lines.join('') || 'A');
   const fontStr = fontString(f);
   const img = I.type === 'image' ? await getImg(I.src) : null;
   setMC(fontStr, 0, 'ltr');
   const capH = MC.measureText('H').actualBoundingBoxAscent || f.size * 0.7;
   const ls = f.spacing;
-  const L = lines.map(s => {
+  const L = lines.map((s, i) => {
     const dir = isRTL(s) ? 'rtl' : 'ltr';
     setMC(fontStr, ls, dir);
-    const w = s ? MC.measureText(s).width - (HAS_LS ? ls : 0) : 0;
-    return { s, dir, w: Math.max(0, w), ls, sc: 1, n: Array.from(s).length };
+    // extra space after each letter (none after the last one)
+    const k = KM ? Array.from({ length: s.length }, (_, j) => j < s.length - 1 ? KM[starts[i] + j] || 0 : 0) : null;
+    const kSum = k ? k.reduce((a, v) => a + v, 0) : 0;
+    const w = s ? MC.measureText(s).width - (HAS_LS ? ls : 0) + kSum : 0;
+    return { s, dir, w: Math.max(0, w), ls, sc: 1, n: Array.from(s).length, i0: starts[i], k: kSum ? k : null };
   });
   setMC(fontStr, 0, 'ltr');
   const natMax = Math.max(...L.map(l => l.w), 1);
@@ -1728,13 +1889,27 @@ function place(d, Lay, x, y) {
     if (!l.s) return { glyphs, alt: i % 2 === 1 };
     const base = top + l.base;
     const lcx = f.align === 'left' ? textLeft + l.chord / 2 : f.align === 'right' ? textLeft + Lay.textW - l.chord / 2 : cx;
-    if (!l.curved) {
+    if (!l.curved && !(l.k && l.dir === 'ltr')) {
       glyphs.push({ s: l.s, x: lcx + (l.dir === 'rtl' ? -1 : 1) * (HAS_LS ? l.ls * l.sc / 2 : 0), y: base + (sgn < 0 ? Lay.maxSag : 0), rot: 0, ls: l.ls, sc: l.sc, dir: l.dir, w: l.w });
+    } else if (!l.curved) {
+      // per-letter spacing: draw the line in pieces; gx/gw keep one text gradient across the whole line
+      const left = lcx - l.w * l.sc / 2, y0 = base + (sgn < 0 ? Lay.maxSag : 0);
+      setMC(Lay.fontStr, l.ls, 'ltr');
+      let a = 0;
+      for (let i = 0; i < l.s.length; i++) {
+        if (i < l.s.length - 1 && !l.k[i]) continue;
+        const run = l.s.slice(a, i + 1), pre = linePrefix(l, a), Wd = MC.measureText(run).width;
+        const x = left + (pre + Wd / 2) * l.sc;
+        glyphs.push({ s: run, x, y: y0, rot: 0, ls: l.ls, sc: l.sc, dir: 'ltr', w: Wd - (HAS_LS ? l.ls : 0), gx: -(pre + Wd / 2), gw: l.w });
+        a = i + 1;
+      }
+      setMC(Lay.fontStr, 0, 'ltr');
     } else {
       setMC(Lay.fontStr, l.ls, 'ltr');
-      let acc = '';
+      let acc = '', kc = 0;
       for (const ch of Array.from(l.s)) {
-        const p0 = MC.measureText(acc).width; acc += ch; const p1 = MC.measureText(acc).width;
+        const p0 = MC.measureText(acc).width + kc; acc += ch; const p1 = MC.measureText(acc).width + kc;
+        if (l.k) kc += l.k[acc.length - 1] || 0;
         const gw = (p1 - p0) - (HAS_LS ? l.ls : 0);
         const phi = ((p0 + gw / 2 - l.w / 2) * l.sc) / Lay.R;
         const dy = Lay.R * (1 - Math.cos(phi));
@@ -1742,7 +1917,7 @@ function place(d, Lay, x, y) {
       }
       setMC(Lay.fontStr, 0, 'ltr');
     }
-    return { glyphs, alt: i % 2 === 1 };
+    return { glyphs, alt: i % 2 === 1, line: l, left: lcx - l.chord / 2, y: base + (sgn < 0 ? Lay.maxSag : 0) };
   });
   let icon = null, badge = null;
   if (Lay.icon) {
@@ -1807,10 +1982,10 @@ function shadowOnly(ctx, S, draw, color, blur, ox, oy) {
 }
 function layerLike(c, S) { const l = document.createElement('canvas'); l.width = c.width; l.height = c.height; l.getContext('2d').setTransform(S, 0, 0, S, 0, 0); return l; }
 function applyTf(c, tf) { if (!tf) return; c.translate(tf.vx, tf.vy); c.scale(tf.s, tf.s); c.translate(-tf.vx, -tf.vy); }
-function textFill(c, d, alt, gw, capH) {
+function textFill(c, d, alt, gw, capH, gx = -gw / 2) {
   const f = d.font, useAlt = alt && f.alt.on;
   if (!f.grad) return useAlt ? f.alt.color : f.color;
-  return canvasGrad(c, useAlt ? f.alt.gradient : f.gradient, -gw / 2, -capH, gw, capH * 1.08);
+  return canvasGrad(c, useAlt ? f.alt.gradient : f.gradient, gx, -capH, gw, capH * 1.08);
 }
 // Paint glyphs (and the icon) with one fill/stroke style. fill: 'face' = the text colours.
 function paint(c, d, Lay, P, o) {
@@ -1821,7 +1996,7 @@ function paint(c, d, Lay, P, o) {
     c.translate(g.x + (o.dx || 0), g.y + (o.dy || 0)); if (g.rot) c.rotate(g.rot); if (g.sc !== 1) c.scale(g.sc, g.sc); if (sk) c.transform(1, 0, -sk, 1, 0, 0);
     c.direction = g.dir; if (HAS_LS) c.letterSpacing = g.ls + 'px';
     if (o.stroke && o.sw) { c.lineWidth = o.sw / g.sc; c.strokeStyle = o.stroke; c.strokeText(g.s, 0, 0); }
-    if (o.fill) { c.fillStyle = o.fill === 'face' ? textFill(c, d, ln.alt, g.w, capH) : o.fill; c.fillText(g.s, 0, 0); }
+    if (o.fill) { c.fillStyle = o.fill === 'face' ? textFill(c, d, ln.alt, g.gw ?? g.w, capH, g.gx ?? -(g.gw ?? g.w) / 2) : o.fill; c.fillText(g.s, 0, 0); }
     if (o.band) o.band(c, g);
     c.restore();
   }
@@ -2385,7 +2560,7 @@ async function buildSVG(d, text, opt = {}) {
   if (sw) out.push(glyphs.map(({ g }) => gEl(g, `fill="none" ${strokeAttrs(fx.tStroke.color, sw / g.sc)}`)).join('') + (ic && ic.type !== 'image' ? iconEl(k => `fill="none" ${strokeAttrs(fx.tStroke.color, sw, k)}`) : ''));
   const faceGlyph = ({ g, alt }) => {
     const useAlt = alt && f.alt.on;
-    const fill = !f.grad ? (useAlt ? f.alt.color : f.color) : gradRef(useAlt ? f.alt.gradient : f.gradient, -g.w / 2, -capH, g.w, capH * 1.08);
+    const fill = !f.grad ? (useAlt ? f.alt.color : f.color) : gradRef(useAlt ? f.alt.gradient : f.gradient, g.gx ?? -g.w / 2, -capH, g.gw ?? g.w, capH * 1.08);
     return gEl(g, `fill="${fill}"`);
   };
   let iconFace = '';
@@ -3234,7 +3409,7 @@ function requestRender() {
 }
 // one button per line; empty lines are skipped, a line of only spaces makes a blank button
 function batchLines() { return $('#batchText').value.split('\n').map(s => s.trim() || s).filter(s => s.length); }
-function updBatchHint() { const n = batchLines().length; $('#batchHint').textContent = n ? `${n} text${n > 1 ? 's' : ''} → ${n} button${n > 1 ? 's' : ''}, same design` : 'Many texts, same design, one export'; }
+function updBatchHint() { const n = batchLines().length; $('#batchHint').textContent = n ? `· ${n}` : ''; }
 function fileBases(lines) {
   const pre = $('#prefix').value.trim(), seen = {};
   return lines.map(l => {
@@ -3429,6 +3604,7 @@ function updateSizeInfo() {
     $('#xPx').textContent = fmtOne === 'svg' ? `${e.fw} × ${e.fh} (vector)` : `${e.fw} × ${e.fh} px`;
     $('#exportOne').textContent = `Export ${fmtOne.toUpperCase()}`;
     $('#xSumTxt').textContent = `${sw} × ${sh} on screen · ${K}× → ${e.fw} × ${e.fh} px` + (EXP.space ? ` (image ${EXP.SW} × ${EXP.SH})` : '');
+    document.querySelector('[data-sum="xMoreS"]').textContent = $('#xSumTxt').textContent;
     $('#xStory').textContent = (EXP.space ? `A ${EXP.SW} × ${EXP.SH} image with the ${sw} × ${sh} button in the middle` : `Shows as a ${sw} × ${sh} button`) +
       (K === 1 ? '. One file pixel per screen pixel.' : `. ${K}× scale: ${K} × ${K} file pixels for every screen pixel, so the edges stay crisp.`);
     $('#fmtNote').innerHTML = fmtOne === 'svg' ? (tfOn(D) && (D.tf.tiltX || D.tf.tiltY) ? 'Tilt has no vector form, so this SVG holds a sharp image of the tilted button.' : 'Vector shapes and editable text. Install the font where you open it.') : '';
@@ -3448,6 +3624,7 @@ async function renderSingle() {
   if (it.frame) { box.classList.add('space'); ox = (cv.width - m.ow * S) / 2 * k; oy = (cv.height - m.oh * S) / 2 * k; }
   guideLayer(box, { css, ox, oy, m, f });
   $('#stage').replaceChildren(box);
+  teAttach(box, it, css, ox, oy, my);
   updLegend(Math.round(m.ow * f) !== Math.round(m.w * f) || Math.round(m.oh * f) !== Math.round(m.h * f));
   $('#sizeOut').textContent = `On screen: ${Math.round(m.w * f)} × ${Math.round(m.h * f)}` + (zoom !== 1 ? ` (zoom ${Math.round(zoom * 100)}%)` : '');
   updateSizeInfo();
@@ -3475,8 +3652,10 @@ async function renderFileView(it, my) {
   $('#fvNote').textContent = cv.width > body.clientWidth - 24 || cv.height > body.clientHeight - 24 ? 'Real size, 1 file pixel = 1 screen pixel. Scroll to see all of it.' : 'Real size, 1 file pixel = 1 screen pixel';
 }
 function syncFold() {
-  [['#xSumS', '#xMoreS'], ['#xSumB', '#xMoreB']].forEach(([b, m]) => { $(m).hidden = !EXP.open; $(b).setAttribute('aria-expanded', EXP.open); });
+  [['#xSumS', '#xMoreS', 'single'], ['#xSumB', '#xMoreB', 'batch']].forEach(([b, m, v]) => { $(m).hidden = !(EXP.open && view === v); $(b).setAttribute('aria-expanded', EXP.open); });
 }
+document.addEventListener('click', e => { if (e.target.closest('.xdone')) { EXP.open = false; saveExp(); syncFold(); } });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && EXP.open && !e.target.closest('input, textarea, select') && $('#tour').hidden) { EXP.open = false; saveExp(); syncFold(); } });
 function expChanged(opts = {}) {
   saveExp();
   if (opts.flash) flash(EXP.open ? (view === 'batch' ? $('#bFiles') : $('#xInfo')) : (view === 'batch' ? $('#xBarB') : $('#xBarS')));
@@ -3540,7 +3719,8 @@ async function renderBatch() {
   const plan = await planBatch(lines); if (my !== bseq) return;
   $('#xScaleB').innerHTML = scaleBtns(plan[0].m.ow, plan[0].m.oh, false);
   { const sz = Math.round(EXP.bmode === 'grow' ? EXP.BH : EXP.BW), mode = { grow: 'grow with the text', same: EXP.fit === 'wrap' ? 'same width, wrap' : 'same width, shrink', widest: 'as wide as the longest' }[EXP.bmode];
-    $('#xSumTxtB').textContent = `${mode} · ${sz} px ${EXP.bmode === 'grow' ? 'tall' : 'wide'} · ${EXP.k}×`; }
+    $('#xSumTxtB').textContent = `${mode} · ${sz} px ${EXP.bmode === 'grow' ? 'tall' : 'wide'} · ${EXP.k}×`;
+    document.querySelector('[data-sum="xMoreB"]').textContent = $('#xSumTxtB').textContent; }
   const est = plan.map(estimate), dpr = window.devicePixelRatio || 1;
   const fonts = est.map(e => e.font), sameFont = Math.max(...fonts) - Math.min(...fonts) < 0.6;
   $('#bSummary').innerHTML = `${lines.length} files · widths ${range(est.map(e => e.fw))}px · heights ${range(est.map(e => e.fh))}px · ` +
@@ -3688,7 +3868,7 @@ $('#exportAll').addEventListener('click', async e => {
 
 /* ================= view controls ================= */
 function setView(v) {
-  view = v;
+  view = v; document.querySelector('.app').dataset.view = v; if (typeof syncFold === 'function') syncFold();
   $('#tab-single').setAttribute('aria-selected', v === 'single');
   $('#tab-batch').setAttribute('aria-selected', v === 'batch');
   $('#view-single').hidden = v !== 'single';
@@ -3700,7 +3880,118 @@ $('#tab-batch').onclick = () => setView('batch');
 const ta = $('#ctaText');
 ta.addEventListener('input', () => { updLayerSums(); syncFontSample(); });
 function autoGrow() { ta.style.height = 'auto'; ta.style.height = Math.min(200, ta.scrollHeight + 2) + 'px'; }
-ta.addEventListener('input', () => { autoGrow(); requestRender(); });
+ta.addEventListener('input', () => {
+  const K = realignKern(D.font.kern, ta.value); if (K !== D.font.kern) { D.font.kern = K || undefined; if (!K) delete D.font.kern; persist(); }
+  try { localStorage.setItem('ctaforge.text', ta.value); } catch (e) {}
+  autoGrow(); requestRender();
+});
+try { const t0 = localStorage.getItem('ctaforge.text'); if (t0 != null) ta.value = t0; } catch (e) {}
+/* ---------- typing on the button in the preview ----------
+   The text box stays the real editor: clicking the button's text focuses it and puts the cursor there; the
+   cursor and selection are drawn over the preview. Photoshop keys: Alt+←/→ spacing (between two letters, or
+   for the selected letters), Alt+↑/↓ line height, Ctrl/Cmd+Shift+< / > size. Esc finishes. */
+const TE = { on: false, geo: null, drag: null };
+async function teAttach(box, it, css, ox, oy, my) {
+  const tfOn_ = tfOn(it.d);
+  const r = await renderButton(it.d, it.t, 1, { noTf: true }); if (my !== seq) return;
+  // caret places per line: x for each position 0..length, in the box's CSS pixels
+  setMC(r.Lay.fontStr, 0, 'ltr');
+  const lines = r.P.lines.map(ln => {
+    const l = ln.line; if (!l) return null;
+    const X = v => (v - r.ox) * css + ox, Y = v => (v - r.oy) * css + oy;
+    let xs;
+    if (l.curved) { const gs = ln.glyphs; xs = gs.map(g => X(g.x - g.w * g.sc / 2)); const g = gs[gs.length - 1]; xs.push(X(g.x + g.w * g.sc / 2)); }
+    else { setMC(r.Lay.fontStr, l.ls, 'ltr'); xs = Array.from({ length: l.s.length + 1 }, (_, p) => X(ln.left + (p >= l.s.length ? l.w : linePrefix(l, p)) * l.sc)); }
+    const capH = r.Lay.capH * l.sc;
+    return { i0: l.i0, n: l.s.length, xs, top: Y(ln.y - capH * 1.25), bot: Y(ln.y + capH * 0.3) };
+  }).filter(Boolean);
+  setMC(r.Lay.fontStr, 0, 'ltr');
+  const layer = document.createElement('div'); layer.className = 'te-layer'; layer.setAttribute('aria-hidden', 'true');
+  box.append(layer);
+  TE.geo = { lines, layer, box, skew: !!tfOn_ };
+  box.classList.add('te-box');
+  teDraw();
+}
+function tePosAt(x, y) {
+  const G = TE.geo; if (!G || !G.lines.length) return 0;
+  let best = G.lines[0], bd = 1e9;
+  for (const l of G.lines) { const d = y < l.top ? l.top - y : y > l.bot ? y - l.bot : 0; if (d < bd) { bd = d; best = l; } }
+  let p = 0, pd = 1e9; best.xs.forEach((v, i) => { const d = Math.abs(v - x); if (d < pd) { pd = d; p = i; } });
+  return best.i0 + p;
+}
+function teDraw() {
+  const G = TE.geo; if (!G) return;
+  const focused = document.activeElement === ta && view === 'single';
+  G.box.classList.toggle('te-on', TE.on && focused);
+  G.layer.replaceChildren();
+  if (!focused || G.skew) { teBars(); return; }
+  const a = Math.min(ta.selectionStart, ta.selectionEnd), b = Math.max(ta.selectionStart, ta.selectionEnd);
+  for (const l of G.lines) {
+    const s = Math.max(a, l.i0), e = Math.min(b, l.i0 + l.n);
+    if (a !== b && s < e) {
+      const r = document.createElement('i'); r.className = 'te-sel';
+      Object.assign(r.style, { left: G.lines && l.xs[s - l.i0] + 'px', top: l.top + 'px', width: Math.max(2, l.xs[e - l.i0] - l.xs[s - l.i0]) + 'px', height: (l.bot - l.top) + 'px' });
+      G.layer.append(r);
+    }
+    if (a === b && a >= l.i0 && a <= l.i0 + l.n) {
+      const c = document.createElement('i'); c.className = 'te-caret';
+      Object.assign(c.style, { left: l.xs[a - l.i0] - 1 + 'px', top: l.top + 'px', height: (l.bot - l.top) + 'px' });
+      G.layer.append(c);
+    }
+  }
+  teBars();
+}
+// the toolbar above the button and the shortcut hint under it, while typing on the button
+function teBars() {
+  const show = TE.on && document.activeElement === ta && view === 'single';
+  $('#teBar').hidden = $('#teKeys').hidden = $('#teChip').hidden = !show;
+  if (!show) return;
+  const f = D.font, a = Math.min(ta.selectionStart, ta.selectionEnd), b = Math.max(ta.selectionStart, ta.selectionEnd), K = kernMap(D, ta.value) || {};
+  let sp;
+  if (a !== b) { const v = []; for (let i = a; i < b; i++) v.push(K[i] || 0); const avg = v.reduce((x, y) => x + y, 0) / v.length; sp = `${avg >= 0 ? '+' : ''}${Math.round(avg * 10) / 10} on ${b - a} letters`; }
+  else if (a > 0 && a < ta.value.length) { const v = K[a - 1] || 0; sp = `${v >= 0 ? '+' : ''}${Math.round(v * 10) / 10} here`; }
+  else sp = `${f.spacing >= 0 ? '+' : ''}${f.spacing} all`;
+  $('#teSize').textContent = Math.round(f.size * 10) / 10; $('#teSp').textContent = sp; $('#teLh').textContent = Number(f.lineHeight).toFixed(2);
+  $('#teUp').setAttribute('aria-pressed', !!f.upper); $('#teIt').setAttribute('aria-pressed', !!f.italic);
+}
+function teKern(dir, big) {
+  const t = ta.value, a = Math.min(ta.selectionStart, ta.selectionEnd), b = Math.max(ta.selectionStart, ta.selectionEnd);
+  const step = Math.max(0.5, Math.round(D.font.size * 0.025 * 2) / 2) * (big ? 5 : 1) * dir;
+  const idx = a !== b ? Array.from({ length: b - a }, (_, i) => a + i) : a > 0 && a < t.length ? [a - 1] : null;
+  if (!idx) { D.font.spacing = Math.round((D.font.spacing + step) * 10) / 10; return; } // cursor at an end: spacing for all
+  const K = D.font.kern && D.font.kern.t === t ? D.font.kern : { t, k: {} };
+  for (const i of idx) { if (i >= t.length - 1 && idx.length > 1) continue; const v = Math.round(((K.k[i] || 0) + step) * 10) / 10; if (v) K.k[i] = v; else delete K.k[i]; }
+  if (Object.keys(K.k).length) D.font.kern = K; else delete D.font.kern;
+}
+ta.addEventListener('keydown', e => {
+  if (view !== 'single') return;
+  const mod = e.ctrlKey || e.metaKey;
+  if (e.altKey && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) { e.preventDefault(); teKern(e.key === 'ArrowRight' ? 1 : -1, mod); }
+  else if (e.altKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); D.font.lineHeight = Math.max(0.5, Math.min(2.5, Math.round((D.font.lineHeight + (e.key === 'ArrowUp' ? -0.05 : 0.05) * (mod ? 5 : 1)) * 100) / 100)); }
+  else if (mod && e.shiftKey && (e.key === '>' || e.key === '<' || e.code === 'Period' || e.code === 'Comma')) { e.preventDefault(); const up = e.key === '>' || e.code === 'Period'; D.font.size = Math.max(8, Math.min(240, Math.round(D.font.size + (up ? 2 : -2) * (e.altKey ? 5 : 1)))); }
+  else if (e.key === 'Escape' && TE.on) { e.preventDefault(); TE.on = false; ta.blur(); teDraw(); return; }
+  else return;
+  syncUI(); changed(); teBars();
+});
+['select', 'keyup', 'focus', 'blur', 'mouseup'].forEach(ev => ta.addEventListener(ev, () => { if (ev === 'blur' && !TE.keep) TE.on = false; requestAnimationFrame(teDraw); }));
+document.addEventListener('selectionchange', () => { if (document.activeElement === ta) teDraw(); });
+// click (and drag) on the button in the preview to put the cursor there
+$('#stage').addEventListener('pointerdown', e => {
+  const G = TE.geo; if (!G || view !== 'single' || !G.box.contains(e.target) || e.button !== 0) return;
+  e.preventDefault();
+  const r = G.box.getBoundingClientRect(), at = ev => tePosAt(ev.clientX - r.left, ev.clientY - r.top);
+  const p0 = at(e); TE.on = true; TE.keep = true; ta.focus({ preventScroll: true }); TE.keep = false;
+  ta.setSelectionRange(p0, p0); TE.drag = p0; teDraw();
+  const move = ev => { if (TE.drag == null) return; const p = at(ev); ta.setSelectionRange(Math.min(TE.drag, p), Math.max(TE.drag, p), p < TE.drag ? 'backward' : 'forward'); teDraw(); };
+  const up = () => { TE.drag = null; removeEventListener('pointermove', move); removeEventListener('pointerup', up); ta.focus({ preventScroll: true }); };
+  addEventListener('pointermove', move); addEventListener('pointerup', up);
+});
+$('#stage').addEventListener('dblclick', e => { if (!TE.geo || !TE.geo.box.contains(e.target)) return; ta.focus({ preventScroll: true }); ta.select(); teDraw(); });
+// the toolbar's own buttons keep the cursor in the text
+['#teUp', '#teIt'].forEach(id => $(id).addEventListener('pointerdown', e => e.preventDefault()));
+$('#teUp').onclick = () => { D.font.upper = !D.font.upper; syncUI(); changed(); teBars(); };
+$('#teIt').onclick = () => { D.font.italic = !D.font.italic; syncUI(); changed(); teBars(); };
+setInterval(() => { const c = document.querySelector('.te-caret'); if (c) c.classList.toggle('blink'); }, 530);
 $('#batchText').addEventListener('input', requestRender);
 $('#prefix').addEventListener('input', requestRender);
 $('#zoom').addEventListener('input', e => { zoom = +e.target.value; $('#zoomOut').textContent = Math.round(zoom * 100) + '%'; renderSingle(); });
@@ -5196,7 +5487,7 @@ Rules:
 const STORE_MINE = 'ctaforge.designs';
 function loadMine() { try { return JSON.parse(localStorage.getItem(STORE_MINE) || '[]'); } catch (e) { return []; } }
 function storeMine(list) { try { localStorage.setItem(STORE_MINE, JSON.stringify(list)); return true; } catch (e) { toast('This browser blocked saving (storage may be full). Use Download .json instead.', 4000); return false; } }
-function applyDesign(d) { D = full(d); syncUI(); changed(); }
+function applyDesign(d) { const keep = D.font.kern; D = full(d); if (!D.font.kern && keep) D.font.kern = keep; syncUI(); changed(); }
 const thumbCache = new Map();
 let gseq = 0, gFilter = 'all', gFolder = '';
 const STORE_HIDDEN = 'ctaforge.hiddenStarters';
@@ -5819,7 +6110,7 @@ function resizer(grip, cssVar, def, min, max, store, target = document.documentE
     const x0 = e.clientX; let raw = get(), moved = !isHandle;
     const begin = () => { grip.classList.add('drag'); el.classList.add('drag'); document.body.classList.add('resizing'); };
     if (moved) begin();
-    const move = ev => { if (!moved) { if (Math.abs(ev.clientX - x0) < 4) return; moved = true; begin(); } raw = ev.clientX - edgeOf(); hooks.drag?.(raw); set(raw); };
+    const move = ev => { if (!moved) { if (Math.abs(ev.clientX - x0) < 4) return; moved = true; begin(); } raw = hooks.fromRight ? edgeOf() - ev.clientX : ev.clientX - edgeOf(); hooks.drag?.(raw); set(raw); };
     const up = () => {
       el.removeEventListener('pointermove', move); grip.classList.remove('drag'); el.classList.remove('drag'); document.body.classList.remove('resizing');
       if (!moved) { hooks.click?.(); return; }
@@ -5829,7 +6120,7 @@ function resizer(grip, cssVar, def, min, max, store, target = document.documentE
   };
   grip.addEventListener('pointerdown', e => startDrag(grip, e, false));
   (hooks.handles || []).forEach(h => h.addEventListener('pointerdown', e => { if (e.button === 0) startDrag(h, e, true); }));
-  grip.addEventListener('keydown', e => { if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { e.preventDefault(); save(set(get() + (e.key === 'ArrowLeft' ? -16 : 16))); } });
+  grip.addEventListener('keydown', e => { if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { e.preventDefault(); save(set(get() + (e.key === 'ArrowLeft' ? -16 : 16) * (hooks.fromRight ? -1 : 1))); } });
   grip.addEventListener('dblclick', () => { target.style.removeProperty(cssVar); save(def); set(def); });
 }
 // the folder list stays in view below the sticky Single/Batch bar
@@ -5857,6 +6148,26 @@ function foldRail(on, focus = true) {
 $('#railFold').onclick = e => { if (e.detail === 0) foldRail(true); };
 $('#railBar').onclick = () => foldRail(false);
 try { if (localStorage.getItem(STORE_RAILFOLD)) foldRail(true, false); } catch (e) {}
+// the presets panel: same divider, fold button and slim bar, on the right
+const PRES_MIN = 260, PFOLD_AT = PRES_MIN - 90, STORE_PRESFOLD = 'ctaforge.presFolded';
+function foldPres(on, focus = true) {
+  const app = document.querySelector('.app');
+  app.classList.toggle('presfolded', on); $('#presBar').hidden = !on; $('#presFold').setAttribute('aria-expanded', !on);
+  try { localStorage.setItem(STORE_PRESFOLD, on ? '1' : ''); } catch (e) {}
+  if (focus) (on ? $('#presBar') : $('#presFold')).focus();
+  requestRender();
+}
+resizer($('#presGrip'), '--pres', 340, () => PRES_MIN, () => Math.max(300, Math.min(640, innerWidth * 0.4)), 'ctaforge.presW', document.querySelector('.app'), () => document.querySelector('.app').getBoundingClientRect().right, {
+  fromRight: true, handles: [$('#presFold')], click: () => foldPres(true),
+  drag: w => { const f = w < PFOLD_AT; $('#presGrip').classList.toggle('folding', f); document.querySelector('.app').classList.toggle('willfoldp', f); },
+  release: w => { $('#presGrip').classList.remove('folding'); document.querySelector('.app').classList.remove('willfoldp'); if (w < PFOLD_AT) {
+    let keep = 340; try { keep = parseFloat(localStorage.getItem('ctaforge.presW')) || 340; } catch (e) {}
+    document.querySelector('.app').style.setProperty('--pres', keep + 'px'); foldPres(true); return true;
+  } return false; },
+});
+$('#presFold').onclick = e => { if (e.detail === 0) foldPres(true); };
+$('#presBar').onclick = () => foldPres(false);
+try { if (localStorage.getItem(STORE_PRESFOLD)) foldPres(true, false); } catch (e) {}
 resizer($('#folderGrip'), '--ftw', 210, () => 150, () => Math.max(200, document.querySelector('.libgrid').clientWidth * 0.5), 'ctaforge.folderW', document.querySelector('.libgrid'), () => document.querySelector('.libgrid').getBoundingClientRect().left);
 
 /* ================= first-run tour ================= */
@@ -5865,13 +6176,13 @@ const STORE_TOUR = 'ctaforge.tourSeen';
 const TOUR = [
   { title: 'Welcome to CTA Button Forge', text: 'Design call-to-action buttons and export them as PNG or SVG, one at a time or many at once. This tour takes about a minute.' },
   { el: '#ctaText', title: 'Your button text', text: 'Type the words for your button. Press Enter for a second line. The button grows to fit.', single: true },
-  { el: '.lib', title: 'Start from a preset', text: 'Every design here applies at once to your button (and to all buttons in Batch). Your text stays. Use the folders to browse.', scroll: 'start' },
+  { el: '#presets', title: 'Start from a preset', text: 'Click any preset on the right and it applies at once to your button (and to all buttons in Batch). Your text stays. Use the folders to browse.' },
   { el: '#controls .layers', title: 'Change any part', text: 'Pick what to edit: the text, the button, an icon, a cursor or the whole design. Its settings show below.' },
-  { el: '#stagegrid', title: 'Live preview', text: 'This is the button at its real size on screen. Purple guides show the button; orange ones show the extra room taken by shadows and glows.', single: true },
+  { el: '#stagegrid', title: 'Live preview, and type on it', text: 'This is the button at its real size on screen. Click its text to type right on it: Alt+←/→ changes the space between letters, Alt+↑/↓ the line height. Purple guides show the button; orange ones show the room taken by shadows and glows.', single: true },
   { el: '.refbar', title: 'Copy a button you like', text: 'Have a screenshot or a Figma design? Match a reference image, or paste the CSS from Figma. Presets… opens the presets right here too.', single: true },
-  { el: '#xBarS', title: 'Export', text: 'This line shows exactly what you will get. Open Size & scale to set the size on screen and the scale (2× is crisp on phones), then press Export.', single: true },
+  { el: '#xDock', title: 'Export', text: 'This line shows exactly what you will get. Open Size & scale to set the size on screen and the scale (2× is crisp on phones), then press Export.', single: true },
   { el: '#tab-batch', title: 'Many buttons at once', text: 'Batch makes one button per line of text, all in the same design, and exports them together as a ZIP, a folder or to the team Drive.' },
-  { el: '.libtools', title: 'Save and share', text: 'Name your design and Save it, or share it with the team so everyone can use it.', scroll: 'center' },
+  { el: '.libtools', title: 'Save and share', text: 'Name your design and Save it, or share it with the team so everyone can use it. More ⋯ imports and downloads designs.' },
   { el: '#tourBtn', title: "That's it", text: 'You can take this tour again any time from the Tour button up here.', last: true },
 ];
 let tourI = 0, tourBack = null;
@@ -5895,7 +6206,7 @@ let tourScrollT = 0;
 function tourPad(el) {
   const mob = matchMedia('(max-width: 860px)').matches, sg = $('#stagegrid');
   if (mob) return sg && view === 'single' && getComputedStyle(sg).position === 'sticky' && !sg.contains(el) && el !== sg ? sg.getBoundingClientRect().height + 12 : 12;
-  return (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--modes-h')) || 90) + 16;
+  return 16;
 }
 function tourWant(el, mode) {
   const mob = matchMedia('(max-width: 860px)').matches, pad = tourPad(el), h = el.getBoundingClientRect().height;
