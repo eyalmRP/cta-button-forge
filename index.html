@@ -1,4 +1,5 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"></head><body><title>CTA Button Forge</title>
+<!doctype html><html lang="en"><head><meta charset="utf-8"></head><body>
+<title>CTA Button Forge</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -279,7 +280,9 @@ input[type="color"] { width: 100%; height: 26px; padding: 0 2px; border: 1px sol
 .xb-drv .btn { padding: 5px 10px; font-size: 12.5px; }
 .copybtn { display: inline-flex; align-items: center; gap: 6px; }
 .copybtn svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linejoin: round; }
-#xBarS .xsum { flex: 1 1 380px; }
+#xBarS .xsum { flex: 1 1 100%; }
+#xBarS #exportOne { margin-left: auto; order: 5; padding-inline: 22px; }
+#xBarS .xb-drv { order: 9; }
 #xBarB .xsum { flex-basis: 100%; }
 .xbar .xgo-row select { flex: none; width: auto; }
 #xBarB #exportAll { margin-left: auto; }
@@ -648,28 +651,15 @@ input.tg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
 .top .mode[aria-selected="true"] svg, .top .mode[aria-selected="true"] small { color: var(--accent-fg); }
 .top .tools { position: static; display: flex; gap: 6px; padding: 0; border: 0; background: none; grid-template-columns: none; }
 .top .tools button { padding: 6px 10px; }
+.layers-h { display: flex; align-items: center; justify-content: space-between; }
+.layers-h #foldBtn { display: inline-flex; align-items: center; gap: 4px; border: 1px solid var(--line); background: var(--panel); color: var(--fg); border-radius: 6px; padding: 3px 8px; font: 500 12px var(--ui); letter-spacing: 0; text-transform: none; cursor: pointer; }
+.layers-h #foldBtn:hover { border-color: var(--accent); color: var(--accent); }
+.layers-h #foldBtn svg { width: 12px; height: 12px; }
 .top .grow { flex: 1; }
 /* Export, docked at the bottom of the design panel */
-.xdock { flex: none; border-top: 1px solid var(--line); background: color-mix(in srgb, var(--sunk) 45%, var(--panel)); padding: 12px; box-shadow: 0 -6px 14px rgba(0,0,0,.05); }
-.xdock .xbar { border: 0; padding: 0; background: none; border-radius: 0; }
-#xBarS { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
-#xBarS .xsum { grid-column: 1 / -1; }
-#xBarS .seg { grid-column: 1; display: flex; }
-#xBarS .seg button { flex: 1; }
-#xBarS #copyOne { grid-column: 2; }
-#xBarS #exportOne { grid-column: 1 / -1; height: 40px; font-size: 14px; }
-#xBarS .xb-drv, #xBarB .xb-drv { grid-column: 1 / -1; order: 9; justify-content: stretch; }
-.xdock .xb-drv > * { flex: 1 1 0; justify-content: center; font-size: 12px !important; padding: 5px 6px !important; }
-#xBarB { display: flex; flex-direction: column; align-items: stretch; gap: 8px; }
-#xBarB .xgo-row { display: flex; gap: 8px; align-items: center; }
-#xBarB .xgo-row select { flex: 1; width: auto; }
-#xBarB #exportAll { order: 8; margin: 0; }
-.xdock .xsum { flex: none; flex-wrap: wrap; row-gap: 2px; }
-.xdock .xsum .xs-v { white-space: normal; }
-.xdock .xsum .xs-c::after { content: " ›"; }
-.xdock .xsum .xs-c { padding: 4px 11px; border-radius: 999px; background: var(--accent-soft); border: 1px solid var(--accent); }
-.xdock .xsum:hover .xs-c { background: var(--accent); color: #ffffff; }
-.app[data-view="batch"] #xBarS, .app:not([data-view="batch"]) #xBarB { display: none; }
+.xsum .xs-c::after { content: " ›"; }
+.xsum .xs-c { padding: 4px 11px; border-radius: 999px; background: var(--accent-soft); border: 1px solid var(--accent); }
+.xsum:hover .xs-c { background: var(--accent); color: #ffffff; }
 /* Size & scale: opens over the middle */
 .app > .xover { grid-column: 2; grid-row: 2; z-index: 30; align-self: start; margin: 12px; max-height: calc(100% - 24px); overflow: auto; background: var(--panel); border: 2px solid var(--accent); border-radius: 14px; box-shadow: 0 18px 50px rgba(20,30,90,.22); padding: 12px 14px 14px; }
 .xo-head { display: flex; align-items: center; gap: 12px; position: sticky; top: -12px; margin: -12px -14px 0; padding: 10px 14px; background: color-mix(in srgb, var(--sunk) 45%, var(--panel)); border-bottom: 1px solid var(--line); z-index: 2; }
@@ -713,6 +703,8 @@ input.tg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
   #view-single > .stagegrid { flex: 1 1 auto; padding-bottom: 0; }
   #view-single > .stagegrid .stage { min-height: 260px; height: 100%; }
   #view-single > .bar { border-bottom: 1px solid var(--line); border-radius: 0 0 12px 12px; padding: 8px 12px 10px; }
+  #view-single > #xBarS { margin-top: 10px; }
+  #view-batch > #xBarB { position: sticky; bottom: 0; z-index: 5; margin-top: 10px; box-shadow: 0 -8px 18px -6px rgba(20,25,40,.18); }
 }
 /* folder rows: their ⋯ shows on hover so names have room */
 .presets .frow .fmore { opacity: 0; }
@@ -758,6 +750,8 @@ input.tg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
   .app > .presgrip, .app > .presfold, .app > .presbar { display: none !important; }
   .app.presfolded > .presets { display: block; }
   .app > .xover { order: 7; position: static; margin: 6px 12px; max-height: none; }
+  #view-single > #xBarS { order: 7; margin: 6px 12px; }
+  .app > .work { display: contents; }
   .app > .presets { order: 8; border-left: 0; border-top: 1px solid var(--line); overflow: visible; }
   .app > .panel { overflow: visible; }
   .app > .panel > #controls { overflow: visible; }
@@ -815,36 +809,6 @@ input.tg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
   <button type="button" class="railbar" id="railBar" hidden title="Show the design panel" aria-label="Show the design panel" aria-controls="panel"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M4.5 3l3 3-3 3"/></svg><span>Design panel</span><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M4.5 3l3 3-3 3"/></svg></button>
   <aside class="panel" id="panel" aria-label="Design controls">
     <div id="controls"></div>
-    <div class="xdock" id="xDock" aria-label="Export">
-      <section class="xbar" id="xBarS">
-        <button type="button" class="xsum" id="xSumS" aria-expanded="false" aria-controls="xMoreS"><span class="xs-l">Export</span><b class="xs-v" id="xSumTxt"></b><span class="xs-c">Size &amp; scale</span></button>
-        <span class="seg" role="group" aria-label="Format">
-              <button data-fmt="png" aria-pressed="true">PNG</button>
-              <button data-fmt="svg" aria-pressed="false">SVG (vector)</button>
-            </span>
-        <span class="xb-drv"><a class="btn drv teamfolder" id="driveLink" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Team folder</a>
-            <a class="btn drv lastexp" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1"/><path d="M3 7v10a2 2 0 0 0 2 2h12.5a2 2 0 0 0 1.9-1.4L22 11H7.5a2 2 0 0 0-1.9 1.4L3 19"/></svg>Open last export</a>
-            <button class="btn" id="driveOne" title="Save this export into the team's shared Google Drive folder">Save to team Drive</button></span>
-        <button class="btn copybtn" id="copyOne" title="Copy the image at the chosen scale, then paste it into Figma, Slack, a doc or an email"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>Copy</button>
-        <button class="btn primary" id="exportOne">Export PNG</button>
-      </section>
-      <section class="xbar" id="xBarB">
-        <button type="button" class="xsum" id="xSumB" aria-expanded="false" aria-controls="xMoreB"><span class="xs-l">Export</span><b class="xs-v" id="xSumTxtB"></b><span class="xs-c">Long texts, size &amp; scale</span></button>
-        <div class="xgo-row"><span class="meta" id="batchCount"></span><label class="chk"><input type="checkbox" id="bPng" checked>PNG</label><label class="chk"><input type="checkbox" id="bSvg">SVG</label></div>
-        <div class="xgo-row"><label class="meta" for="prefix">File prefix</label><input id="prefix" type="text" value="cta-" class="sm" style="width:90px"></div>
-        <div class="xgo-row"><label class="meta" for="destSel">Save as</label>
-            <select class="sm" id="destSel">
-              <option value="zip">One ZIP file</option>
-              <option value="folder">Into a folder…</option>
-              <option value="files">Separate files</option>
-              <option value="drive" id="destDrive" disabled>Team Drive folder</option>
-            </select>
-            </div>
-        <span class="xb-drv"><a class="btn drv teamfolder" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Team folder</a>
-            <a class="btn drv lastexp" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1"/><path d="M3 7v10a2 2 0 0 0 2 2h12.5a2 2 0 0 0 1.9-1.4L22 11H7.5a2 2 0 0 0-1.9 1.4L3 19"/></svg>Open last export</a></span>
-        <button class="btn primary" id="exportAll">Export all</button>
-      </section>
-    </div>
   </aside>
 
   <section class="work">
@@ -912,6 +876,18 @@ input.tg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
             <span class="meta grow" id="sizeOut"></span>
             <button class="btn sm pinbtn" id="pinBtn" aria-pressed="true">Unpin preview</button>
           </div>
+      <section class="xbar" id="xBarS">
+        <button type="button" class="xsum" id="xSumS" aria-expanded="false" aria-controls="xMoreS"><span class="xs-l">Export</span><b class="xs-v" id="xSumTxt"></b><span class="xs-c">Size &amp; scale</span></button>
+        <span class="seg" role="group" aria-label="Format">
+              <button data-fmt="png" aria-pressed="true">PNG</button>
+              <button data-fmt="svg" aria-pressed="false">SVG (vector)</button>
+            </span>
+        <span class="xb-drv"><a class="btn drv teamfolder" id="driveLink" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Team folder</a>
+            <a class="btn drv lastexp" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1"/><path d="M3 7v10a2 2 0 0 0 2 2h12.5a2 2 0 0 0 1.9-1.4L22 11H7.5a2 2 0 0 0-1.9 1.4L3 19"/></svg>Open last export</a>
+            <button class="btn" id="driveOne" title="Save this export into the team's shared Google Drive folder">Save to team Drive</button></span>
+        <button class="btn copybtn" id="copyOne" title="Copy the image at the chosen scale, then paste it into Figma, Slack, a doc or an email"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>Copy</button>
+        <button class="btn primary" id="exportOne">Export PNG</button>
+      </section>
     </div>
 
     <div class="view" id="view-batch" hidden>
@@ -935,6 +911,22 @@ Start</textarea>
               <div class="bgrid" id="bgrid"></div>
             </div>
           </div>
+      <section class="xbar" id="xBarB">
+        <button type="button" class="xsum" id="xSumB" aria-expanded="false" aria-controls="xMoreB"><span class="xs-l">Export</span><b class="xs-v" id="xSumTxtB"></b><span class="xs-c">Long texts, size &amp; scale</span></button>
+        <div class="xgo-row"><span class="meta" id="batchCount"></span><label class="chk"><input type="checkbox" id="bPng" checked>PNG</label><label class="chk"><input type="checkbox" id="bSvg">SVG</label></div>
+        <div class="xgo-row"><label class="meta" for="prefix">File prefix</label><input id="prefix" type="text" value="cta-" class="sm" style="width:90px"></div>
+        <div class="xgo-row"><label class="meta" for="destSel">Save as</label>
+            <select class="sm" id="destSel">
+              <option value="zip">One ZIP file</option>
+              <option value="folder">Into a folder…</option>
+              <option value="files">Separate files</option>
+              <option value="drive" id="destDrive" disabled>Team Drive folder</option>
+            </select>
+            </div>
+        <span class="xb-drv"><a class="btn drv teamfolder" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Team folder</a>
+            <a class="btn drv lastexp" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1"/><path d="M3 7v10a2 2 0 0 0 2 2h12.5a2 2 0 0 0 1.9-1.4L22 11H7.5a2 2 0 0 0-1.9 1.4L3 19"/></svg>Open last export</a></span>
+        <button class="btn primary" id="exportAll">Export all</button>
+      </section>
     </div>
 
   </section>
@@ -6180,7 +6172,7 @@ const TOUR = [
   { el: '#controls .layers', title: 'Change any part', text: 'Pick what to edit: the text, the button, an icon, a cursor or the whole design. Its settings show below.' },
   { el: '#stagegrid', title: 'Live preview, and type on it', text: 'This is the button at its real size on screen. Click its text to type right on it: Alt+←/→ changes the space between letters, Alt+↑/↓ the line height. Purple guides show the button; orange ones show the room taken by shadows and glows.', single: true },
   { el: '.refbar', title: 'Copy a button you like', text: 'Have a screenshot or a Figma design? Match a reference image, or paste the CSS from Figma. Presets… opens the presets right here too.', single: true },
-  { el: '#xDock', title: 'Export', text: 'This line shows exactly what you will get. Open Size & scale to set the size on screen and the scale (2× is crisp on phones), then press Export.', single: true },
+  { el: '#xBarS', title: 'Export', text: 'This line shows exactly what you will get. Open Size & scale to set the size on screen and the scale (2× is crisp on phones), then press Export.', single: true },
   { el: '#tab-batch', title: 'Many buttons at once', text: 'Batch makes one button per line of text, all in the same design, and exports them together as a ZIP, a folder or to the team Drive.' },
   { el: '.libtools', title: 'Save and share', text: 'Name your design and Save it, or share it with the team so everyone can use it. More ⋯ imports and downloads designs.' },
   { el: '#tourBtn', title: "That's it", text: 'You can take this tour again any time from the Tour button up here.', last: true },
@@ -6273,6 +6265,7 @@ $('#tour').addEventListener('keydown', e => {
 $('#tour').addEventListener('pointerdown', e => { if (!e.target.closest('#tourCard')) e.preventDefault(); });
 /* ================= boot ================= */
 buildPanel();
+document.querySelector('#controls .layers-h').append($('#foldBtn'));
 syncUI();
 syncBatchExp();
 syncFold();
@@ -6290,4 +6283,5 @@ pushHist();
 })();
 document.fonts.addEventListener?.('loadingdone', () => requestRender());
 </script>
+
 </body></html>
