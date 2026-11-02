@@ -761,9 +761,11 @@ input.tg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
 /* narrower windows: slimmer side panels and icon-only edit tools (a width you dragged still wins) */
 @media (max-width: 1280px) and (min-width: 861px) {
   .app { --rail: 300px; --pres: 280px; }
+  .top .mode small { display: none; }
+}
+@media (max-width: 1040px) and (min-width: 861px) {
   .top .tools button { font-size: 0; gap: 0; padding: 7px 9px; }
   .top .tools svg { width: 16px; height: 16px; }
-  .top .mode small { display: none; }
 }
 /* Single: the text, its tools, the preview and the preview tools read as one card */
 @media (min-width: 861px) {
@@ -881,6 +883,40 @@ input.tg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
 .xside.xsz .xk, .xside.xsz .xx, .xside.xsz .note-sm { color: color-mix(in srgb, var(--fg) 72%, var(--panel)); }
 .xh { font-size: 11.5px; color: color-mix(in srgb, var(--accent) 80%, var(--fg)); }
 /* phones: comfortable tap targets */
+/* ===== audit fixes, round 2 ===== */
+/* one look for dropdowns, color wells and picker tiles */
+.fld select, .ge-top select, #destSel { -webkit-appearance: none; appearance: none; height: 32px; padding: 0 28px 0 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M3 4.5 6 7.5 9 4.5' fill='none' stroke='%238a92a3' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 9px center / 12px; color: var(--fg); font-size: 13px; cursor: pointer; }
+.fld select:hover, .ge-top select:hover, #destSel:hover { border-color: var(--accent); }
+.ge-top select { height: 28px; }
+input[type="color"] { height: 30px; padding: 3px; border-radius: 8px; }
+input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+input[type="color"]::-webkit-color-swatch { border: 1px solid rgba(20,25,40,.22); border-radius: 5px; }
+input[type="color"]::-moz-color-swatch { border: 1px solid rgba(20,25,40,.22); border-radius: 5px; }
+.ip { background: var(--panel); border-radius: 8px; }
+.ip:hover { border-color: var(--accent); }
+.ip[aria-pressed="true"] { border: 2px solid var(--accent); box-shadow: none; background: var(--accent-soft); padding: 3px; }
+#curGrid .ip { background: #ffffff; }
+#curGrid .ip[aria-pressed="true"] { background: #e3e7fd; }
+#curGrid .ip-up { color: #3550f0; }
+#curGrid .ip-up svg { width: 70%; height: 70%; }
+.cur-hint { grid-column: 1 / -1; margin: 6px 2px 0; padding: 10px 12px; border: 1px dashed var(--line); border-radius: 8px; color: var(--muted); font-size: 12.5px; line-height: 1.45; }
+/* Batch: the text list is a narrower column so the buttons get the room */
+.batch { grid-template-columns: minmax(200px, 250px) minmax(0, 1fr); }
+.batch textarea { min-height: 230px; }
+@media (max-width: 1279px) and (min-width: 861px) {
+  .fld { grid-template-columns: 96px minmax(0, 1fr) 54px; }
+  #controls .fp-sample { display: none; }
+}
+/* greyed Drive buttons say why */
+.drvnote { font-size: 12px; color: var(--muted); line-height: 1.4; }
+.drvnote[hidden] { display: none; }
+/* theme switch: in the header on desktop, at the bottom of the page on phones */
+.themefoot { display: none; }
+@media (max-width: 860px) {
+  .top .themeseg { display: none; }
+  .themefoot { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 8px max(12px, env(safe-area-inset-left, 0px)) 20px; padding: 12px 0 0; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; }
+  .top .tools { flex-wrap: nowrap; }
+}
 </style>
 
 <div class="app">
@@ -899,7 +935,7 @@ input.tg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
     </div>
     <span class="grow"></span>
     <button type="button" class="btn sm tourbtn" id="tourBtn" title="A one-minute walk through the app. Run it any time."><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14"/><path d="M12 17.5h.01"/></svg>Tour</button>
-    <span class="seg" role="group" aria-label="Interface theme">
+    <span class="seg themeseg" role="group" aria-label="Interface theme">
       <button data-theme-set="system" aria-pressed="true">Auto</button>
       <button data-theme-set="light" aria-pressed="false">Light</button>
       <button data-theme-set="dark" aria-pressed="false">Dark</button>
@@ -1001,7 +1037,7 @@ input.tg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; 
             <button class="btn copybtn" id="copyOne" title="Copy the image at the chosen scale, then paste it into Figma, Slack, a doc or an email"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>Copy</button></div>
           <div class="note-sm" id="fmtNote"></div>
           <button class="btn primary xgo" id="exportOne">Export PNG</button>
-          <span class="xb-drv"><a class="btn drv teamfolder" id="driveLink" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Team folder</a>
+          <div class="drvnote" hidden></div><span class="xb-drv"><a class="btn drv teamfolder" id="driveLink" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Team folder</a>
             <a class="btn drv lastexp" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1"/><path d="M3 7v10a2 2 0 0 0 2 2h12.5a2 2 0 0 0 1.9-1.4L22 11H7.5a2 2 0 0 0-1.9 1.4L3 19"/></svg>Open last export</a>
             <button class="btn" id="driveOne" title="Save this export into the team's shared Google Drive folder">Save to team Drive</button></span>
         </section>
@@ -1047,7 +1083,7 @@ Start</textarea>
             </select></div>
           <div class="xrow"><label class="xk" for="prefix">Name</label><input id="prefix" type="text" value="cta-" class="sm" aria-label="File name prefix"></div>
           <button class="btn primary xgo" id="exportAll">Export all</button>
-          <span class="xb-drv"><a class="btn drv teamfolder" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Team folder</a>
+          <div class="drvnote" hidden></div><span class="xb-drv"><a class="btn drv teamfolder" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Team folder</a>
             <a class="btn drv lastexp" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1"/><path d="M3 7v10a2 2 0 0 0 2 2h12.5a2 2 0 0 0 1.9-1.4L22 11H7.5a2 2 0 0 0-1.9 1.4L3 19"/></svg>Open last export</a></span>
         </section>
       </section>
@@ -1091,6 +1127,7 @@ Start</textarea>
         <div class="gallery" id="gallery"></div>
       </div>
     </div>
+    <div class="themefoot"><span>Theme</span><span class="seg" role="group" aria-label="Interface theme"><button data-theme-set="system" aria-pressed="true">Auto</button><button data-theme-set="light" aria-pressed="false">Light</button><button data-theme-set="dark" aria-pressed="false">Dark</button></span></div>
   </aside>
 </div>
 <input type="file" id="fontFile" accept=".ttf,.otf,.woff,.woff2" multiple hidden>
@@ -2967,7 +3004,8 @@ function syncCursorGal() {
   const t = D.cursor.type;
   g.innerHTML = `<button type="button" class="ip" data-cur="none" title="No cursor" aria-pressed="${t === 'none'}" style="font-size:11px">None</button>` +
     Object.keys(CURSORS).map(k => `<button type="button" class="ip" data-cur="${k}" title="${CURSORS[k].name}" aria-label="${CURSORS[k].name}" aria-pressed="${t === k}">${cursorThumb(k)}</button>`).join('') +
-    `<button type="button" class="ip" data-cur="custom" title="My image" aria-pressed="${t === 'custom'}" style="font-size:10px;line-height:1.1">My image</button>`;
+    `<button type="button" class="ip ip-up" data-cur="custom" title="Use my own cursor image" aria-label="My own cursor image" aria-pressed="${t === 'custom'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="m21 15-4-4L6 21"/></svg></button>` +
+    (t === 'none' ? `<p class="cur-hint">A cursor shows people where to tap or click. Pick one to add it to the button, then drag its position below.</p>` : '');
 }
 function cornerHTML() {
   const btn = c => `<button type="button" class="cn-c" data-corner="${c}" aria-label="${CORNER_NAMES[c]} corner" aria-pressed="true"><svg viewBox="0 0 18 18" style="transform:rotate(${{ tl: 0, tr: 90, br: 180, bl: 270 }[c]}deg)"><path d="" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>`;
@@ -3097,7 +3135,7 @@ const LAYER_SUM = {
   button: d => { if (!d.box.on) return ['Off, text only', false]; const n = fxCount(d, 'button'); return [[SHAPE_SHORT[d.box.shape], { solid: 'solid', gradient: 'gradient', image: 'image' }[d.box.fill], n ? plural(n, 'effect') : ''].filter(Boolean).join(' · '), true]; },
   icon: d => d.icon.type === 'none' ? ['Add +', false] : [d.icon.type === 'vector' ? (ICONS[d.icon.id] || ICONS.play)[0] : d.icon.type === 'emoji' ? d.icon.char : 'My image', true],
   cursor: d => d.cursor.type === 'none' ? ['Add +', false] : [d.cursor.type === 'custom' ? 'My image' : CURSORS[d.cursor.type]?.name, true],
-  whole: d => { const t = d.tf, p = [t.rot && 'rotated', t.skewX && 'slanted', (t.tiltX || t.tiltY) && 'tilted'].filter(Boolean); return p.length ? [p.join(' · '), true] : ['Straight', false]; },
+  whole: d => { const t = d.tf, p = [t.rot && 'rotated', t.skewX && 'slanted', (t.tiltX || t.tiltY) && 'tilted'].filter(Boolean); return p.length ? [p.join(' · '), true] : ['No tilt', false]; },
 };
 function updLayerSums() {
   for (const L of LAYERS) { const el = document.getElementById('lsum-' + L.id); if (!el) continue; const [t, isOn] = LAYER_SUM[L.id](D); el.textContent = t; el.classList.toggle('add', !isOn); }
@@ -6005,7 +6043,8 @@ async function renderGallery() {
     it.thumb = thumb; return card;
   });
   g.replaceChildren(...cards);
-  for (const it of items) {
+  // four at a time, so one slow font doesn't hold up the whole list
+  const one = async it => {
     const key = JSON.stringify([it.design, it.sample]);
     let cv = thumbCache.get(key);
     if (!cv) { cv = (await renderButton(full(it.design), it.sample || 'Play Now', 1.5)).canvas; thumbCache.set(key, cv); }
@@ -6013,7 +6052,9 @@ async function renderGallery() {
     const copy = document.createElement('canvas'); copy.width = cv.width; copy.height = cv.height; copy.getContext('2d').drawImage(cv, 0, 0);
     copy.style.width = (cv.width / 1.5) + 'px';
     it.thumb.replaceChildren(copy);
-  }
+  };
+  const queue = [...items];
+  await Promise.all(Array.from({ length: 4 }, async () => { while (queue.length && my === gseq) await one(queue.shift()); }));
 }
 /* team library: designs the whole team shares, and a Drive folder for exported files.
    Two stores: a Google Sheet behind a small Apps Script web app (works for anyone with the app's link, set
@@ -6138,6 +6179,7 @@ function driveUI() {
     if (on && TEAM.folderUrl) { a.href = TEAM.folderUrl; a.title = 'The shared team Drive folder'; }
   });
   lastExpUI();
+  document.querySelectorAll('.drvnote').forEach(n => { n.hidden = on; n.textContent = TEAM.kind === 'db' ? 'Team Drive buttons work on the team site, not in this copy.' : 'Team Drive isn’t connected right now, so these buttons are off. Click one to see why.'; });
 }
 // a greyed-out Drive button or link explains itself instead of doing nothing
 document.addEventListener('click', e => { const t = e.target.closest('.off[data-why]'); if (!t || !t.dataset.why) return; e.preventDefault(); e.stopImmediatePropagation(); toast(t.dataset.why, 6000); }, true);
