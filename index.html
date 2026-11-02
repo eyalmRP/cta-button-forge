@@ -1398,6 +1398,8 @@ function migrate(d) {
   if (!d || typeof d !== 'object') return d;
   d = clone(d);
   const b = d.box, f = d.font, fx = d.fx || {};
+  if (f && f.kern && f.kern.k && f.kern.t != null) { f.kerns = { ...(f.kerns || {}), [kernKey(f.kern.t)]: f.kern.k }; }
+  if (f) delete f.kern;
   if (b && b.fill === 'linear') { b.fill = 'gradient'; if (!b.gradient) b.gradient = G2(b.c1 || '#888888', b.c2 || '#444444', b.angle ?? 180); }
   if (f && f.color2 && !f.gradient) f.gradient = f.mid3 ? GS([[0, f.color], [0.5, f.colorMid || f.color], [1, f.color2]]) : G2(f.color, f.color2);
   if (f?.alt && f.alt.color2 && !f.alt.gradient) f.alt.gradient = G2(f.alt.color, f.alt.color2);
@@ -1805,9 +1807,16 @@ function sparkleSpots(d, x, y, w, h) {
 
 /* ================= text layout ================= */
 /* ---------- per-letter spacing (kerning and tracking) ----------
-   D.font.kern = { t: the text it belongs to, k: { index: extra px after that letter } }.
-   It applies only to that exact text, so Batch texts and other designs ignore it. */
-function kernMap(d, text) { const K = d.font.kern; return K && K.k && K.t === String(text ?? '') && Object.keys(K.k).length ? K.k : null; }
+   D.font.kerns = { text: { index: extra px after that letter } }: each text keeps its own, so every Batch
+   button (and the Single text) can have its own spacing. A line break, | and a space count as the same letter. */
+function kernKey(text) { return String(text ?? '').replace(/[|\n]/g, ' '); }
+function kernMap(d, text) { const k = d.font.kerns && d.font.kerns[kernKey(text)]; return k && Object.keys(k).length ? k : null; }
+function setKern(text, k) {
+  const m = { ...(D.font.kerns || {}) }, key = kernKey(text);
+  if (k && Object.keys(k).length) m[key] = k; else delete m[key];
+  const keys = Object.keys(m); if (keys.length > 60) delete m[keys[0]];
+  if (Object.keys(m).length) D.font.kerns = m; else delete D.font.kerns;
+}
 // distance from a line's left edge to just before letter p (letters, spacing and extra space so far)
 function linePrefix(l, p) {
   if (p <= 0) return 0;
@@ -3646,7 +3655,10 @@ function updateSizeInfo() {
 }
 async function renderSingle() {
   const my = ++seq, text = $('#ctaText').value;
-  const [it] = await planExport([text]); if (my !== seq) return;
+  let it;
+  if (FROMB) { const plan = await planBatch(batchLines()); it = plan[FROMB.i]; if (it && kernKey(it.t) !== kernKey(text)) it = null; }
+  if (!it) [it] = await planExport([text]);
+  if (my !== seq) return;
   const f = it.f, m = it.m, dpr = window.devicePixelRatio || 1, css = f * zoom, S = Math.min(10, dpr * css);
   const cv = await renderItem({ ...it, k: S, frame: it.frame && { W: Math.round(EXP.SW / f * S), H: Math.round(EXP.SH / f * S) } });
   if (my !== seq) return;
@@ -3909,14 +3921,20 @@ function setView(v) {
 $('#tab-single').onclick = () => setView('single');
 $('#tab-batch').onclick = () => setView('batch');
 const ta = $('#ctaText');
+var taPrev = '';
 ta.addEventListener('input', () => { updLayerSums(); syncFontSample(); });
 function autoGrow() { ta.style.height = 'auto'; ta.style.height = Math.min(200, ta.scrollHeight + 2) + 'px'; }
 ta.addEventListener('input', () => {
-  const K = realignKern(D.font.kern, ta.value); if (K !== D.font.kern) { D.font.kern = K || undefined; if (!K) delete D.font.kern; persist(); }
+  const old = taPrev; taPrev = ta.value;
+  if (old !== ta.value && !kernMap(D, ta.value)) {
+    const k0 = kernMap(D, old), K = k0 && realignKern({ t: kernKey(old), k: k0 }, kernKey(ta.value));
+    if (K) { setKern(ta.value, K.k); if (!batchLines().some(l => kernKey(l) === kernKey(old))) setKern(old, null); persist(); }
+  }
   try { localStorage.setItem('ctaforge.text', ta.value); } catch (e) {}
   autoGrow(); requestRender();
 });
 try { const t0 = localStorage.getItem('ctaforge.text'); if (t0 != null) ta.value = t0; } catch (e) {}
+taPrev = ta.value;
 /* ---------- editing one Batch button on its own ----------
    Double-click a card (or its Edit button) to open that text in Single. Text edits go back to its line in the
    list; the design is shared, so design changes apply to all. Done, Esc or the Batch tab brings you back. */
@@ -3933,7 +3951,7 @@ function syncFromB() {
 function fromBatch(i) {
   const lines = batchLines(), r = rawIndex(i); if (r < 0) return;
   FROMB = { i, n: lines.length, r, prev: ta.value, line: lines[i] };
-  ta.value = lines[i].replace(/\|/g, '\n'); autoGrow();
+  ta.value = taPrev = lines[i].replace(/\|/g, '\n'); autoGrow();
   updLayerSums(); syncFontSample(); syncFromB();
   setView('single');
   window.scrollTo({ top: 0 }); document.querySelector('.app > .work')?.scrollTo?.({ top: 0 });
@@ -3950,7 +3968,7 @@ ta.addEventListener('input', () => {
 async function backToBatch() {
   if (!FROMB) return;
   const f = FROMB; FROMB = null; TE.on = false;
-  ta.value = f.prev; autoGrow(); try { localStorage.setItem('ctaforge.text', f.prev); } catch (e) {}
+  ta.value = taPrev = f.prev; autoGrow(); try { localStorage.setItem('ctaforge.text', f.prev); } catch (e) {}
   updLayerSums(); syncFontSample(); syncFromB();
   await setView('batch');
   BACK = { i: f.i, until: Date.now() + 2200 };
@@ -4039,9 +4057,9 @@ function teKern(dir, big) {
   const step = Math.max(0.5, Math.round(D.font.size * 0.025 * 2) / 2) * (big ? 5 : 1) * dir;
   const idx = a !== b ? Array.from({ length: b - a }, (_, i) => a + i) : a > 0 && a < t.length ? [a - 1] : null;
   if (!idx) { D.font.spacing = Math.round((D.font.spacing + step) * 10) / 10; return; } // cursor at an end: spacing for all
-  const K = D.font.kern && D.font.kern.t === t ? D.font.kern : { t, k: {} };
-  for (const i of idx) { if (i >= t.length - 1 && idx.length > 1) continue; const v = Math.round(((K.k[i] || 0) + step) * 10) / 10; if (v) K.k[i] = v; else delete K.k[i]; }
-  if (Object.keys(K.k).length) D.font.kern = K; else delete D.font.kern;
+  const k = { ...(kernMap(D, t) || {}) };
+  for (const i of idx) { if (i >= t.length - 1 && idx.length > 1) continue; const v = Math.round(((k[i] || 0) + step) * 10) / 10; if (v) k[i] = v; else delete k[i]; }
+  setKern(t, k);
 }
 ta.addEventListener('keydown', e => {
   if (view !== 'single') return;
@@ -5567,7 +5585,7 @@ Rules:
 const STORE_MINE = 'ctaforge.designs';
 function loadMine() { try { return JSON.parse(localStorage.getItem(STORE_MINE) || '[]'); } catch (e) { return []; } }
 function storeMine(list) { try { localStorage.setItem(STORE_MINE, JSON.stringify(list)); return true; } catch (e) { toast('This browser blocked saving (storage may be full). Use Download .json instead.', 4000); return false; } }
-function applyDesign(d) { const keep = D.font.kern; D = full(d); if (!D.font.kern && keep) D.font.kern = keep; syncUI(); changed(); }
+function applyDesign(d) { const keep = D.font.kerns; D = full(d); if (!D.font.kerns && keep) D.font.kerns = keep; syncUI(); changed(); }
 const thumbCache = new Map();
 let gseq = 0, gFilter = 'all', gFolder = '';
 const STORE_HIDDEN = 'ctaforge.hiddenStarters';
@@ -5777,7 +5795,7 @@ async function downloadPng(it) {
 }
 function openItem(it) {
   applyDesign(it.design);
-  if (it.sample && view === 'single') { ta.value = it.sample.replace(/\|/g, '\n'); autoGrow(); requestRender(); }
+  if (it.sample && view === 'single') { ta.value = taPrev = it.sample.replace(/\|/g, '\n'); autoGrow(); requestRender(); }
   $('#saveName').value = it.kind === 'starter' ? '' : it.name;
   toast(it.kind === 'starter' ? `Opened ${it.name}. Edit it, then Save to keep your version.` : `Opened ${it.name}. Edit it, then use ⋯ → Save current design here to keep the changes.`, 3500);
 }
